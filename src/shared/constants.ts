@@ -341,7 +341,6 @@ export function getDefaultUIState(): PersistedUIState {
     sidebarWidth: 280,
     rightSidebarWidth: 350,
     groupBy: 'repo',
-    showWorkspaceLineage: false,
     sortBy: 'recent',
     showActiveOnly: false,
     hideDefaultBranchWorkspace: false,

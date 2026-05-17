@@ -655,7 +655,7 @@ const WorktreeCard = React.memo(function WorktreeCard({
           </div>
         )}
 
-        {lineageChildren && <div className="-ml-4 mt-1.5 space-y-1">{lineageChildren}</div>}
+        {lineageChildren && <div className="-ml-3 mt-1.5 space-y-1">{lineageChildren}</div>}
       </div>
     </div>
   )
