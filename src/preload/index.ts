@@ -39,6 +39,7 @@ import type { ShellOpenLocalPathResult } from '../shared/shell-open-types'
 import type { SkillDiscoveryResult } from '../shared/skills'
 import type {
   RuntimeBrowserDriverState,
+  RuntimeMobileSessionTabMove,
   RuntimeStatus,
   RuntimeSyncWindowGraph,
   RuntimeTerminalDriverState
@@ -2323,6 +2324,7 @@ const api = {
         requestId: string
         worktreeId?: string
         afterTabId?: string
+        targetGroupId?: string
         command?: string
         title?: string
         activate?: boolean
@@ -2334,6 +2336,7 @@ const api = {
           requestId: string
           worktreeId?: string
           afterTabId?: string
+          targetGroupId?: string
           command?: string
           title?: string
           activate?: boolean
@@ -2409,6 +2412,16 @@ const api = {
       ) => callback(data)
       ipcRenderer.on('ui:closeSessionTab', listener)
       return () => ipcRenderer.removeListener('ui:closeSessionTab', listener)
+    },
+    onMoveSessionTab: (
+      callback: (data: { worktreeId: string } & RuntimeMobileSessionTabMove) => void
+    ): (() => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        data: { worktreeId: string } & RuntimeMobileSessionTabMove
+      ) => callback(data)
+      ipcRenderer.on('ui:moveSessionTab', listener)
+      return () => ipcRenderer.removeListener('ui:moveSessionTab', listener)
     },
     onOpenFileFromMobile: (
       callback: (data: { worktreeId: string; filePath: string; relativePath: string }) => void
