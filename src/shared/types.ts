@@ -1950,7 +1950,14 @@ export type WorktreeCardProperty =
   // view options.
   | 'inline-agents'
 
-export type StatusBarItem = 'claude' | 'codex' | 'gemini' | 'opencode-go' | 'ssh' | 'resource-usage'
+export type StatusBarItem =
+  | 'claude'
+  | 'codex'
+  | 'gemini'
+  | 'opencode-go'
+  | 'ssh'
+  | 'resource-usage'
+  | 'ports'
 export type FloatingTerminalTriggerLocation = 'floating-button' | 'status-bar'
 
 export type TaskResumeState = {
@@ -1995,6 +2002,8 @@ export type PersistedUIState = {
   /** One-shot migration flag for the old default blue/violet/emerald status
    *  visuals. Once stamped, valid user-authored colors/icons are preserved. */
   _workspaceStatusesDefaultVisualsMigrated?: boolean
+  /** One-shot migration flag for adding the default-on Ports status item. */
+  _portsStatusBarDefaultAdded?: boolean
   statusBarItems: StatusBarItem[]
   statusBarVisible: boolean
   dismissedUpdateVersion: string | null
