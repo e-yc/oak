@@ -643,8 +643,12 @@ function ClaudeSwitcherMenu({
     }
   }, [])
 
-  useEffect(() => {
-    if (accountsExpanded) {
+  // Why: inactive-account usage is needed only for the explicit switcher
+  // expansion, so fetch it on that event instead of one render later.
+  const handleAccountsExpandedToggle = useCallback((): void => {
+    const nextExpanded = !accountsExpanded
+    setAccountsExpanded(nextExpanded)
+    if (nextExpanded) {
       void fetchInactiveClaudeAccountUsage()
     }
   }, [accountsExpanded, fetchInactiveClaudeAccountUsage])
@@ -735,7 +739,7 @@ function ClaudeSwitcherMenu({
       <DropdownMenuItem
         onSelect={(event) => {
           event.preventDefault()
-          setAccountsExpanded((prev) => !prev)
+          handleAccountsExpandedToggle()
         }}
       >
         <span className="max-w-[180px] truncate text-[12px] text-foreground">
