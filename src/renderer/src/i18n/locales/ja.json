@@ -3556,6 +3556,9 @@
           "3d4b9c4997": "ホバー",
           "ba87080fb7": "プロパティを表示する",
           "320b675c9a": "カードのレイアウト",
+          "newCardDisplay": {
+            "title": "カード表示"
+          },
           "09faabd875": "プロジェクトの順序",
           "7bada3b1ab": "並べ替え",
           "dc0bb670bc": "グループ化",
@@ -3578,6 +3581,8 @@
           "b8dcc6f321": "PR/MRリンク",
           "ca4d3c522e": "Linear イシュー",
           "91dfc653e8": "GitHub チケット",
+          "bdd23b4e07": "GitHub イシュー",
+          "44713a5d04": "Linear イシュー",
           "cc17bd443b": "詳細",
           "0f9b959b31": "PR",
           "e029a2d775": "状態",
@@ -3590,7 +3595,14 @@
           "projectSshHost": "Project SSH",
           "activeRuntimeHost": "Active server",
           "projectRuntimeHost": "Project server",
-          "631b97eea9": "Host scope"
+          "631b97eea9": "Host scope",
+          "2d4f0eb933": "デフォルト",
+          "1a0eec0d35": "ステータス",
+          "b5536d5a88": "タスク",
+          "8d62c68b35": "ノート",
+          "2d74665a56": "ポート",
+          "65a9820bd1": "Agent ステータス",
+          "219ebf1961": "ブランチ名"
         },
         "SshDisconnectedDialog": {
           "ca4a7892af": "接続中...",
@@ -4654,6 +4666,12 @@
             "idleMinutesSuffix": "分",
             "title": "Agent の休止",
             "toggleLabel": "Agent の休止を切り替え"
+          },
+          "newWorktreeCardStyle": {
+            "copy": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
+            "description": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
+            "title": "新しいカードスタイル",
+            "toggleLabel": "新しいカードスタイルを切り替え"
           }
         },
         "FloatingWorkspacePane": {
@@ -6751,6 +6769,17 @@
               "sleep": "スリープ",
               "terminal": "ターミナル",
               "title": "Agent の休止"
+            },
+            "newWorktreeCardStyle": {
+              "card": "カード",
+              "cards": "カード",
+              "description": "更新された worktree カードのレイアウト、メタデータ配置、カード表示メニュー項目、ステータス表示をプレビューします。",
+              "menu": "メニュー",
+              "metadata": "メタデータ",
+              "status": "ステータス",
+              "title": "新しいカードスタイル",
+              "worktree": "worktree",
+              "worktrees": "worktrees"
             }
           }
         },

@@ -3595,6 +3595,9 @@
           "3d4b9c4997": "Hover",
           "ba87080fb7": "Show properties",
           "320b675c9a": "Card layout",
+          "newCardDisplay": {
+            "title": "Card display"
+          },
           "09faabd875": "Project order",
           "7bada3b1ab": "Sort by",
           "dc0bb670bc": "Group by",
@@ -3618,12 +3621,21 @@
           "b8dcc6f321": "PR/MR link",
           "ca4d3c522e": "Linear issue",
           "91dfc653e8": "GitHub ticket",
+          "bdd23b4e07": "GitHub issues",
+          "44713a5d04": "Linear issues",
           "cc17bd443b": "Detailed",
           "0f9b959b31": "PR",
           "e029a2d775": "Status",
           "c2c7a45cda": "None",
           "680043342f": "compact",
-          "c7591b6014": "repo"
+          "c7591b6014": "repo",
+          "2d4f0eb933": "Default",
+          "1a0eec0d35": "Status",
+          "b5536d5a88": "Tasks",
+          "8d62c68b35": "Notes",
+          "2d74665a56": "Ports",
+          "65a9820bd1": "Agent statuses",
+          "219ebf1961": "Branch name"
         },
         "SshDisconnectedDialog": {
           "ca4a7892af": "Connecting...",
@@ -4666,6 +4678,12 @@
             "idleMinutesSuffix": "minutes",
             "title": "Agent hibernation",
             "toggleLabel": "Toggle agent hibernation"
+          },
+          "newWorktreeCardStyle": {
+            "copy": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
+            "description": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
+            "title": "New card style",
+            "toggleLabel": "Toggle new card style"
           },
           "ca2219fe5e": "Shows a small animated pet pinned to the bottom-right corner. Pick a character (Claudino, OpenCode, Gremlin) or upload your own PNG, APNG, GIF, WebP, JPG, or SVG from the status-bar pet menu. Hide it any time from the same menu without disabling this setting.",
           "dd6f0a1d45": "Pet",
@@ -6749,6 +6767,17 @@
               "sleep": "sleep",
               "terminal": "terminal",
               "title": "Agent hibernation"
+            },
+            "newWorktreeCardStyle": {
+              "card": "card",
+              "cards": "cards",
+              "description": "Preview updated worktree-card layout, metadata placement, card-display menu options, and status presentation.",
+              "menu": "menu",
+              "metadata": "metadata",
+              "status": "status",
+              "title": "New card style",
+              "worktree": "worktree",
+              "worktrees": "worktrees"
             },
             "fe5688b761": "sidebar",
             "ca5d1f3f46": "timeline",
