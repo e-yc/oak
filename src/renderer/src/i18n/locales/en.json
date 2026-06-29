@@ -10992,7 +10992,14 @@
           "32ae8d7d57": "Previous match",
           "158c645829": "Find in rich markdown editor",
           "98b89276f3": "Find in rich editor",
-          "a86958d508": "No results"
+          "a86958d508": "No results",
+          "e8c147435f": "Hide replace",
+          "9cdc38be33": "Toggle replace",
+          "482b637099": "Match case",
+          "68d090241d": "Match whole word",
+          "fd97c7e585": "Replace",
+          "44682b4159": "Replace in rich markdown editor",
+          "c2884f5e95": "Replace all"
         },
         "RichMarkdownSlashMenu": {
           "82c6816ff8": "No blocks found",

@@ -10992,7 +10992,14 @@
           "32ae8d7d57": "Partido anterior",
           "158c645829": "Buscar en el editor de markdowns enriquecido",
           "98b89276f3": "Buscar en editor enriquecido",
-          "a86958d508": "Sin resultados"
+          "a86958d508": "Sin resultados",
+          "e8c147435f": "Ocultar reemplazo",
+          "9cdc38be33": "Mostrar reemplazo",
+          "482b637099": "Distingue mayúsculas y minúsculas",
+          "68d090241d": "Coincidir con toda la palabra",
+          "fd97c7e585": "Reemplazar",
+          "44682b4159": "Reemplazar en el editor de markdown enriquecido",
+          "c2884f5e95": "Reemplazar todo"
         },
         "RichMarkdownSlashMenu": {
           "82c6816ff8": "No se encontraron bloques",

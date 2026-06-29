@@ -318,17 +318,7 @@ export default function RichMarkdownEditor({
     })
   }, [handleLocalImagePick, toggleLinkFromToolbar])
 
-  const {
-    activeMatchIndex,
-    closeSearch,
-    isSearchOpen,
-    matchCount,
-    moveToMatch,
-    openSearch,
-    searchInputRef,
-    searchQuery,
-    setSearchQuery
-  } = useRichMarkdownSearch({
+  const { openSearch, searchState, searchActions } = useRichMarkdownSearch({
     editor,
     rootRef,
     scrollContainerRef
@@ -389,18 +379,8 @@ export default function RichMarkdownEditor({
       markdownSourceLineOffset={markdownSourceLineOffset}
       tableOfContentsItems={tableOfContentsItems}
       showTableOfContents={showTableOfContents}
-      searchState={{
-        activeMatchIndex,
-        isSearchOpen,
-        matchCount,
-        searchQuery,
-        searchInputRef
-      }}
-      searchActions={{
-        closeSearch,
-        moveToMatch,
-        setSearchQuery
-      }}
+      searchState={searchState}
+      searchActions={searchActions}
       linkBubbleActions={{
         handleLinkSave,
         handleLinkRemove,

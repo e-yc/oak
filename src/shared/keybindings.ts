@@ -85,6 +85,7 @@ export type KeybindingActionId =
   | 'browser.focusAddressBar'
   | 'browser.grabElement'
   | 'editor.find'
+  | 'editor.replace'
   | 'editor.save'
   | 'editor.markdownPreview'
   | 'editor.copyContext'
@@ -772,6 +773,20 @@ export const KEYBINDING_DEFINITIONS: readonly KeybindingDefinition[] = [
     scope: 'editor',
     searchKeywords: ['shortcut', 'editor', 'find', 'search'],
     defaultBindings: platformBindings(['Mod+F'])
+  },
+  {
+    id: 'editor.replace',
+    title: 'Replace in editor',
+    group: 'Editors',
+    scope: 'editor',
+    searchKeywords: ['shortcut', 'editor', 'replace', 'find', 'search'],
+    // Why: match the source editor's native replace shortcut — Cmd+Alt+F on
+    // macOS, Ctrl+H on Linux/Windows.
+    defaultBindings: {
+      darwin: ['Mod+Alt+F'],
+      linux: ['Mod+H'],
+      win32: ['Mod+H']
+    }
   },
   {
     id: 'editor.save',

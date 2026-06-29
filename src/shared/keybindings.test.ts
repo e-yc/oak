@@ -179,6 +179,14 @@ describe('keybindings', () => {
     expect(formatKeybindingList(['Mod+Shift+O'], 'darwin')).toBe('⌘⇧O')
   })
 
+  it('defines platform-native replace-in-editor shortcuts', () => {
+    expect(getEffectiveKeybindingsForAction('editor.replace', 'darwin')).toEqual(['Mod+Alt+F'])
+    expect(getEffectiveKeybindingsForAction('editor.replace', 'linux')).toEqual(['Mod+H'])
+    expect(getEffectiveKeybindingsForAction('editor.replace', 'win32')).toEqual(['Mod+H'])
+    expect(formatKeybindingList(['Mod+Alt+F'], 'darwin')).toBe('⌘⌥F')
+    expect(formatKeybindingList(['Mod+H'], 'linux')).toBe('Ctrl+H')
+  })
+
   it('uses overrides as the complete effective binding list for an action', () => {
     const overrides = {
       'worktree.quickOpen': ['Ctrl+Alt+O', 'not-a-shortcut']
