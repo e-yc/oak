@@ -316,7 +316,7 @@ export function createMainWindow(
       // Why: tells the renderer glass can render now (vs after a restart) —
       // window transparency/vibrancy cannot be toggled on a live window.
       ...(process.platform === 'darwin' && (blur || sidebarGlass || terminalGlass)
-        ? { additionalArguments: ['--orca-window-vibrancy'] }
+        ? { additionalArguments: ['--oak-window-vibrancy'] }
         : {})
     }
   })

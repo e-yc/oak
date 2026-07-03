@@ -126,7 +126,7 @@ export function LeftSidebarAppearanceSetting({
             <p className="text-xs text-muted-foreground">
               {translate(
                 'auto.components.settings.AppearancePane.leftSidebarAppearance.liquidGlassRestartDescription',
-                'Restart Orca to enable the glass sidebar.'
+                'Restart Oak to enable the glass sidebar.'
               )}
             </p>
           </div>

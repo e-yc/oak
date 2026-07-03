@@ -1022,7 +1022,7 @@ function sendAgentPipOpenChanged(): void {
   }
 }
 
-// Why: the pinned stack is a glanceable away-from-Orca surface — while an IDE
+// Why: the pinned stack is a glanceable away-from-Oak surface — while an IDE
 // window is focused it only duplicates what the app already shows, so it stays
 // hidden until the app loses focus. Focusing the PiP itself (to reply) must
 // not count as "in the IDE" or clicking it would hide it.

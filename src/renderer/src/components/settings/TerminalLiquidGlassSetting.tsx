@@ -102,7 +102,7 @@ export function TerminalLiquidGlassSetting({
             <p className="text-xs text-muted-foreground">
               {translate(
                 'auto.components.settings.TerminalWindowSection.terminalLiquidGlassRestartDescription',
-                'Restart Orca to enable terminal glass.'
+                'Restart Oak to enable terminal glass.'
               )}
             </p>
           </div>
