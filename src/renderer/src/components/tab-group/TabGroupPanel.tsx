@@ -18,6 +18,11 @@ import { closeTerminalTab } from '../terminal/terminal-tab-actions'
 import { resolveGroupTabFromVisibleId } from './tab-group-visible-id'
 import { getTabPaneBodyDroppableId, type HoveredTabInsertion } from './useTabDragSplit'
 import { tabGroupBodyAnchorName } from './tab-group-body-anchor'
+import {
+  SLIM_TAB_STRIP_HEIGHT_PX,
+  shouldSlimTabGroupHeader,
+  useSlimStackedHeaderReveal
+} from './use-slim-stacked-header'
 import { translate } from '@/i18n/i18n'
 
 const EditorPanel = lazy(() => import('../editor/EditorPanel'))
@@ -27,6 +32,7 @@ export default function TabGroupPanel({
   worktreeId,
   isFocused,
   hasSplitGroups,
+  touchesTopEdge,
   touchesRightEdge,
   touchesLeftEdge,
   reserveClosedExplorerToggleSpace,
@@ -38,6 +44,7 @@ export default function TabGroupPanel({
   worktreeId: string
   isFocused: boolean
   hasSplitGroups: boolean
+  touchesTopEdge: boolean
   touchesRightEdge: boolean
   touchesLeftEdge: boolean
   reserveClosedExplorerToggleSpace: boolean
@@ -47,6 +54,18 @@ export default function TabGroupPanel({
 }): React.JSX.Element {
   const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
   const sidebarOpen = useAppStore((state) => state.sidebarOpen)
+  const slimStackedPaneHeaders = useAppStore(
+    (state) => state.settings?.slimStackedPaneHeaders === true
+  )
+  const slimHeader = shouldSlimTabGroupHeader({
+    slimStackedPaneHeaders,
+    hasSplitGroups,
+    touchesTopEdge
+  })
+  const { revealed, rootRevealHandlers, headerHoverHandlers } = useSlimStackedHeaderReveal(slimHeader)
+  // Why: a tab drag must always see the strip — it is the drop target for
+  // moving tabs into this group, and an invisible target reads as broken.
+  const headerOverlayVisible = slimHeader && (revealed || isTabDragActive)
 
   const model = useTabGroupWorkspaceModel({ groupId, worktreeId })
   const { activeTab, browserItems, commands, editorItems, tabBarOrder, terminalTabs } = model
@@ -205,9 +224,13 @@ export default function TabGroupPanel({
             // border-l/border-r in those spots stacks a second 1px line
             // next to it, reading as a ~2px bar below the drag strip
             // (where the sibling border continues alone above).
-            ` ${touchesLeftEdge ? '' : 'border-l'} ${touchesRightEdge ? '' : 'border-r'} border-border border-b ${isFocused ? 'border-b-accent' : 'opacity-95'}`
+            // Why: `opacity-95` creates a stacking context that would trap the
+            // revealed slim header under the terminal overlay layer (a later
+            // DOM sibling with z-index auto), so the dim yields while it shows.
+            ` ${touchesLeftEdge ? '' : 'border-l'} ${touchesRightEdge ? '' : 'border-r'} border-border border-b ${isFocused ? 'border-b-accent' : headerOverlayVisible ? '' : 'opacity-95'}`
           : ''
       }`}
+      {...(slimHeader ? rootRevealHandlers : {})}
       onPointerDown={commands.focusGroup}
       // Why: keyboard and assistive-tech users can move focus into an unfocused
       // split group without generating a pointer event. Keeping the owning
@@ -223,9 +246,26 @@ export default function TabGroupPanel({
           way to drag-move the window is via -webkit-app-region: drag. Without
           this, the empty space after tabs in the center column is dead — the
           user can only drag from the tiny left-sidebar header strip. */}
+      {slimHeader ? (
+        // Why: the slim strip holds the layout slot so the terminal body (and
+        // its anchor-positioned pane overlay) keeps a stable height — the full
+        // tab row reveals as an overlay instead of reflowing xterm on hover.
+        <div
+          className="shrink-0 border-b border-border bg-card"
+          style={{ height: SLIM_TAB_STRIP_HEIGHT_PX }}
+          data-terminal-focus-release-surface="true"
+        />
+      ) : null}
       <div
-        className="h-[32px] shrink-0 border-b border-border bg-card"
+        className={
+          slimHeader
+            ? `absolute inset-x-0 top-0 z-30 h-[32px] border-b border-border bg-card shadow-md transition-opacity duration-150 ${
+                headerOverlayVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+              }`
+            : 'h-[32px] shrink-0 border-b border-border bg-card'
+        }
         data-terminal-focus-release-surface="true"
+        {...(slimHeader ? headerHoverHandlers : {})}
       >
         <div className="flex h-full items-stretch pr-1.5">
           {/* Why: Electron's native drag hit-test only respects no-drag on DOM
@@ -340,9 +380,11 @@ export default function TabGroupPanel({
           activeTab.contentType !== 'terminal' &&
           activeTab.contentType !== 'browser' &&
           activeTab.contentType !== 'simulator' && (
-            <div className="absolute inset-0 flex min-h-0 min-w-0">
+            <div className="absolute inset-0 flex min-h-0 min-w-0 bg-background">
               {/* Why: split groups render editor content inside a plain relative pane body
-                  instead of the legacy flex column in Terminal.tsx. */}
+                  instead of the legacy flex column in Terminal.tsx. bg-background keeps
+                  editors on an opaque ground — the center column stops painting under
+                  terminal liquid glass and editors must not go glassy with it. */}
               <Suspense
                 fallback={
                   <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">

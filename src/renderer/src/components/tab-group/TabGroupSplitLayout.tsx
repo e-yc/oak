@@ -150,6 +150,7 @@ function SplitNode({
         // "focused", Cmd/Ctrl+W and split shortcuts can hit the wrong worktree.
         isFocused={isWorktreeActive && node.groupId === focusedGroupId}
         hasSplitGroups={hasSplitGroups}
+        touchesTopEdge={touchesTopEdge}
         touchesRightEdge={touchesRightEdge}
         touchesLeftEdge={touchesLeftEdge}
         reserveClosedExplorerToggleSpace={touchesTopEdge && touchesRightEdge}

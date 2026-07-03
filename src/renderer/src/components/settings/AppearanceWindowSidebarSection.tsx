@@ -13,6 +13,7 @@ import {
 } from './SettingsFormControls'
 import { useAvailableStatusBarToggles } from '../status-bar/use-available-status-bar-toggles'
 import { getLayoutEntries, getSidebarEntries, getStatusBarToggles } from './appearance-search'
+import { getSplitPaneEntries } from './appearance-split-pane-search'
 import { LeftSidebarAppearanceSetting } from './LeftSidebarAppearanceSetting'
 import {
   getLeftSidebarAppearanceEntry,
@@ -84,10 +85,13 @@ export function AppearanceWindowSidebarSection({
     ...sidebarEntries
   ])
   const fileExplorerAdvancedMatches = matchesSettingsSearch(searchQuery, layoutEntries)
+  const splitPaneEntries = getSplitPaneEntries()
+  const splitPanesAdvancedMatches = matchesSettingsSearch(searchQuery, splitPaneEntries)
   const showStatusBarControls = !isSearching || statusBarSectionMatches || statusBarControlMatches
   const showSidebarAdvanced = !isSearching || sidebarAdvancedMatches
   const showFileExplorerAdvanced = !isSearching || fileExplorerAdvancedMatches
-  const showAdvanced = showSidebarAdvanced || showFileExplorerAdvanced
+  const showSplitPanesAdvanced = !isSearching || splitPanesAdvancedMatches
+  const showAdvanced = showSidebarAdvanced || showFileExplorerAdvanced || showSplitPanesAdvanced
 
   return (
     <div className="space-y-2">
@@ -250,6 +254,41 @@ export function AppearanceWindowSidebarSection({
                       checked={settings.showMobileButton !== false}
                       onChange={() =>
                         updateSettings({ showMobileButton: !(settings.showMobileButton !== false) })
+                      }
+                    />
+                  </SearchableSetting>
+                </div>
+              </div>
+            ) : null}
+
+            {showSplitPanesAdvanced ? (
+              <div className="space-y-3">
+                <SettingsSubsectionHeader
+                  title={translate(
+                    'auto.components.settings.AppearancePane.splitPanes',
+                    'Split Panes'
+                  )}
+                />
+                <div className="ml-4 divide-y divide-border/40">
+                  <SearchableSetting
+                    title={splitPaneEntries[0]?.title ?? 'Slim Stacked Pane Headers'}
+                    description={splitPaneEntries[0]?.description}
+                    keywords={splitPaneEntries[0]?.keywords ?? ['pane', 'header', 'slim']}
+                  >
+                    <SettingsSwitchRow
+                      label={translate(
+                        'auto.components.settings.AppearancePane.slimStackedPaneHeaders',
+                        'Slim Stacked Pane Headers'
+                      )}
+                      description={translate(
+                        'auto.components.settings.AppearancePane.slimStackedPaneHeadersDescription',
+                        'Collapse the tab strip of panes stacked below another pane. Move the mouse inside a pane to reveal its tabs.'
+                      )}
+                      checked={settings.slimStackedPaneHeaders === true}
+                      onChange={() =>
+                        updateSettings({
+                          slimStackedPaneHeaders: !(settings.slimStackedPaneHeaders === true)
+                        })
                       }
                     />
                   </SearchableSetting>
