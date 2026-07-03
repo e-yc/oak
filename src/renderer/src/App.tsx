@@ -127,6 +127,7 @@ import {
 } from './startup/startup-diagnostics'
 import { shouldRenderPetOverlay } from './components/pet/pet-overlay-visibility'
 import { applyDocumentTheme } from './lib/document-theme'
+import { applyInterfaceColorOverrides } from './lib/interface-color-overrides'
 import { isEditableTarget } from './lib/editable-target'
 import { getSelectedTextForFileSearch } from './lib/file-search-selection'
 import { useShortcutLabel } from './hooks/useShortcutLabel'
@@ -1390,6 +1391,12 @@ function App(): React.JSX.Element {
       buildAppFontFamily(settings?.appFontFamily)
     )
   }, [settings?.appFontFamily])
+
+  // Custom IDE pane colors follow the effective light/dark mode, so re-apply
+  // on theme changes and system-preference flips, not just override edits.
+  useEffect(() => {
+    applyInterfaceColorOverrides(settings, systemPrefersDark)
+  }, [settings, systemPrefersDark])
 
   // Refresh GitHub data (PR/issue status) when window regains focus
   useEffect(() => {

@@ -234,6 +234,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     terminalThemeLight: 'Builtin Tango Light',
     terminalCustomThemes: [],
     terminalDividerColorLight: '#d4d4d8',
+    appearancePresets: [],
     terminalInactivePaneOpacity: 0.8,
     terminalActivePaneOpacity: 1,
     terminalPaneOpacityTransitionMs: 140,

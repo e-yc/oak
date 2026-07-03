@@ -1,6 +1,6 @@
 import type React from 'react'
 import { useState } from 'react'
-import { AppWindow, PanelLeft, TerminalSquare } from 'lucide-react'
+import { AppWindow, PanelLeft, Palette, SwatchBook, TerminalSquare } from 'lucide-react'
 
 import type { GlobalSettings } from '../../../../shared/types'
 
@@ -25,6 +25,10 @@ import {
 } from './appearance-search'
 import { getTerminalAppearanceSearchEntries } from './terminal-search'
 import { TerminalAppearanceSection } from './TerminalAppearanceSection'
+import { AppearancePresetsSection } from './AppearancePresetsSection'
+import { AppearanceColorsSection } from './AppearanceColorsSection'
+import { getAppearancePresetEntries } from './appearance-presets-search'
+import { getInterfaceColorEntries } from './appearance-colors-search'
 import type { UseGhosttyImportReturn } from './useGhosttyImport'
 import type { UseWarpThemeImportReturn } from './useWarpThemeImport'
 import { AppIconSelector } from './AppIconSelector'
@@ -50,7 +54,7 @@ type AppearancePaneProps = {
   warpThemes: UseWarpThemeImportReturn
 }
 
-type AppearanceSectionKey = 'interface' | 'terminal' | 'window'
+type AppearanceSectionKey = 'presets' | 'interface' | 'terminal' | 'colors' | 'window'
 
 function resolveThemeSummary(theme: GlobalSettings['theme']): string {
   if (theme === 'system') {
@@ -98,8 +102,19 @@ export function AppearancePane({
     'auto.components.settings.AppearancePane.windowSidebarSummary',
     'Sidebar, status bar, and file explorer'
   )
+  const presetsTitle = translate(
+    'auto.components.settings.AppearancePresetsSection.title',
+    'Presets'
+  )
+  const colorsTitle = translate('auto.components.settings.AppearancePane.colorsTitle', 'Colors')
+  const colorsSummary = translate(
+    'auto.components.settings.AppearancePane.colorsSummary',
+    'Terminal background and interface pane colors'
+  )
 
   // Search-entry buckets per section so a query can force-open the matching one.
+  const presetsSearchEntries = [{ title: presetsTitle }, ...getAppearancePresetEntries()]
+  const colorsSearchEntries = [{ title: colorsTitle }, ...getInterfaceColorEntries()]
   const interfaceSearchEntries = [
     { title: interfaceTitle },
     ...getThemeEntries(),
@@ -125,9 +140,13 @@ export function AppearancePane({
     getWorkspaceCardLayoutEntry()
   ]
 
+  const presetsMatches = matchesSettingsSearch(searchQuery, presetsSearchEntries)
+  const colorsMatches = matchesSettingsSearch(searchQuery, colorsSearchEntries)
   const interfaceMatches = matchesSettingsSearch(searchQuery, interfaceSearchEntries)
   const terminalMatches = matchesSettingsSearch(searchQuery, terminalSearchEntries)
   const windowMatches = matchesSettingsSearch(searchQuery, windowSearchEntries)
+  const presetsLabelMatches = matchesSettingsSearch(searchQuery, { title: presetsTitle })
+  const colorsLabelMatches = matchesSettingsSearch(searchQuery, { title: colorsTitle })
   const interfaceLabelMatches = matchesSettingsSearch(searchQuery, { title: interfaceTitle })
   const terminalLabelMatches = matchesSettingsSearch(searchQuery, { title: terminalTitle })
   const windowLabelMatches = matchesSettingsSearch(searchQuery, {
@@ -141,11 +160,18 @@ export function AppearancePane({
   // shows exactly one manually-chosen section.
   function isSectionOpen(key: AppearanceSectionKey): boolean {
     if (isSearching) {
-      return key === 'interface'
-        ? interfaceMatches
-        : key === 'terminal'
-          ? terminalMatches
-          : windowMatches
+      switch (key) {
+        case 'presets':
+          return presetsMatches
+        case 'interface':
+          return interfaceMatches
+        case 'terminal':
+          return terminalMatches
+        case 'colors':
+          return colorsMatches
+        case 'window':
+          return windowMatches
+      }
     }
     return manuallyOpenSection === key
   }
@@ -163,8 +189,40 @@ export function AppearancePane({
     translate('auto.components.settings.AppearancePane.terminalDefaultFont', 'Default font')
   } · ${settings.terminalFontSize}px`
 
+  const presetCount = settings.appearancePresets?.length ?? 0
+  const presetsSummary =
+    presetCount === 0
+      ? translate(
+          'auto.components.settings.AppearancePane.presetsSummaryEmpty',
+          'Save and switch appearance setups'
+        )
+      : translate(
+          'auto.components.settings.AppearancePane.presetsSummaryCount',
+          '{{count}} saved',
+          { count: presetCount }
+        )
+
   return (
     <div className="space-y-2.5">
+      {presetsMatches ? (
+        <AppearanceSection
+          id="presets"
+          icon={<SwatchBook aria-hidden="true" />}
+          title={presetsTitle}
+          summary={presetsSummary}
+          open={isSectionOpen('presets')}
+          onToggle={() => toggleSection('presets')}
+        >
+          <AppearancePresetsSection
+            settings={settings}
+            updateSettings={updateSettings}
+            applyTheme={applyTheme}
+            systemPrefersDark={systemPrefersDark}
+            forceVisiblePrimary={presetsLabelMatches}
+          />
+        </AppearanceSection>
+      ) : null}
+
       {interfaceMatches ? (
         <AppearanceSection
           id="interface"
@@ -208,6 +266,24 @@ export function AppearancePane({
             ghostty={ghostty}
             warpThemes={warpThemes}
             forceVisiblePrimary={terminalLabelMatches}
+          />
+        </AppearanceSection>
+      ) : null}
+
+      {colorsMatches ? (
+        <AppearanceSection
+          id="colors"
+          icon={<Palette aria-hidden="true" />}
+          title={colorsTitle}
+          summary={colorsSummary}
+          open={isSectionOpen('colors')}
+          onToggle={() => toggleSection('colors')}
+        >
+          <AppearanceColorsSection
+            settings={settings}
+            updateSettings={updateSettings}
+            systemPrefersDark={systemPrefersDark}
+            forceVisiblePrimary={colorsLabelMatches}
           />
         </AppearanceSection>
       ) : null}

@@ -17,6 +17,7 @@ import { normalizeAppIconId } from '../../shared/app-icon'
 import { normalizeUiLanguage } from '../../shared/ui-language'
 import { applyAppIcon } from '../app-icon'
 import { normalizeTerminalCustomThemes } from '../../shared/terminal-custom-themes'
+import { normalizeAppearancePresets } from '../../shared/appearance-presets'
 import { normalizeDesktopTerminalScrollbackRows } from '../../shared/terminal-scrollback-policy'
 import { prepareLocalWorktreeRootsForRepos } from '../worktree-root-preparation'
 import { scheduleCurrentWorktreeBaseDirectoryWatcherSync } from './worktree-base-directory-watcher'
@@ -89,6 +90,9 @@ export function registerSettingsHandlers(
     }
     if ('terminalCustomThemes' in args) {
       sanitizedArgs.terminalCustomThemes = normalizeTerminalCustomThemes(args.terminalCustomThemes)
+    }
+    if ('appearancePresets' in args) {
+      sanitizedArgs.appearancePresets = normalizeAppearancePresets(args.appearancePresets)
     }
     if ('terminalScrollbackRows' in args) {
       sanitizedArgs.terminalScrollbackRows = normalizeDesktopTerminalScrollbackRows(
