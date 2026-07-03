@@ -33,7 +33,16 @@ function getDefaultAgentPipPosition(width: number): { x: number; y: number } | n
   }
 }
 
-export function createAgentPipWindow(store: Store | null): BrowserWindow {
+type CreateAgentPipWindowOptions = {
+  /** Sampled at ready-to-show. Lets the caller keep the window hidden when it
+   *  is created while an IDE window is focused (focus-aware PiP). */
+  shouldShowOnReady?: () => boolean
+}
+
+export function createAgentPipWindow(
+  store: Store | null,
+  opts?: CreateAgentPipWindowOptions
+): BrowserWindow {
   const rawSavedBounds = store?.getUI().agentPipWindowBounds
   // Why: height is content-driven (rows push the window taller), so only
   // {x, y, width} persist. Validate against attached displays with the row
@@ -110,7 +119,7 @@ export function createAgentPipWindow(store: Store | null): BrowserWindow {
   })
 
   win.once('ready-to-show', () => {
-    if (!win.isDestroyed()) {
+    if (!win.isDestroyed() && (opts?.shouldShowOnReady?.() ?? true)) {
       // Why: opening the PiP must not steal focus from whatever the user is
       // working in — it is a background status surface until clicked.
       win.showInactive()

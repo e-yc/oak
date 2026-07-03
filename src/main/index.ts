@@ -1022,16 +1022,56 @@ function sendAgentPipOpenChanged(): void {
   }
 }
 
+// Why: the pinned stack is a glanceable away-from-Orca surface — while an IDE
+// window is focused it only duplicates what the app already shows, so it stays
+// hidden until the app loses focus. Focusing the PiP itself (to reply) must
+// not count as "in the IDE" or clicking it would hide it.
+function isIdeWindowFocused(): boolean {
+  const focused = BrowserWindow.getFocusedWindow()
+  return focused !== null && focused !== agentPipWindow
+}
+
+let agentPipFocusSyncTimer: ReturnType<typeof setTimeout> | null = null
+
+function syncAgentPipVisibilityToAppFocus(): void {
+  if (agentPipFocusSyncTimer) {
+    clearTimeout(agentPipFocusSyncTimer)
+  }
+  // Why: blur of one window and focus of the next arrive as separate events;
+  // settle briefly so intra-app focus handoffs don't flash the PiP.
+  agentPipFocusSyncTimer = setTimeout(() => {
+    agentPipFocusSyncTimer = null
+    const win = agentPipWindow
+    if (!win || win.isDestroyed()) {
+      return
+    }
+    if (isIdeWindowFocused()) {
+      if (win.isVisible()) {
+        win.hide()
+      }
+    } else if (!win.isVisible()) {
+      win.showInactive()
+    }
+  }, 80)
+}
+
+app.on('browser-window-focus', syncAgentPipVisibilityToAppFocus)
+app.on('browser-window-blur', syncAgentPipVisibilityToAppFocus)
+
 function isAgentPipWindowOpen(): boolean {
   return agentPipWindow !== null && !agentPipWindow.isDestroyed()
 }
 
 function openAgentPipWindow(): void {
   if (isAgentPipWindowOpen()) {
-    agentPipWindow?.showInactive()
+    if (!isIdeWindowFocused()) {
+      agentPipWindow?.showInactive()
+    }
     return
   }
-  const win = createAgentPipWindow(store)
+  // Why: opening from the status bar happens while the IDE is focused — the
+  // PiP is created hidden and first appears when the app loses focus.
+  const win = createAgentPipWindow(store, { shouldShowOnReady: () => !isIdeWindowFocused() })
   agentPipWindow = win
   setAgentPipWindow(win)
   win.on('closed', () => {
