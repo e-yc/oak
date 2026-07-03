@@ -3392,3 +3392,20 @@ html[data-agent-pip-vibrancy] .agent-pip-surface {
 .agent-pip-row-active {
   background: color-mix(in srgb, var(--foreground) 7%, transparent);
 }
+
+/* Why: rows run edge-to-edge and the OS shell's corner radius does all the
+   rounding; hairline separators divide rows. Foreground-tinted like the hover
+   above so the line reads on both the vibrancy glass and the opaque fallback. */
+.agent-pip-row + .agent-pip-row {
+  box-shadow: inset 0 0.5px 0 color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+/* Why: the last row must clear the shell's corner curve — large on the macOS
+   liquid-glass window, small (8px or square) on Windows/Linux. */
+.agent-pip-list {
+  padding-bottom: 4px;
+}
+
+html[data-agent-pip-vibrancy] .agent-pip-list {
+  padding-bottom: 10px;
+}

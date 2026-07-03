@@ -150,7 +150,7 @@ export function AgentPipRow({ row, onFocusPane }: AgentPipRowProps): React.JSX.E
   if (editing) {
     return (
       <div
-        className="agent-pip-no-drag agent-pip-row-active flex flex-col gap-0.5 rounded-md px-2 py-1"
+        className="agent-pip-row agent-pip-no-drag agent-pip-row-active flex flex-col justify-center gap-0.5 px-3.5 py-1"
         data-pane-key={paneKey}
       >
         <div className="flex items-center gap-1.5">
@@ -197,7 +197,7 @@ export function AgentPipRow({ row, onFocusPane }: AgentPipRowProps): React.JSX.E
   return (
     <div
       className={cn(
-        'agent-pip-no-drag agent-pip-row-hover group flex h-7 cursor-text items-center gap-2 rounded-md px-2',
+        'agent-pip-row agent-pip-no-drag agent-pip-row-hover group flex h-7.5 cursor-text items-center gap-2 px-3.5',
         closed && 'cursor-default opacity-55'
       )}
       data-pane-key={paneKey}

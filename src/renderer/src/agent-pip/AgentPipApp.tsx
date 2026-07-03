@@ -70,8 +70,8 @@ export function AgentPipApp(): React.JSX.Element {
   return (
     <div className="agent-pip-drag agent-pip-surface flex h-dvh flex-col overflow-hidden text-popover-foreground">
       <div className="scrollbar-sleek flex-1 overflow-y-auto">
-        <div ref={contentRef} className="flex flex-col gap-0.5 px-1.5 pb-1.5">
-          <div className="flex h-6 items-center justify-between pl-1 pr-0">
+        <div ref={contentRef} className="agent-pip-list flex flex-col">
+          <div className="flex h-7 items-center justify-between pl-3.5 pr-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/60">
               {translate('agentPip.header.title', 'Agents')}
               {workingCount > 0 ? (
@@ -92,7 +92,7 @@ export function AgentPipApp(): React.JSX.Element {
             </button>
           </div>
           {rows.length === 0 ? (
-            <div className="flex h-8 items-center px-1 pb-1 text-[11px] text-muted-foreground/60">
+            <div className="flex h-8 items-center px-3.5 text-[11px] text-muted-foreground/60">
               {translate('agentPip.empty', 'No active agents')}
             </div>
           ) : (
