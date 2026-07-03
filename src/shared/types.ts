@@ -33,6 +33,8 @@ import type { AgentKind, LaunchSource, RequestKind } from './telemetry-events'
 import type { SleepingAgentLaunchConfig, SleepingAgentSessionRecord } from './agent-session-resume'
 import type { ClaudeAgentTeamsMode } from './claude-agent-teams-tmux-compat'
 import type { TerminalCustomTheme } from './terminal-custom-themes'
+import type { InterfaceColorOverrides } from './interface-color-overrides'
+import type { AppearancePreset } from './appearance-presets'
 import type { UiLanguage } from './ui-language'
 import type { ForkSyncMode } from './git-fork-sync'
 import type { GitRemoteIdentity } from './git-remote-identity'
@@ -2523,6 +2525,12 @@ export type GlobalSettings = {
   terminalDividerThicknessPx: number
   terminalBackgroundOpacity?: number
   terminalColorOverrides?: TerminalColorOverrides
+  /** Per-mode (dark/light) hex overrides for IDE pane surfaces (app
+   *  background, sidebar, editor, cards). Applied as CSS variables. */
+  interfaceColorOverrides?: InterfaceColorOverrides
+  /** Named snapshots of the full appearance state (theme, terminal theme,
+   *  color overrides, sidebar appearance) the user can switch between. */
+  appearancePresets?: AppearancePreset[]
   terminalPaddingX?: number
   terminalPaddingY?: number
   terminalMouseHideWhileTyping?: boolean

@@ -8,6 +8,8 @@ import { translate } from '@/i18n/i18n'
 import { translateSearchKeyword } from './settings-search-keywords'
 import { SHOW_UI_LANGUAGE_SETTING } from '@/i18n/supported-languages'
 import { getStatusBarToggles } from './appearance-status-bar-search'
+import { getAppearancePresetEntries } from './appearance-presets-search'
+import { getInterfaceColorEntries } from './appearance-colors-search'
 
 export { getStatusBarToggles }
 
@@ -250,6 +252,9 @@ const getAppearanceSectionEntries = createLocalizedCatalog((): SettingsSearchEnt
     title: translate('auto.components.settings.AppearancePane.interfaceTitle', 'Interface')
   },
   {
+    title: translate('auto.components.settings.AppearancePane.colorsTitle', 'Colors')
+  },
+  {
     title: translate('auto.components.settings.AppearancePane.terminalTitle', 'Terminal')
   },
   {
@@ -274,6 +279,8 @@ function buildAppearancePaneSearchEntries(
 ): SettingsSearchEntry[] {
   return [
     ...getAppearanceSectionEntries(),
+    ...getAppearancePresetEntries(),
+    ...getInterfaceColorEntries(),
     ...getThemeEntries(),
     ...(SHOW_UI_LANGUAGE_SETTING ? getLanguageEntries() : []),
     ...getTypographyEntries(),

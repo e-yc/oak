@@ -11,6 +11,7 @@ import { assertRuntimeStatusCompatible } from '@/runtime/runtime-protocol-compat
 import type { RuntimeStatus } from '../../../../shared/runtime-types'
 import { normalizeTerminalQuickCommands } from '../../../../shared/terminal-quick-commands'
 import { normalizeTerminalCustomThemes } from '../../../../shared/terminal-custom-themes'
+import { normalizeAppearancePresets } from '../../../../shared/appearance-presets'
 import { normalizeTaskProviderSettings } from '../../../../shared/task-providers'
 import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'
 import { createSettingsSearchState, type SettingsSearchState } from './settings-search-state'
@@ -93,6 +94,9 @@ export const createSettingsSlice: StateCreator<AppState, [], [], SettingsSlice> 
         sanitizedUpdates.terminalCustomThemes = normalizeTerminalCustomThemes(
           updates.terminalCustomThemes
         )
+      }
+      if ('appearancePresets' in updates) {
+        sanitizedUpdates.appearancePresets = normalizeAppearancePresets(updates.appearancePresets)
       }
       if ('visibleTaskProviders' in updates || 'defaultTaskSource' in updates) {
         const taskProviderSettings = normalizeTaskProviderSettings({

@@ -4774,7 +4774,11 @@
           "windowSidebarSummary": "Sidebar, status bar, and file explorer",
           "statusBarCount": "{{value0}} indicators visible.",
           "gitIgnoredGlossary": "Files matched by .gitignore.",
-          "statusBarDescription": "Choose which indicators appear in the status bar."
+          "statusBarDescription": "Choose which indicators appear in the status bar.",
+          "colorsTitle": "Colors",
+          "colorsSummary": "Terminal background and interface pane colors",
+          "presetsSummaryEmpty": "Save and switch appearance setups",
+          "presetsSummaryCount": "{{count}} saved"
         },
         "AutoRenameBranchFromWorkSetting": {
           "1626524572": "Nautilus",
@@ -8702,6 +8706,47 @@
         "ephemeralVmsExperimentalSetting": {
           "description": "Shows setup controls and workspace run targets for repo-owned, on-demand environments.",
           "toggleLabel": "Toggle per-workspace environments"
+        },
+        "AppearanceColorsSection": {
+          "paneBackground": "App Background",
+          "paneBackgroundDescription": "The main window canvas behind all panes.",
+          "paneSidebar": "Sidebar",
+          "paneSidebarDescription": "The workspace sidebar surface.",
+          "paneEditor": "Editor",
+          "paneEditorDescription": "Code and markdown editor panes.",
+          "paneCards": "Panels & Cards",
+          "paneCardsDescription": "Panels lifted off the canvas, like workspace cards.",
+          "terminalBackgroundTitle": "Terminal Background",
+          "paneColorsTitle": "Interface Panes",
+          "terminalBackgroundDescription": "Override the background of the active terminal theme.",
+          "terminalBackgroundLabel": "Background",
+          "terminalBackgroundFieldDescription": "Applied on top of the selected terminal theme in both modes.",
+          "terminalBackgroundReset": "Reset to theme background",
+          "paneColorsDescription": "Recolor the app background, sidebar, editor, and panels.",
+          "paneColorsModeAria": "Choose which mode to edit pane colors for",
+          "paneColorsDarkHint": "These colors apply while Orca is in dark mode.",
+          "paneColorsLightHint": "These colors apply while Orca is in light mode.",
+          "paneColorsResetDark": "Reset dark pane colors",
+          "paneColorsResetLight": "Reset light pane colors"
+        },
+        "AppearancePresetsSection": {
+          "title": "Presets",
+          "description": "Save the current appearance as a preset and switch between saved setups.",
+          "emptyState": "No presets yet. Save your current appearance to switch between setups quickly.",
+          "apply": "Apply",
+          "presetActions": "Preset actions",
+          "updateFromCurrent": "Update from current appearance",
+          "rename": "Rename…",
+          "delete": "Delete",
+          "saveCurrent": "Save Current as Preset",
+          "renameTitle": "Rename Preset",
+          "createTitle": "Save Preset",
+          "createDescription": "Captures the current theme, terminal theme, and custom colors.",
+          "nameLabel": "Name",
+          "namePlaceholder": "e.g. Night coding",
+          "cancel": "Cancel",
+          "renameConfirm": "Rename",
+          "saveConfirm": "Save"
         }
       },
       "right": {
