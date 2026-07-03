@@ -46,6 +46,7 @@ import {
 } from '../../shared/keybindings'
 import { getMainE2EConfig } from '../e2e-config'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
+import { boundsHaveVisibleAreaOnAnyDisplay } from './bounds-visible-on-display'
 import { clearTrustedUIRendererWebContentsId, setTrustedUIRendererWebContentsId } from '../ipc/ui'
 
 function forceRepaint(window: BrowserWindow): void {
@@ -187,42 +188,17 @@ export function createMainWindow(
   // Why: defense in depth — if a previous quit/update path persisted
   // shrink-to-min bounds (see freezeBoundsOnQuit), discard them on restore
   // rather than resurrecting a tiny window. Anything at or below the min
-  // dimensions is treated as corrupt and falls back to defaultBounds. The
-  // position must also land on a currently-attached display with a
-  // *meaningful* visible area — not just any >0 overlap, since a 1-pixel
-  // sliver (or a sub-pixel shaving after DPI scaling) would still leave
-  // the titlebar unreachable. Require at least MIN_WIDTH/2 of horizontal
-  // and MIN_HEIGHT/2 of vertical overlap with some display's workArea
-  // (workArea excludes menu bar / dock, so a rect entirely hidden under
-  // the dock is also correctly discarded). A rect saved while an external
-  // monitor was connected would otherwise be restored off-screen and
-  // macOS would silently shrink/reposition the window.
-  const rectHasVisibleAreaOnAnyDisplay = (b: {
-    x: number
-    y: number
-    width: number
-    height: number
-  }): boolean => {
-    try {
-      return screen.getAllDisplays().some((d) => {
-        const wa = d.workArea
-        const overlapX = Math.max(0, Math.min(b.x + b.width, wa.x + wa.width) - Math.max(b.x, wa.x))
-        const overlapY = Math.max(
-          0,
-          Math.min(b.y + b.height, wa.y + wa.height) - Math.max(b.y, wa.y)
-        )
-        return overlapX >= MIN_WIDTH / 2 && overlapY >= MIN_HEIGHT / 2
-      })
-    } catch (err) {
-      console.warn('[window] screen.getAllDisplays() threw; treating bounds as off-screen', err)
-      return false
-    }
-  }
+  // dimensions is treated as corrupt and falls back to defaultBounds.
+  // Require at least MIN_WIDTH/2 of horizontal and MIN_HEIGHT/2 of vertical
+  // overlap with some display's workArea (see bounds-visible-on-display.ts).
   const savedBounds =
     rawSavedBounds &&
     rawSavedBounds.width > MIN_WIDTH &&
     rawSavedBounds.height > MIN_HEIGHT &&
-    rectHasVisibleAreaOnAnyDisplay(rawSavedBounds)
+    boundsHaveVisibleAreaOnAnyDisplay(rawSavedBounds, {
+      width: MIN_WIDTH / 2,
+      height: MIN_HEIGHT / 2
+    })
       ? rawSavedBounds
       : undefined
   if (rawSavedBounds && !savedBounds) {

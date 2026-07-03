@@ -352,6 +352,7 @@ export function getDefaultSettings(homedir: string): GlobalSettings {
     experimentalActivity: false,
     experimentalActivityDefaultedOffForAllUsers: true,
     experimentalTerminalAttention: false,
+    experimentalAgentPip: false,
     experimentalAgentHibernation: false,
     agentHibernationIdleMs: 30 * 60 * 1000,
     experimentalNewWorktreeCardStyle: false,

@@ -99,6 +99,13 @@ import { getInitialClaudeRateLimitTarget } from './rate-limits/claude-rate-limit
 import { getInitialCodexRateLimitTarget } from './rate-limits/codex-rate-limit-target'
 import { attachMainWindowServices } from './window/attach-main-window-services'
 import { createMainWindow, loadMainWindow } from './window/createMainWindow'
+import { createAgentPipWindow, loadAgentPipWindow } from './window/create-agent-pip-window'
+import { requestAgentPipReplyFromRenderer } from './window/agent-pip-reply-relay'
+import { registerAgentPipHandlers, setAgentPipWindow } from './ipc/agent-pip'
+import { enrichAgentPipRow } from './agent-pip/enrich-agent-pip-row'
+import type { AgentPipInitState, AgentPipReplyResult } from '../shared/agent-pip-types'
+import { parsePaneKey } from '../shared/stable-pane-id'
+import { normalizeUiLanguage } from '../shared/ui-language'
 import { createSystemTray, destroySystemTray } from './tray/system-tray'
 import { focusExistingMainWindow } from './window/focus-existing-window'
 import { CodexAccountService } from './codex-accounts/service'
@@ -171,6 +178,11 @@ import { applyElectronProxySettings } from './network/proxy-settings'
 import { preserveAgentAuthBeforeRestart } from './agent-auth-restart-preservation'
 
 let mainWindow: BrowserWindow | null = null
+/** Always-on-top pinned agent stack (PiP). Lifetime is bounded by the main
+ *  window in v1: agent status stops flowing once the hook listener detaches,
+ *  and a lingering extra window would defeat the window-all-closed quit
+ *  policy on Windows/Linux. */
+let agentPipWindow: BrowserWindow | null = null
 /** Whether a manual app.quit() (Cmd+Q, etc.) is in progress. Shared with the
  *  window close handler so it can tell the renderer to skip the running-process
  *  confirmation dialog and proceed directly to buffer capture + close. */
@@ -831,6 +843,18 @@ function openMainWindow(): BrowserWindow {
       }
     }
   )
+  registerAgentPipHandlers({
+    getSnapshot: () =>
+      agentHookServer.getStatusSnapshot().map((entry) => enrichAgentPipRow(entry, store)),
+    getInitState: getAgentPipInitState,
+    reply: handleAgentPipReply,
+    focusPane: handleAgentPipFocusPane,
+    requestClose: () => closeAgentPipWindow({ rememberClosed: true }),
+    toggleFromMainWindow: toggleAgentPipWindow,
+    isOpen: isAgentPipWindowOpen,
+    isMainWindowSender: (event) =>
+      mainWindow !== null && !mainWindow.isDestroyed() && event.sender === mainWindow.webContents
+  })
   automations.setWebContents(window.webContents)
   automations.start()
   attachMainWindowServices(
@@ -860,6 +884,11 @@ function openMainWindow(): BrowserWindow {
     if (mainWindow === window) {
       mainWindow = null
     }
+    // Why: PiP lifetime ⊆ main window lifetime. Status stops flowing once the
+    // hook listener detaches below, and a lingering extra window would keep
+    // the window-all-closed quit policy from firing on Windows/Linux. Not
+    // persisted as user-closed, so the PiP comes back on the next launch.
+    closeAgentPipWindow({ rememberClosed: false })
     clearExpectedRendererReload(rendererWebContentsId)
     automations?.setWebContents(null)
     // Why: detach the agent hook listener on window close so the server
@@ -917,7 +946,7 @@ function openMainWindow(): BrowserWindow {
       maybeAutoRenameBranchOnFirstWorkFromHook({ paneKey, tabId, worktreeId, payload, isReplay })
       const orchestration = runtime?.getAgentStatusOrchestrationContextForPaneKey(paneKey)
       const terminalHandle = runtime?.getAgentStatusTerminalHandleForPaneKey(paneKey)
-      mainWindow?.webContents.send('agentStatus:set', {
+      const ipcPayload = {
         ...payload,
         paneKey,
         ...(launchToken ? { launchToken } : {}),
@@ -929,7 +958,11 @@ function openMainWindow(): BrowserWindow {
         stateStartedAt,
         ...(providerSession ? { providerSession } : {}),
         ...(orchestration ? { orchestration } : {})
-      })
+      }
+      mainWindow?.webContents.send('agentStatus:set', ipcPayload)
+      if (agentPipWindow && !agentPipWindow.isDestroyed()) {
+        agentPipWindow.webContents.send('agentPip:set', enrichAgentPipRow(ipcPayload, store))
+      }
       recordAgentStateCrashBreadcrumb(payload.agentType ?? 'unknown', payload.state)
       // Why: some native OSC titles miss terminal idle/permission frames.
       // Inject hook-derived frames so the renderer title tracker updates too.
@@ -957,6 +990,9 @@ function openMainWindow(): BrowserWindow {
       return
     }
     mainWindow?.webContents.send('agentStatus:clear', { paneKey })
+    if (agentPipWindow && !agentPipWindow.isDestroyed()) {
+      agentPipWindow.webContents.send('agentPip:clear', { paneKey })
+    }
   })
   setMigrationUnsupportedPtyListener((event) => {
     if (mainWindow?.isDestroyed()) {
@@ -972,7 +1008,118 @@ function openMainWindow(): BrowserWindow {
   })
   logStartupMilestone('load-start')
   loadMainWindow(window)
+  // Why: restore the pinned agent stack alongside the main window when it was
+  // open at last close and the experiment is still enabled.
+  if (store.getSettings().experimentalAgentPip && store.getUI().agentPipWindowOpen) {
+    openAgentPipWindow()
+  }
   return window
+}
+
+function sendAgentPipOpenChanged(): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('agentPip:openChanged', isAgentPipWindowOpen())
+  }
+}
+
+function isAgentPipWindowOpen(): boolean {
+  return agentPipWindow !== null && !agentPipWindow.isDestroyed()
+}
+
+function openAgentPipWindow(): void {
+  if (isAgentPipWindowOpen()) {
+    agentPipWindow?.showInactive()
+    return
+  }
+  const win = createAgentPipWindow(store)
+  agentPipWindow = win
+  setAgentPipWindow(win)
+  win.on('closed', () => {
+    if (agentPipWindow === win) {
+      agentPipWindow = null
+      setAgentPipWindow(null)
+      // Why: the hidden main renderer relays PiP replies while the PiP is
+      // open; restore normal throttling once that duty ends. macOS keeps
+      // throttling off permanently for webview repaint reasons (see
+      // createMainWindow.ts), so only non-darwin toggles here.
+      if (process.platform !== 'darwin' && mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.setBackgroundThrottling(true)
+      }
+      sendAgentPipOpenChanged()
+    }
+  })
+  loadAgentPipWindow(win)
+  if (process.platform !== 'darwin' && mainWindow && !mainWindow.isDestroyed()) {
+    // Why: while the PiP is open, reply relays run in the (possibly hidden)
+    // main renderer; unthrottle so its post-paste submit timer stays at 500ms.
+    mainWindow.webContents.setBackgroundThrottling(false)
+  }
+  store?.updateUI({ agentPipWindowOpen: true })
+  sendAgentPipOpenChanged()
+}
+
+function closeAgentPipWindow(options: { rememberClosed: boolean }): void {
+  if (options.rememberClosed) {
+    store?.updateUI({ agentPipWindowOpen: false })
+  }
+  if (agentPipWindow && !agentPipWindow.isDestroyed()) {
+    agentPipWindow.close()
+  }
+}
+
+// Why: returns the intended state, not isAgentPipWindowOpen() — win.close()
+// is asynchronous, so sampling right after a close still reads "open".
+function toggleAgentPipWindow(): boolean {
+  if (isAgentPipWindowOpen()) {
+    closeAgentPipWindow({ rememberClosed: true })
+    return false
+  }
+  openAgentPipWindow()
+  return true
+}
+
+async function handleAgentPipReply(paneKey: string, text: string): Promise<AgentPipReplyResult> {
+  // Why: the hook-server cache is the PiP's source of truth; a pane missing
+  // there has no live agent session to receive the reply.
+  const entry = agentHookServer.getStatusSnapshot().find((row) => row.paneKey === paneKey)
+  if (!entry || !entry.worktreeId) {
+    return { status: 'unknown-pane' }
+  }
+  const parsed = parsePaneKey(paneKey)
+  if (!parsed) {
+    return { status: 'unknown-pane' }
+  }
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return { status: 'main-window-unavailable' }
+  }
+  return requestAgentPipReplyFromRenderer(mainWindow, {
+    paneKey,
+    worktreeId: entry.worktreeId,
+    tabId: parsed.tabId,
+    leafId: parsed.leafId,
+    text
+  })
+}
+
+function handleAgentPipFocusPane(paneKey: string): void {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return
+  }
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore()
+  }
+  mainWindow.show()
+  mainWindow.focus()
+  mainWindow.webContents.send('agentPip:revealPane', { paneKey })
+}
+
+function getAgentPipInitState(): AgentPipInitState {
+  const settings = store?.getSettings()
+  return {
+    uiLanguage: normalizeUiLanguage(settings?.uiLanguage),
+    theme: settings?.theme ?? 'system',
+    platform: process.platform
+  }
 }
 
 function sendOpenFeatureTour(targetWindow?: BrowserWindow | null): void {

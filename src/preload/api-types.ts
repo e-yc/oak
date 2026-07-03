@@ -263,6 +263,10 @@ import type {
 } from '../shared/agent-status-types'
 import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
 import type {
+  AgentPipRendererReplyRequest,
+  AgentPipRendererReplyResponse
+} from '../shared/agent-pip-types'
+import type {
   RuntimeBrowserDriverState,
   RuntimeMobileSessionTabMove,
   RuntimeStatus,
@@ -2901,6 +2905,18 @@ export type PreloadApi = {
     /** Drop every cached hook status under one terminal tab prefix.
      *  Fire-and-forget. */
     dropByTabPrefix: (tabId: string) => void
+  }
+  agentPip: {
+    /** Listen for reply requests relayed from the PiP window. The main-window
+     *  renderer executes the send (it owns SSH-correct runtime routing) and
+     *  answers via replyResponse. */
+    onReplyRequest: (callback: (request: AgentPipRendererReplyRequest) => void) => () => void
+    replyResponse: (response: AgentPipRendererReplyResponse) => void
+    /** Fired when the user asks the PiP to reveal a pane in the main window. */
+    onRevealPane: (callback: (data: { paneKey: string }) => void) => () => void
+    onOpenChanged: (callback: (open: boolean) => void) => () => void
+    toggleWindow: () => Promise<boolean>
+    isOpen: () => Promise<boolean>
   }
   mobile: {
     listNetworkInterfaces: () => Promise<{

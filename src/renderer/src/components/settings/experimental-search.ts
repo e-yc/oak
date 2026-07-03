@@ -2,6 +2,7 @@ import type { SettingsSearchEntry } from './settings-search'
 import { createLocalizedCatalog } from '@/i18n/localized-catalog'
 import { translate } from '@/i18n/i18n'
 import { translateSearchKeyword } from './settings-search-keywords'
+import { getAgentPipSearchEntry } from './agent-pip-search-entry'
 import { getNewWorktreeCardStyleSearchEntry } from './new-worktree-card-style-search-entry'
 import { getNativeChatExperimentalSearchEntry } from './native-chat-experimental-search-entry'
 import { getEphemeralVmsSearchEntry } from './ephemeral-vms-search'
@@ -148,6 +149,7 @@ export const getExperimentalPaneSearchEntries = createLocalizedCatalog(
         )
       ]
     },
+    getAgentPipSearchEntry(),
     {
       title: translate(
         'auto.components.settings.experimental.search.agentHibernation.title',
@@ -260,6 +262,9 @@ export function getExperimentalSearchEntry() {
     ),
     terminalAttention: findEntry(
       translate('auto.components.settings.experimental.search.9e4ddf776d', 'Terminal attention')
+    ),
+    agentPip: findEntry(
+      translate('auto.components.settings.experimental.search.agentPip.title', 'Pinned agent stack')
     ),
     agentHibernation: findEntry(
       translate(

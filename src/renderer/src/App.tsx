@@ -50,6 +50,7 @@ import { ActivityTitlebarControls } from './components/activity/ActivityTitlebar
 import Sidebar from './components/Sidebar'
 import { shutdownBufferCaptures } from './components/terminal-pane/shutdown-buffer-captures'
 import { dispatchWindowCloseRequest } from './components/window-close-request-coordinator'
+import { installAgentPipMainWindowBridge } from './lib/agent-pip-main-window-bridge'
 import {
   getSystemPrefersDarkSnapshot,
   useSystemPrefersDark
@@ -1292,6 +1293,12 @@ function App(): React.JSX.Element {
   // handler when present, else confirms the close directly.
   useEffect(() => {
     return window.api.ui.onWindowCloseRequested(dispatchWindowCloseRequest)
+  }, [])
+
+  // Why: the agent PiP window cannot send to terminals itself; this bridge
+  // executes relayed PiP replies and reveal-pane requests in the main window.
+  useEffect(() => {
+    return installAgentPipMainWindowBridge()
   }, [])
 
   // Why there is no periodic scrollback save: PR #461 added a 3-minute

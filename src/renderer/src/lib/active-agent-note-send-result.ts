@@ -1,13 +1,6 @@
-export type ActiveAgentNotesSendStatus =
-  | 'sent'
-  | 'empty'
-  | 'no-active-terminal'
-  | 'no-agent'
-  | 'permission'
-  | 'status-unavailable'
-  | 'not-ready'
-  | 'not-writable'
-  | 'partial-submit-failed'
+import type { ActiveAgentNotesSendStatus } from '../../../shared/active-agent-send-status'
+
+export type { ActiveAgentNotesSendStatus } from '../../../shared/active-agent-send-status'
 
 export type ActiveAgentNotesSendResult = {
   status: ActiveAgentNotesSendStatus

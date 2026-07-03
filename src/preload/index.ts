@@ -129,6 +129,10 @@ import type {
 } from '../shared/agent-status-types'
 import type { AgentInterruptInferenceRequest } from '../shared/agent-interrupt-intent'
 import type {
+  AgentPipRendererReplyRequest,
+  AgentPipRendererReplyResponse
+} from '../shared/agent-pip-types'
+import type {
   SpeechErrorEvent,
   SpeechLifecycleEvent,
   SpeechModelManifest,
@@ -4070,6 +4074,33 @@ const api = {
     dropByTabPrefix: (tabId: string): void => {
       ipcRenderer.send('agentStatus:dropByTabPrefix', tabId)
     }
+  },
+
+  agentPip: {
+    onReplyRequest: (callback: (request: AgentPipRendererReplyRequest) => void): (() => void) => {
+      const listener = (
+        _event: Electron.IpcRendererEvent,
+        request: AgentPipRendererReplyRequest
+      ): void => callback(request)
+      ipcRenderer.on('agentPip:replyRequest', listener)
+      return () => ipcRenderer.removeListener('agentPip:replyRequest', listener)
+    },
+    replyResponse: (response: AgentPipRendererReplyResponse): void => {
+      ipcRenderer.send('agentPip:replyResponse', response)
+    },
+    onRevealPane: (callback: (data: { paneKey: string }) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, data: { paneKey: string }): void =>
+        callback(data)
+      ipcRenderer.on('agentPip:revealPane', listener)
+      return () => ipcRenderer.removeListener('agentPip:revealPane', listener)
+    },
+    onOpenChanged: (callback: (open: boolean) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, open: boolean): void => callback(open)
+      ipcRenderer.on('agentPip:openChanged', listener)
+      return () => ipcRenderer.removeListener('agentPip:openChanged', listener)
+    },
+    toggleWindow: (): Promise<boolean> => ipcRenderer.invoke('agentPip:toggleWindow'),
+    isOpen: (): Promise<boolean> => ipcRenderer.invoke('agentPip:isOpen')
   },
 
   speech: {

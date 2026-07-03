@@ -214,6 +214,14 @@ export default defineConfig({
     build: {
       externalizeDeps: {
         exclude: ['@electron-toolkit/preload']
+      },
+      rollupOptions: {
+        // Why: explicit input overrides the src/preload/index.ts default, so
+        // `index` must be re-listed alongside the agent PiP preload.
+        input: {
+          index: resolve('src/preload/index.ts'),
+          'agent-pip': resolve('src/preload/agent-pip.ts')
+        }
       }
     }
   },
@@ -227,6 +235,16 @@ export default defineConfig({
     plugins: [react(), tailwindcss()],
     worker: {
       format: 'es'
+    },
+    build: {
+      rollupOptions: {
+        // Why: explicit input overrides the src/renderer/index.html default,
+        // so `index` must be re-listed alongside the agent PiP entry.
+        input: {
+          index: resolve('src/renderer/index.html'),
+          'agent-pip': resolve('src/renderer/agent-pip.html')
+        }
+      }
     }
   }
 })

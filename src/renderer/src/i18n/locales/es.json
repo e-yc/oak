@@ -2934,7 +2934,11 @@
             "972a1ff497": "¿Restablecer límites de Codex?",
             "6d1042aa6f": "Esto usa un crédito de restablecimiento de límite de Codex para la cuenta activa y restablece de inmediato las ventanas de uso aptas.",
             "f077f586db": "No volver a preguntar",
-            "c0e972d726": "Cancelar"
+            "c0e972d726": "Cancelar",
+            "agentPip": {
+              "close": "Close pinned agent stack",
+              "open": "Open pinned agent stack"
+            }
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Conectar una cuenta",
@@ -5114,6 +5118,11 @@
             "defaultViewLabel": "Vista de chat nativa predeterminada",
             "defaultViewTerminal": "charla terminal",
             "defaultViewNative": "chat nativo"
+          },
+          "agentPip": {
+            "title": "Pinned agent stack",
+            "searchDescription": "Always-on-top mini window with agent statuses and quick replies.",
+            "description": "Adds a status-bar toggle for a small always-on-top window that lists your agent sessions across workspaces — like a video pop-out. Click a row to reply to that agent without switching back to Orca."
           }
         },
         "FloatingWorkspacePane": {
@@ -7257,6 +7266,10 @@
             "nativeChat": {
               "title": "chat nativo",
               "description": "Obtenga una vista previa de la superficie de chat del escritorio para las sesiones de terminal de Claude y Codex."
+            },
+            "agentPip": {
+              "title": "Pinned agent stack",
+              "description": "Always-on-top mini window with agent statuses and quick replies."
             }
           }
         },
@@ -12438,6 +12451,29 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    }
+  },
+  "agentPip": {
+    "header": {
+      "title": "Agents",
+      "close": "Close pinned agents",
+      "workingCount": "{{count}} working"
+    },
+    "empty": "No active agents",
+    "error": {
+      "mainWindowUnavailable": "Open Orca to reply.",
+      "rendererTimeout": "Orca did not confirm the send. Check the terminal.",
+      "unknownPane": "This agent session is no longer available."
+    },
+    "row": {
+      "interrupted": "Interrupted by user",
+      "sessionClosed": "Session closed",
+      "replyPlaceholder": "Reply to {{agent}}…",
+      "sending": "Sending…",
+      "clickToReply": "Click to reply — {{agent}}",
+      "sent": "Sent",
+      "reply": "Reply",
+      "openInOrca": "Open in Orca"
     }
   }
 }

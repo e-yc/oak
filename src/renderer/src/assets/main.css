@@ -3350,3 +3350,45 @@ html.onboarding-tour-start-transition::view-transition-new(root) {
     inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent),
     0 10px 24px rgba(0, 0, 0, 0.18);
 }
+
+/* ── Agent PiP (pinned agent stack window) ────────────── */
+
+/* Why: the PiP is a frameless always-on-top window — empty chrome drags the
+   window (video-PiP convention) while rows/inputs opt out so they stay
+   clickable. */
+.agent-pip-drag {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.agent-pip-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+.agent-pip-surface {
+  background: var(--popover);
+}
+
+/* Why: on macOS the PiP window carries an NSVisualEffectView (vibrancy) —
+   the page and surface must go translucent so the liquid-glass layer shows
+   through. The attribute is stamped by the PiP bootstrap on darwin only;
+   Windows/Linux keep the opaque popover surface. */
+html[data-agent-pip-vibrancy],
+html[data-agent-pip-vibrancy] body {
+  background: transparent;
+}
+
+html[data-agent-pip-vibrancy] .agent-pip-surface {
+  background: color-mix(in srgb, var(--popover) 42%, transparent);
+}
+
+/* Why: token surfaces (accent) are opaque and read as gray slabs on glass;
+   a foreground-tinted translucent hover keeps rows legible on both the
+   vibrancy surface and the opaque fallback. */
+.agent-pip-row-hover:hover {
+  background: color-mix(in srgb, var(--foreground) 9%, transparent);
+}
+
+.agent-pip-row-active {
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
+}

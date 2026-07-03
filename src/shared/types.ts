@@ -2839,6 +2839,10 @@ export type GlobalSettings = {
    *  and agent-completion events. Opt-in while the signal/noise balance is
    *  being tested. */
   experimentalTerminalAttention: boolean
+  /** Experimental: pinned agent stack — an always-on-top mini window listing
+   *  agent sessions across worktrees with per-row reply inputs. Opt-in while
+   *  the OS-level PiP window behavior is validated across platforms. */
+  experimentalAgentPip: boolean
   /** Experimental: automatically sleep completed, resumable background agent terminals. */
   experimentalAgentHibernation?: boolean
   /** Milliseconds a completed agent must stay idle before hibernation can be considered. */
@@ -3279,6 +3283,12 @@ export type PersistedUIState = {
   windowBounds?: { x: number; y: number; width: number; height: number } | null
   /** Whether the window was maximized when it was last closed. */
   windowMaximized?: boolean
+  /** Saved pinned-agent-stack (PiP) window position and width. Height is
+   *  content-driven and intentionally not persisted. */
+  agentPipWindowBounds?: { x: number; y: number; width: number } | null
+  /** Whether the pinned agent stack was open when the main window last closed,
+   *  so it comes back on the next launch. */
+  agentPipWindowOpen?: boolean
   /** One-shot migration flag: 'recent' used to mean the weighted smart sort
    *  (v1→v2 rename). When this flag is absent and sortBy is 'recent', the
    *  main-process load() migrates it to 'smart' and sets this flag so the

@@ -7,6 +7,7 @@ import { getExperimentalPaneSearchEntries, getExperimentalSearchEntry } from './
 import { HiddenExperimentalGroup } from './HiddenExperimentalGroup'
 import { NumberField, SettingsSwitch } from './SettingsFormControls'
 import { translate } from '@/i18n/i18n'
+import { AgentPipExperimentalSetting } from './AgentPipExperimentalSetting'
 import { NativeChatExperimentalSetting } from './NativeChatExperimentalSetting'
 import { EphemeralVmsExperimentalSetting } from './EphemeralVmsExperimentalSetting'
 import {
@@ -43,6 +44,7 @@ export function ExperimentalPane({
   const showTerminalAttention = matchesSettingsSearch(searchQuery, [
     getExperimentalSearchEntry().terminalAttention
   ])
+  const showAgentPip = matchesSettingsSearch(searchQuery, [getExperimentalSearchEntry().agentPip])
   const showWorktreeSymlinks = matchesSettingsSearch(searchQuery, [
     getExperimentalSearchEntry().symlinksOnWorktrees
   ])
@@ -204,6 +206,10 @@ export function ExperimentalPane({
             </button>
           </div>
         </SearchableSetting>
+      ) : null}
+
+      {showAgentPip ? (
+        <AgentPipExperimentalSetting settings={settings} updateSettings={updateSettings} />
       ) : null}
 
       {showAgentHibernation ? (

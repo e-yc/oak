@@ -2934,7 +2934,11 @@
             "972a1ff497": "Codex 한도를 재설정할까요?",
             "6d1042aa6f": "활성 계정의 Codex rate-limit 재설정 크레딧 1회를 사용해 재설정 가능한 사용량 창을 즉시 초기화합니다.",
             "f077f586db": "다시 묻지 않기",
-            "c0e972d726": "취소"
+            "c0e972d726": "취소",
+            "agentPip": {
+              "close": "Close pinned agent stack",
+              "open": "Open pinned agent stack"
+            }
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "계정 연결",
@@ -5099,6 +5103,11 @@
             "defaultViewLabel": "기본 기본 채팅 보기",
             "defaultViewTerminal": "Terminal 채팅",
             "defaultViewNative": "네이티브 채팅"
+          },
+          "agentPip": {
+            "title": "Pinned agent stack",
+            "searchDescription": "Always-on-top mini window with agent statuses and quick replies.",
+            "description": "Adds a status-bar toggle for a small always-on-top window that lists your agent sessions across workspaces — like a video pop-out. Click a row to reply to that agent without switching back to Orca."
           }
         },
         "FloatingWorkspacePane": {
@@ -7242,6 +7251,10 @@
             "nativeChat": {
               "title": "네이티브 채팅",
               "description": "Claude 및 Codex terminal 세션에 대한 데스크톱 채팅 화면을 미리 봅니다."
+            },
+            "agentPip": {
+              "title": "Pinned agent stack",
+              "description": "Always-on-top mini window with agent statuses and quick replies."
             }
           }
         },
@@ -12438,6 +12451,29 @@
           "githubPullRequestNumber": "PR #{{value0}}"
         }
       }
+    }
+  },
+  "agentPip": {
+    "header": {
+      "title": "Agents",
+      "close": "Close pinned agents",
+      "workingCount": "{{count}} working"
+    },
+    "empty": "No active agents",
+    "error": {
+      "mainWindowUnavailable": "Open Orca to reply.",
+      "rendererTimeout": "Orca did not confirm the send. Check the terminal.",
+      "unknownPane": "This agent session is no longer available."
+    },
+    "row": {
+      "interrupted": "Interrupted by user",
+      "sessionClosed": "Session closed",
+      "replyPlaceholder": "Reply to {{agent}}…",
+      "sending": "Sending…",
+      "clickToReply": "Click to reply — {{agent}}",
+      "sent": "Sent",
+      "reply": "Reply",
+      "openInOrca": "Open in Orca"
     }
   }
 }

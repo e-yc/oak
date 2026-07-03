@@ -10,10 +10,12 @@ import {
   ChevronRight,
   Loader2,
   PanelsTopLeft,
+  PictureInPicture2,
   RefreshCw,
   Server
 } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { cn } from '@/lib/utils'
 import { lazyWithRetry } from '@/lib/lazy-with-retry'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -1767,6 +1769,24 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
   // statusBarItems checkbox would double-toggle the surface). It is driven
   // purely by the experimentalPet settings flag.
   const petEnabled = useAppStore((s) => s.settings?.experimentalPet === true)
+  const agentPipEnabled = useAppStore((s) => s.settings?.experimentalAgentPip === true)
+  const [agentPipOpen, setAgentPipOpen] = useState(false)
+  useEffect(() => {
+    if (!agentPipEnabled) {
+      return
+    }
+    let disposed = false
+    void window.api.agentPip.isOpen().then((open) => {
+      if (!disposed) {
+        setAgentPipOpen(open)
+      }
+    })
+    const unsubscribe = window.api.agentPip.onOpenChanged(setAgentPipOpen)
+    return () => {
+      disposed = true
+      unsubscribe()
+    }
+  }, [agentPipEnabled])
   const toggleStatusBarItem = useAppStore((s) => s.toggleStatusBarItem)
   const usageEmptyStateDismissed = useAppStore((s) => s.usageEmptyStateDismissed)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -2003,6 +2023,47 @@ function StatusBarInner({ floatingTerminalOpen }: StatusBarProps): React.JSX.Ele
           {showPorts ? <PortsStatusSegment compact={compact} iconOnly={iconOnly} /> : null}
           {showSsh ? <SshStatusSegment compact={compact} iconOnly={iconOnly} /> : null}
         </React.Suspense>
+        {agentPipEnabled && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  'inline-flex size-5 cursor-pointer items-center justify-center rounded border border-border bg-secondary text-secondary-foreground shadow-xs transition-colors hover:bg-accent hover:text-accent-foreground',
+                  agentPipOpen && 'bg-accent text-accent-foreground'
+                )}
+                aria-label={
+                  agentPipOpen
+                    ? translate(
+                        'auto.components.status.bar.StatusBar.agentPip.close',
+                        'Close pinned agent stack'
+                      )
+                    : translate(
+                        'auto.components.status.bar.StatusBar.agentPip.open',
+                        'Open pinned agent stack'
+                      )
+                }
+                aria-pressed={agentPipOpen}
+                onClick={() => {
+                  void window.api.agentPip.toggleWindow().then(setAgentPipOpen)
+                }}
+              >
+                <PictureInPicture2 className="size-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6}>
+              {agentPipOpen
+                ? translate(
+                    'auto.components.status.bar.StatusBar.agentPip.close',
+                    'Close pinned agent stack'
+                  )
+                : translate(
+                    'auto.components.status.bar.StatusBar.agentPip.open',
+                    'Open pinned agent stack'
+                  )}
+            </TooltipContent>
+          </Tooltip>
+        )}
         {showFloatingTerminalToggle && (
           <FloatingTerminalIconContextMenu currentLocation="status-bar" className="relative">
             <Tooltip>
