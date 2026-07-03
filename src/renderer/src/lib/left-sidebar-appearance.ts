@@ -113,9 +113,31 @@ function resolveTintedSurfaceVariables(
   return buildSurfaceVariables({ background, foreground: 'var(--foreground)' })
 }
 
+function resolveLiquidGlassSurfaceVariables(
+  settings: LeftSidebarAppearanceSettings,
+  systemPrefersDark: boolean
+): LeftSidebarStyleVariables {
+  const isDark =
+    settings.theme === 'dark' || (settings.theme === 'system' && systemPrefersDark)
+  // Why: translucent remixes of the default sidebar surface (main.css
+  // --worktree-sidebar values); the window's vibrancy layer supplies the
+  // blur, CSS only thins the paint so it shows through. Alphas are kept low —
+  // the macOS 'sidebar' material already carries most of the surface tone.
+  const background = isDark ? 'rgb(42 42 42 / 0.25)' : 'rgb(245 245 245 / 0.30)'
+  const foreground = isDark ? '#fafafa' : '#0a0a0a'
+  return buildSurfaceVariables({ background, foreground })
+}
+
+export type LeftSidebarStyleOptions = {
+  /** Whether the OS window actually carries vibrancy (macOS, restart-bound).
+   *  Without it, glass would just tint over the opaque body. */
+  liquidGlassAvailable?: boolean
+}
+
 export function resolveLeftSidebarStyleVariables(
   settings: LeftSidebarAppearanceSettings | null | undefined,
-  systemPrefersDark: boolean
+  systemPrefersDark: boolean,
+  options?: LeftSidebarStyleOptions
 ): LeftSidebarStyleVariables | undefined {
   if (!settings) {
     return undefined
@@ -127,5 +149,11 @@ export function resolveLeftSidebarStyleVariables(
       return resolveTerminalSurfaceVariables(settings, systemPrefersDark)
     case 'tinted':
       return resolveTintedSurfaceVariables(settings)
+    case 'liquid-glass':
+      // Why: fall back to the default opaque surface on non-mac platforms or
+      // before the restart that gives the window its vibrancy layer.
+      return options?.liquidGlassAvailable
+        ? resolveLiquidGlassSurfaceVariables(settings, systemPrefersDark)
+        : undefined
   }
 }

@@ -72,6 +72,26 @@ export const getTerminalWindowSearchEntries = createLocalizedCatalog(() => [
     ]
   },
   {
+    title: translate(
+      'auto.components.settings.terminal.search.terminalLiquidGlass',
+      'Terminal Liquid Glass'
+    ),
+    description: translate(
+      'auto.components.settings.terminal.search.terminalLiquidGlassDescription',
+      'Render terminal backgrounds as translucent glass tinted with the theme background.'
+    ),
+    keywords: [
+      ...translateSearchKeyword('auto.components.settings.terminal.search.glassKeyword', 'glass'),
+      ...translateSearchKeyword('auto.components.settings.terminal.search.liquidKeyword', 'liquid'),
+      ...translateSearchKeyword('auto.components.settings.terminal.search.6c2f9f05c8', 'vibrancy'),
+      ...translateSearchKeyword(
+        'auto.components.settings.terminal.search.4f7f8f28ca',
+        'transparency'
+      ),
+      ...translateSearchKeyword('auto.components.settings.terminal.search.f6dd9ff606', 'background')
+    ]
+  },
+  {
     title: translate('auto.components.settings.terminal.search.b4f182f24d', 'Horizontal Padding'),
     description: translate(
       'auto.components.settings.terminal.search.75691e4911',

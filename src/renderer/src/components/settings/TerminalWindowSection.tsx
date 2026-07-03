@@ -6,6 +6,7 @@ import { Label } from '../ui/label'
 import { ColorField, NumberField } from './SettingsFormControls'
 import { SearchableSetting } from './SearchableSetting'
 import { clampNumber } from '@/lib/terminal-theme'
+import { TerminalLiquidGlassSetting } from './TerminalLiquidGlassSetting'
 import { useMountedRef } from '@/hooks/useMountedRef'
 import { translate } from '@/i18n/i18n'
 
@@ -176,6 +177,8 @@ export function TerminalWindowSection({
             </div>
           ) : null}
         </SearchableSetting>
+
+        <TerminalLiquidGlassSetting settings={settings} updateSettings={updateSettings} />
 
         <SearchableSetting
           title={translate(

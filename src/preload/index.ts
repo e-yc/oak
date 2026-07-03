@@ -491,7 +491,11 @@ const api = {
       osRelease:
         (process as NodeJS.Process & { getSystemVersion?: () => string }).getSystemVersion?.() ??
         '',
-      displayServer: getLinuxDisplayServer()
+      displayServer: getLinuxDisplayServer(),
+      // Why: stamped via additionalArguments when the window was created with
+      // vibrancy; the renderer gates liquid-glass surfaces on it because
+      // transparency cannot be enabled without a restart.
+      windowVibrancy: process.argv.includes('--orca-window-vibrancy')
     })
   } satisfies PreloadApi['platform'],
 

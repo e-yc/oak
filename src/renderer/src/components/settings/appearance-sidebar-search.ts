@@ -30,6 +30,18 @@ export const getLeftSidebarAppearanceEntry = createLocalizedCatalog(
       ...translateSearchKeyword(
         'auto.components.settings.appearance.search.leftSidebarAppearance.tint',
         'tint'
+      ),
+      ...translateSearchKeyword(
+        'auto.components.settings.appearance.search.leftSidebarAppearance.glass',
+        'glass'
+      ),
+      ...translateSearchKeyword(
+        'auto.components.settings.appearance.search.leftSidebarAppearance.liquid',
+        'liquid'
+      ),
+      ...translateSearchKeyword(
+        'auto.components.settings.appearance.search.leftSidebarAppearance.vibrancy',
+        'vibrancy'
       )
     ]
   })

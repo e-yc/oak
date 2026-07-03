@@ -23,6 +23,11 @@ import logo from '../../../resources/logo.svg'
 import { SYNC_FIT_PANES_EVENT, TOGGLE_TERMINAL_PANE_EXPAND_EVENT } from '@/constants/terminal'
 import { syncZoomCSSVar } from '@/lib/ui-zoom'
 import { resolveLeftSidebarStyleVariables } from '@/lib/left-sidebar-appearance'
+import {
+  applyLeftSidebarGlassDocumentAttribute,
+  applyTerminalGlassDocumentAttribute,
+  isLiquidGlassAvailable
+} from '@/lib/liquid-glass'
 import { canShowRightSidebarForView } from '@/lib/right-sidebar-visibility'
 import {
   isPairedWebClientWindow,
@@ -622,10 +627,24 @@ function App(): React.JSX.Element {
   const isFullScreen = useAppStore((s) => s.isFullScreen)
   const settings = useAppStore((s) => s.settings)
   const systemPrefersDark = useSystemPrefersDark()
+  // Why: fixed for the process lifetime — vibrancy is a window-creation option.
+  const liquidGlassAvailable = useMemo(() => isLiquidGlassAvailable(), [])
   const leftSidebarStyle = useMemo(
-    () => resolveLeftSidebarStyleVariables(settings, systemPrefersDark),
-    [settings, systemPrefersDark]
+    () =>
+      resolveLeftSidebarStyleVariables(settings, systemPrefersDark, {
+        liquidGlassAvailable
+      }),
+    [settings, systemPrefersDark, liquidGlassAvailable]
   ) as React.CSSProperties | undefined
+  const leftSidebarGlassActive =
+    liquidGlassAvailable && settings?.leftSidebarAppearanceMode === 'liquid-glass'
+  const terminalGlassActive = liquidGlassAvailable && settings?.terminalLiquidGlass === true
+  useEffect(() => {
+    applyLeftSidebarGlassDocumentAttribute(leftSidebarGlassActive)
+  }, [leftSidebarGlassActive])
+  useEffect(() => {
+    applyTerminalGlassDocumentAttribute(terminalGlassActive)
+  }, [terminalGlassActive])
   const dictationState = useAppStore((s) => s.dictationState)
   const hasSshCredentialRequest = useAppStore((s) => s.sshCredentialQueue.length > 0)
   const shouldMountDictationController =
@@ -2240,7 +2259,11 @@ function App(): React.JSX.Element {
                         </RecoverableRenderErrorBoundary>
                       )
                     ) : null}
-                    <div className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
+                    {/* Why: body stops painting in liquid-glass modes so glass
+                    columns can expose the desktop; this backstop keeps the
+                    center opaque for sidebar-only glass and goes transparent
+                    itself under terminal glass (see main.css). */}
+                    <div className="app-center-column flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden">
                       {stackedSidebarOpen ? (
                         <div className="titlebar">{titlebarMainStrip}</div>
                       ) : null}

@@ -849,6 +849,9 @@ export type PreloadApi = {
       platform: NodeJS.Platform
       osRelease: string
       displayServer: 'wayland' | 'x11' | null
+      /** True when the window was created with native vibrancy (macOS glass);
+       *  restart-bound, so the renderer must not assume it from settings. */
+      windowVibrancy: boolean
     }
   }
   e2e: {

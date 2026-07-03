@@ -2423,7 +2423,7 @@ export type OpenInApplication = {
 export type SourceControlViewMode = 'list' | 'tree'
 export type SourceControlGroupOrder = 'changes-first' | 'staged-first' | 'untracked-first'
 
-export type LeftSidebarAppearanceMode = 'default' | 'match-terminal' | 'tinted'
+export type LeftSidebarAppearanceMode = 'default' | 'match-terminal' | 'tinted' | 'liquid-glass'
 
 export type FloatingTerminalCwdRequest = {
   path?: string
@@ -2538,6 +2538,10 @@ export type GlobalSettings = {
   terminalCursorOpacity?: number
   terminalQuickCommands?: TerminalQuickCommand[]
   windowBackgroundBlur?: boolean
+  /** macOS-only. Terminal pane backgrounds become a translucent tint of the
+   *  terminal theme background over the window's liquid-glass vibrancy.
+   *  Restart-bound (vibrancy is a window-creation option). */
+  terminalLiquidGlass?: boolean
   /** Why: Windows-only. When on, the close (X) button hides the window to the
    *  system tray instead of quitting Oak; off keeps the default quit-on-close.
    *  The tray icon itself is always present on Windows regardless of this flag. */
@@ -2854,6 +2858,9 @@ export type GlobalSettings = {
   /** Compact worktree cards by hiding a redundant metadata row when the title
    *  and branch already say the same thing. */
   compactWorktreeCards: boolean
+  /** Collapse the tab strip of split panes that sit below another pane
+   *  (vertical stacks); moving the mouse inside the pane reveals it. */
+  slimStackedPaneHeaders?: boolean
   /** Legacy persisted key from the Experimental rollout. New writes use
    *  compactWorktreeCards. */
   experimentalCompactWorktreeCards?: boolean

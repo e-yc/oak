@@ -44,6 +44,7 @@ import {
   type KeybindingMatchOptions,
   type KeybindingOverrides
 } from '../../shared/keybindings'
+import { normalizeLeftSidebarAppearanceMode } from '../../shared/left-sidebar-appearance'
 import { getMainE2EConfig } from '../e2e-config'
 import { buildEditableContextMenuTemplate } from './editable-context-menu'
 import { boundsHaveVisibleAreaOnAnyDisplay } from './bounds-visible-on-display'
@@ -228,17 +229,36 @@ export function createMainWindow(
     return false
   })
   const blur = settings?.windowBackgroundBlur ?? false
+  // Why: the liquid-glass surfaces (sidebar mode, terminal glass) need the
+  // same creation-time vibrancy as window blur — transparency cannot be
+  // toggled on a live window, so all of them are restart-bound.
+  const sidebarGlass =
+    process.platform === 'darwin' &&
+    normalizeLeftSidebarAppearanceMode(settings?.leftSidebarAppearanceMode) === 'liquid-glass'
+  const terminalGlass = process.platform === 'darwin' && settings?.terminalLiquidGlass === true
   // Why: native blur requires platform-specific Electron APIs. macOS uses
   // vibrancy (needs transparent: true), Windows uses backgroundMaterial.
   // Linux has no native equivalent. Blur only applies at window creation;
   // changing the setting requires a restart.
-  const platformBlurOptions = blur
-    ? process.platform === 'darwin'
-      ? { vibrancy: 'under-window' as const, transparent: true }
-      : process.platform === 'win32'
-        ? { backgroundMaterial: 'acrylic' as const }
-        : {}
-    : {}
+  const platformBlurOptions =
+    blur || sidebarGlass || terminalGlass
+      ? process.platform === 'darwin'
+        ? {
+            // Why: 'sidebar' is the Finder-sidebar material — noticeably more
+            // wallpaper punch-through than the near-opaque dark 'under-window'
+            // material, which reads as flat gray behind a translucent surface.
+            vibrancy: 'sidebar' as const,
+            // Why: alpha-zero backgroundColor, NOT `transparent: true` — the
+            // transparent flag composites web content over black instead of
+            // the vibrancy layer and drops native rounded corners/shadow.
+            // Same recipe as create-agent-pip-window.ts. This spread lands
+            // after the base backgroundColor and must override it.
+            backgroundColor: '#00000000'
+          }
+        : process.platform === 'win32'
+          ? { backgroundMaterial: 'acrylic' as const }
+          : {}
+      : {}
 
   const mainWindow = new BrowserWindow({
     width: savedBounds?.width ?? defaultBounds.width,
@@ -292,7 +312,12 @@ export function createMainWindow(
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
-      webviewTag: true
+      webviewTag: true,
+      // Why: tells the renderer glass can render now (vs after a restart) —
+      // window transparency/vibrancy cannot be toggled on a live window.
+      ...(process.platform === 'darwin' && (blur || sidebarGlass || terminalGlass)
+        ? { additionalArguments: ['--orca-window-vibrancy'] }
+        : {})
     }
   })
   const rendererWebContentsId = mainWindow.webContents.id

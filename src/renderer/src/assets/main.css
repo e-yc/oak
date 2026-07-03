@@ -3409,3 +3409,28 @@ html[data-agent-pip-vibrancy] .agent-pip-surface {
 html[data-agent-pip-vibrancy] .agent-pip-list {
   padding-bottom: 10px;
 }
+
+/* ── Liquid glass (macOS main window) ───────────────────── */
+
+/* Why: the main window carries vibrancy when a liquid-glass surface is
+   active (attributes stamped by App from platform.windowVibrancy). body is
+   the only full-window opaque paint, so it must go transparent for the glass
+   to show through; every non-glass column keeps its own opaque surface
+   (right sidebar, status bar, titlebars). Sidebar glass tokens come from
+   resolveLeftSidebarStyleVariables; terminal glass tint comes from the
+   terminal theme via applyTerminalAppearance. */
+html[data-left-sidebar-glass] body,
+html[data-terminal-glass] body {
+  background: transparent;
+}
+
+/* Why: the center column is the opaque backstop behind terminal/editor
+   content while only the sidebar is glass; terminal glass needs it out of
+   the way — panes and non-terminal views paint their own surfaces. */
+.app-center-column {
+  background: var(--background);
+}
+
+html[data-terminal-glass] .app-center-column {
+  background: transparent;
+}

@@ -81,4 +81,31 @@ describe('resolveLeftSidebarStyleVariables', () => {
 
     expect(vars?.['--worktree-sidebar']).toBe('color-mix(in srgb, #000000 35%, var(--background))')
   })
+
+  it('falls back to the default surface for liquid glass without window vibrancy', () => {
+    const vars = resolveLeftSidebarStyleVariables(
+      settings({ leftSidebarAppearanceMode: 'liquid-glass' }),
+      true
+    )
+
+    expect(vars).toBeUndefined()
+  })
+
+  it('builds translucent glass surfaces per theme when vibrancy is available', () => {
+    const dark = resolveLeftSidebarStyleVariables(
+      settings({ leftSidebarAppearanceMode: 'liquid-glass', theme: 'dark' }),
+      false,
+      { liquidGlassAvailable: true }
+    )
+    expect(dark?.['--worktree-sidebar']).toBe('rgb(42 42 42 / 0.25)')
+    expect(dark?.['--sidebar']).toBe(dark?.['--worktree-sidebar'])
+    expect(dark?.['--worktree-sidebar-accent']).toContain('#fafafa 9%')
+
+    const light = resolveLeftSidebarStyleVariables(
+      settings({ leftSidebarAppearanceMode: 'liquid-glass', theme: 'system' }),
+      false,
+      { liquidGlassAvailable: true }
+    )
+    expect(light?.['--worktree-sidebar']).toBe('rgb(245 245 245 / 0.30)')
+  })
 })

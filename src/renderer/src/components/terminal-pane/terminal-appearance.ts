@@ -17,11 +17,16 @@ import {
   resolveTerminalCursorInactiveStyle
 } from '@/lib/pane-manager/pane-terminal-options'
 import { getFitOverrideForPty } from '@/lib/pane-manager/mobile-fit-overrides'
+import { isTerminalLiquidGlassActive } from '@/lib/liquid-glass'
 import type { PtyTransport } from './pty-transport'
 import type { EffectiveMacOptionAsAlt } from '@/lib/keyboard-layout/detect-option-as-alt'
 import { HEX_COLOR_RE } from '../../../../shared/color-validation'
 
 export { mode2031SequenceFor }
+
+/** Tint strength used when terminal liquid glass is on but Background
+ *  Opacity is at its opaque default — 1.0 would hide the glass entirely. */
+export const TERMINAL_GLASS_DEFAULT_BACKGROUND_OPACITY = 0.55
 
 // Why Pick<IParser, ...> over a hand-rolled structural type: keeps the helper
 // tied to xterm's canonical signature so any upstream tightening (added
@@ -212,7 +217,21 @@ export function applyTerminalAppearance(
   const appearance = resolveEffectiveTerminalAppearance(settings, systemPrefersDark)
   const paneStyles = resolvePaneStyleOptions(settings)
   const baseTheme: ITheme | null = appearance.theme ?? getBuiltinTheme(appearance.themeName)
-  const theme = composeActiveTerminalTheme(baseTheme, settings)
+  // Why: terminal liquid glass renders the pane as a tint of the theme
+  // background over window vibrancy. An explicit sub-1 Background Opacity is
+  // the user's tint strength; the opaque default (1) would hide the glass
+  // entirely, so it falls back to a readable glass default.
+  const terminalGlass = isTerminalLiquidGlassActive(settings)
+  const configuredOpacity = settings.terminalBackgroundOpacity
+  const effectiveBackgroundOpacity =
+    terminalGlass && (configuredOpacity === undefined || configuredOpacity >= 1)
+      ? TERMINAL_GLASS_DEFAULT_BACKGROUND_OPACITY
+      : configuredOpacity
+  const themeSettings =
+    effectiveBackgroundOpacity === configuredOpacity
+      ? settings
+      : { ...settings, terminalBackgroundOpacity: effectiveBackgroundOpacity }
+  const theme = composeActiveTerminalTheme(baseTheme, themeSettings)
   const paneBackground = theme?.background ?? '#000000'
 
   const terminalFontWeights = resolveTerminalFontWeights(settings.terminalFontWeight)
@@ -229,7 +248,7 @@ export function applyTerminalAppearance(
     // it explicitly when opacity is at (or above) 1 to avoid a stale `true`
     // bleeding in from a prior opacity setting that has since been reset.
     pane.terminal.options.allowTransparency =
-      settings.terminalBackgroundOpacity !== undefined && settings.terminalBackgroundOpacity < 1
+      effectiveBackgroundOpacity !== undefined && effectiveBackgroundOpacity < 1
     const cursorStyle = settings.terminalCursorStyle ?? 'block'
     pane.terminal.options.cursorStyle = cursorStyle
     pane.terminal.options.cursorInactiveStyle = resolveTerminalCursorInactiveStyle(cursorStyle)
