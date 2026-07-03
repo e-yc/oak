@@ -2253,6 +2253,13 @@ export function connectPanePty(
   }
   const shouldApplyNativeWindowsRewriteRefresh = isNativeWindowsConpty
   const shouldApplyWindowsRendererUnicodeRefresh = CLIENT_PLATFORM === 'win32'
+  // Why: the risky-output forced refresh + atlas recovery fight Windows
+  // renderer corruption (stale glyphs after emoji/bg-SGR rewrites). The forced
+  // synchronous present also paints half-redrawn TUI frames that the debounced
+  // renderer would coalesce — visible as text flashing on every keystroke echo
+  // and stream chunk, glaring on translucent terminal-glass backgrounds — so
+  // non-Windows clients skip the whole recovery decision.
+  const shouldApplyForegroundRendererRiskRecovery = CLIENT_PLATFORM === 'win32'
   const shouldProtectNativeWindowsSynchronizedOutput = isNativeWindowsConpty
   let lastAgentStatusState = state.agentStatusByPaneKey[cacheKey]?.state
   let unsubscribeWindowsDoneTerminalModeReset: (() => void) | null = null
@@ -3776,6 +3783,9 @@ export function connectPanePty(
       inPlaceRewrite: boolean
       recoverWebglAtlasAfterParse: boolean
     } {
+      if (!shouldApplyForegroundRendererRiskRecovery) {
+        return { refresh: false, inPlaceRewrite: false, recoverWebglAtlasAfterParse: false }
+      }
       const rewriteOutputPrefersRenderRefresh = foregroundRewriteOutputPrefersRenderRefresh(data)
       const recentInput =
         performance.now() - lastTerminalInputAt <= FOREGROUND_INTERACTIVE_REDRAW_WINDOW_MS

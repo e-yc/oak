@@ -8823,97 +8823,167 @@ describe('connectPanePty', () => {
     expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
   })
 
-  it('forces a viewport refresh for foreground Codex-style background redraws', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('forces a viewport refresh for foreground Codex-style background redraws on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const manager = createManager(1)
-    const refresh = vi.fn()
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const manager = createManager(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, manager as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.(
+        '\x1b[2J\x1b[H\x1b[48;2;52;52;52m codex block text \x1b[0m\r\n'
+      )
+
+      expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      callback?.()
-    })
-
-    connectPanePty(pane as never, manager as never, createDeps() as never)
-    await flushAsyncTicks(6)
-
-    capturedDataCallback.current?.('\x1b[2J\x1b[H\x1b[48;2;52;52;52m codex block text \x1b[0m\r\n')
-
-    expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-    expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
   })
 
-  it('forces a viewport refresh for foreground CJK output without CSI', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('skips renderer-risk refresh and atlas recovery for foreground output on non-Windows clients', async () => {
+    // Why: forced synchronous presents paint half-redrawn TUI frames that the
+    // debounced renderer would coalesce — visible as text flashing on every
+    // Claude keystroke echo, glaring on translucent terminal-glass backgrounds.
+    const restoreNavigator = temporarilySetNavigatorUserAgent('Mozilla/5.0 (Macintosh)')
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const refresh = vi.fn()
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.(
+        '\x1b[2J\x1b[H\x1b[48;2;52;52;52m ⏺ claude block text \x1b[0m\r\n'
+      )
+
+      expect(refresh).not.toHaveBeenCalled()
+      expect(scheduleTerminalWebglAtlasRecovery).not.toHaveBeenCalled()
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      callback?.()
-    })
-
-    connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
-    await flushAsyncTicks(6)
-
-    capturedDataCallback.current?.('没改什么(护城河)\r\n')
-
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-    expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
   })
 
-  it('schedules WebGL atlas recovery after renderer-risk foreground output parses', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('forces a viewport refresh for foreground CJK output without CSI on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const refresh = vi.fn()
-    let parseCallback: (() => void) | undefined
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.('没改什么(护城河)\r\n')
+
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      parseCallback = callback
-    })
+  })
 
-    connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
-    await flushAsyncTicks(6)
+  it('schedules WebGL atlas recovery after renderer-risk foreground output parses on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    capturedDataCallback.current?.('没改什么(护城河)\r\n')
+      const pane = createPane(1)
+      const refresh = vi.fn()
+      let parseCallback: (() => void) | undefined
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        parseCallback = callback
+      })
 
-    expect(scheduleTerminalWebglAtlasRecovery).not.toHaveBeenCalled()
-    expect(refresh).not.toHaveBeenCalled()
-    parseCallback?.()
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-    expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+      connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.('没改什么(护城河)\r\n')
+
+      expect(scheduleTerminalWebglAtlasRecovery).not.toHaveBeenCalled()
+      expect(refresh).not.toHaveBeenCalled()
+      parseCallback?.()
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+    } finally {
+      restoreNavigator()
+    }
   })
 
   it('does not schedule WebGL atlas recovery for plain synchronized foreground frames', async () => {
@@ -8949,106 +9019,135 @@ describe('connectPanePty', () => {
     }
   })
 
-  it('forces a viewport refresh when foreground background SGR is split across PTY chunks', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('forces a viewport refresh when foreground background SGR is split across PTY chunks on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const manager = createManager(1)
-    const refresh = vi.fn()
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const manager = createManager(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, manager as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.('\x1b[48')
+      expect(refresh).not.toHaveBeenCalled()
+
+      capturedDataCallback.current?.(';2;52;52;52m codex block text \x1b[0m\r\n')
+
+      expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      callback?.()
-    })
-
-    connectPanePty(pane as never, manager as never, createDeps() as never)
-    await flushAsyncTicks(6)
-
-    capturedDataCallback.current?.('\x1b[48')
-    expect(refresh).not.toHaveBeenCalled()
-
-    capturedDataCallback.current?.(';2;52;52;52m codex block text \x1b[0m\r\n')
-
-    expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-    expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
   })
 
-  it('forces a viewport refresh when the foreground CSI introducer is split across PTY chunks', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('forces a viewport refresh when the foreground CSI introducer is split across PTY chunks on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const manager = createManager(1)
-    const refresh = vi.fn()
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const manager = createManager(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, manager as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.('\x1b')
+      expect(refresh).not.toHaveBeenCalled()
+
+      capturedDataCallback.current?.('[48;2;52;52;52m codex block text \x1b[0m\r\n')
+
+      expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      callback?.()
-    })
-
-    connectPanePty(pane as never, manager as never, createDeps() as never)
-    await flushAsyncTicks(6)
-
-    capturedDataCallback.current?.('\x1b')
-    expect(refresh).not.toHaveBeenCalled()
-
-    capturedDataCallback.current?.('[48;2;52;52;52m codex block text \x1b[0m\r\n')
-
-    expect(manager.markPaneHasComplexScriptOutput).not.toHaveBeenCalled()
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-    expect(scheduleTerminalWebglAtlasRecovery).toHaveBeenCalledTimes(1)
   })
 
-  it('does not keep forcing viewport refresh after completed background redraws', async () => {
-    const { connectPanePty } = await import('./pty-connection')
-    const transport = createMockTransport()
-    const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
-    transport.connect.mockImplementation(async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
-      capturedDataCallback.current = callbacks.onData ?? null
-      return 'pty-id'
-    })
-    transportFactoryQueue.push(transport)
+  it('does not keep forcing viewport refresh after completed background redraws on Windows clients', async () => {
+    const restoreNavigator = temporarilySetNavigatorUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+    )
+    try {
+      const { connectPanePty } = await import('./pty-connection')
+      const transport = createMockTransport()
+      const capturedDataCallback: { current: ((data: string) => void) | null } = { current: null }
+      transport.connect.mockImplementation(
+        async ({ callbacks }: { callbacks: ConnectCallbacks }) => {
+          capturedDataCallback.current = callbacks.onData ?? null
+          return 'pty-id'
+        }
+      )
+      transportFactoryQueue.push(transport)
 
-    const pane = createPane(1)
-    const refresh = vi.fn()
-    const terminal = pane.terminal as typeof pane.terminal & {
-      _core?: { refresh: typeof refresh }
+      const pane = createPane(1)
+      const refresh = vi.fn()
+      const terminal = pane.terminal as typeof pane.terminal & {
+        _core?: { refresh: typeof refresh }
+      }
+      terminal._core = { refresh }
+      terminal.write = vi.fn((_data: string, callback?: () => void) => {
+        callback?.()
+      })
+
+      connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
+      await flushAsyncTicks(6)
+
+      capturedDataCallback.current?.(
+        '\x1b[2J\x1b[H\x1b[48;2;52;52;52m codex block text \x1b[0m\r\n'
+      )
+      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+
+      refresh.mockClear()
+      scheduleTerminalWebglAtlasRecovery.mockClear()
+      capturedDataCallback.current?.('plain follow-up output\r\n')
+
+      expect(refresh).not.toHaveBeenCalled()
+      expect(scheduleTerminalWebglAtlasRecovery).not.toHaveBeenCalled()
+    } finally {
+      restoreNavigator()
     }
-    terminal._core = { refresh }
-    terminal.write = vi.fn((_data: string, callback?: () => void) => {
-      callback?.()
-    })
-
-    connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
-    await flushAsyncTicks(6)
-
-    capturedDataCallback.current?.('\x1b[2J\x1b[H\x1b[48;2;52;52;52m codex block text \x1b[0m\r\n')
-    expect(refresh).toHaveBeenCalledWith(0, 39, true)
-
-    refresh.mockClear()
-    scheduleTerminalWebglAtlasRecovery.mockClear()
-    capturedDataCallback.current?.('plain follow-up output\r\n')
-
-    expect(refresh).not.toHaveBeenCalled()
-    expect(scheduleTerminalWebglAtlasRecovery).not.toHaveBeenCalled()
   })
 
   it('forces a viewport refresh for native Windows CJK foreground output after terminal input', async () => {
@@ -9293,7 +9392,7 @@ describe('connectPanePty', () => {
     }
   })
 
-  it('does not schedule a follow-up repaint for the Claude redraw pattern on non-Windows clients', async () => {
+  it('does not force a repaint for the Claude redraw pattern on non-Windows clients', async () => {
     const restoreNavigator = temporarilySetNavigatorUserAgent('Mozilla/5.0 (Macintosh)')
     try {
       const { connectPanePty } = await import('./pty-connection')
@@ -9320,12 +9419,12 @@ describe('connectPanePty', () => {
       connectPanePty(pane as never, createManager(1) as never, createDeps() as never)
       await flushAsyncTicks(6)
 
-      // The CR redraw still forces one synchronous refresh (cross-platform rewrite
-      // handling), but no native-Windows follow-up next-frame repaint is scheduled.
+      // Non-Windows clients skip the renderer-risk recovery entirely: the CR
+      // redraw parses without a forced synchronous present, so the debounced
+      // renderer coalesces it instead of painting the half-rewritten line.
       capturedDataCallback.current?.('\r\x1b[3Gzzzx\x1b[K')
 
-      expect(refresh).toHaveBeenCalledTimes(1)
-      expect(refresh).toHaveBeenCalledWith(0, 39, true)
+      expect(refresh).not.toHaveBeenCalled()
     } finally {
       restoreNavigator()
     }
