@@ -213,7 +213,7 @@ describe('RelayDispatcher', () => {
     const cliId = dispatcher.attachClient(() => {})
 
     const pending = dispatcher.requestAnyClient(
-      'orca.cli',
+      'oak.cli',
       { argv: ['status'] },
       { excludeClientId: cliId }
     )
@@ -221,7 +221,7 @@ describe('RelayDispatcher', () => {
     expect(ownerWritten).toHaveLength(1)
     const requestFrame = decodeFirstFrame(ownerWritten[0])
     const request = JSON.parse(requestFrame.payload.toString('utf-8')) as JsonRpcRequest
-    expect(request.method).toBe('orca.cli')
+    expect(request.method).toBe('oak.cli')
     expect(request.params).toEqual({ argv: ['status'] })
 
     dispatcher.feedClient(
@@ -240,7 +240,7 @@ describe('RelayDispatcher', () => {
     const cliId = dispatcher.attachClient(() => {})
 
     const pending = dispatcher.requestAnyClient(
-      'orca.cli',
+      'oak.cli',
       { argv: ['status'] },
       { excludeClientId: cliId }
     )
@@ -249,7 +249,7 @@ describe('RelayDispatcher', () => {
     expect(ownerWritten).toHaveLength(1)
     const requestFrame = decodeFirstFrame(ownerWritten[0])
     const request = JSON.parse(requestFrame.payload.toString('utf-8')) as JsonRpcRequest
-    expect(request.method).toBe('orca.cli')
+    expect(request.method).toBe('oak.cli')
 
     dispatcher.feedClient(
       ownerId,

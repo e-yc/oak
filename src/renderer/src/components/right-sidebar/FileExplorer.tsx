@@ -627,7 +627,7 @@ function FileExplorerFiles(): React.JSX.Element {
     <>
       <div
         ref={setExplorerShellRef}
-        data-orca-explorer-shell
+        data-oak-explorer-shell
         data-selected-folder-relative-path={
           selectedNode?.isDirectory ? selectedNode.relativePath : undefined
         }

@@ -34,7 +34,10 @@ function getPaneColorRows(): PaneColorRow[] {
   return [
     {
       key: 'background',
-      label: translate('auto.components.settings.AppearanceColorsSection.paneBackground', 'App Background'),
+      label: translate(
+        'auto.components.settings.AppearanceColorsSection.paneBackground',
+        'App Background'
+      ),
       description: translate(
         'auto.components.settings.AppearanceColorsSection.paneBackgroundDescription',
         'The main window canvas behind all panes.'
@@ -58,7 +61,10 @@ function getPaneColorRows(): PaneColorRow[] {
     },
     {
       key: 'card',
-      label: translate('auto.components.settings.AppearanceColorsSection.paneCards', 'Panels & Cards'),
+      label: translate(
+        'auto.components.settings.AppearanceColorsSection.paneCards',
+        'Panels & Cards'
+      ),
       description: translate(
         'auto.components.settings.AppearanceColorsSection.paneCardsDescription',
         'Panels lifted off the canvas, like workspace cards.'
@@ -203,11 +209,11 @@ export function AppearanceColorsSection({
             {editingMode === 'dark'
               ? translate(
                   'auto.components.settings.AppearanceColorsSection.paneColorsDarkHint',
-                  'These colors apply while Orca is in dark mode.'
+                  'These colors apply while Oak is in dark mode.'
                 )
               : translate(
                   'auto.components.settings.AppearanceColorsSection.paneColorsLightHint',
-                  'These colors apply while Orca is in light mode.'
+                  'These colors apply while Oak is in light mode.'
                 )}
           </p>
           <div className="ml-4 space-y-2">

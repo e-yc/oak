@@ -1,6 +1,6 @@
 import type { CliStatusResult, RuntimeStatus } from '../../shared/runtime-types'
 import { parsePairingCode, type PairingOffer } from '../../shared/pairing'
-import { launchOrcaApp } from './launch'
+import { launchOakApp } from './launch'
 import { getDefaultUserDataPath, readMetadata } from './metadata'
 import { getCliStatus } from './status'
 import { sendRequest } from './transport'
@@ -34,8 +34,8 @@ export class RuntimeClient {
   constructor(
     userDataPath = getDefaultUserDataPath(),
     requestTimeoutMs = 60_000,
-    remotePairingCode = process.env.ORCA_PAIRING_CODE ?? process.env.ORCA_REMOTE_PAIRING ?? null,
-    environmentSelector = process.env.ORCA_ENVIRONMENT ?? null
+    remotePairingCode = process.env.OAK_PAIRING_CODE ?? process.env.OAK_REMOTE_PAIRING ?? null,
+    environmentSelector = process.env.OAK_ENVIRONMENT ?? null
   ) {
     this.userDataPath = userDataPath
     this.requestTimeoutMs = requestTimeoutMs
@@ -112,7 +112,7 @@ export class RuntimeClient {
         ok: true,
         result: {
           // Why: remote status proves the paired runtime is reachable, not
-          // that this client machine has a local Orca desktop process.
+          // that this client machine has a local Oak desktop process.
           app: {
             running: false,
             pid: null
@@ -167,13 +167,13 @@ export class RuntimeClient {
     }
   }
 
-  async openOrca(timeoutMs = 15_000): Promise<RuntimeRpcSuccess<CliStatusResult>> {
+  async openOak(timeoutMs = 15_000): Promise<RuntimeRpcSuccess<CliStatusResult>> {
     const initial = await this.getCliStatus()
     if (initial.result.runtime.reachable) {
       return initial
     }
 
-    launchOrcaApp()
+    launchOakApp()
     const startedAt = Date.now()
     while (Date.now() - startedAt < timeoutMs) {
       const status = await this.getCliStatus()
@@ -185,7 +185,7 @@ export class RuntimeClient {
 
     throw new RuntimeClientError(
       'runtime_open_timeout',
-      'Timed out waiting for Orca to start. Run the Orca app manually and try again.'
+      'Timed out waiting for Oak to start. Run the Oak app manually and try again.'
     )
   }
 }
@@ -211,7 +211,7 @@ function resolveRemotePairing(
   if (!pairing) {
     throw new RuntimeClientError(
       'invalid_argument',
-      'Invalid remote pairing code. Expected an orca://pair?... URL or bare pairing payload.'
+      'Invalid remote pairing code. Expected an oak://pair?... URL or bare pairing payload.'
     )
   }
   return pairing

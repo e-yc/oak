@@ -13,7 +13,7 @@
  *   - terminalDriverChanged notifications fire at the right transitions
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { OrcaRuntimeService } from './orca-runtime'
+import { OakRuntimeService } from './oak-runtime'
 
 vi.mock('../git/worktree', () => ({
   listWorktrees: vi.fn().mockResolvedValue([]),
@@ -70,7 +70,7 @@ const store = {
 }
 
 function createRuntime() {
-  const runtime = new OrcaRuntimeService(store)
+  const runtime = new OakRuntimeService(store)
   const ptySizes = new Map<string, { cols: number; rows: number }>([
     ['pty-1', { cols: 150, rows: 40 }]
   ])

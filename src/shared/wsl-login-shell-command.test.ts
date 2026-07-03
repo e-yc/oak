@@ -59,17 +59,17 @@ describe('wsl login shell command helpers', () => {
 
     expect(command).toContain('getent passwd')
     expect(command).toContain('bash|zsh|ksh|mksh|ash)')
-    expect(command).toContain('exec "$_orca_wsl_shell" -ilc')
+    expect(command).toContain('exec "$_oak_wsl_shell" -ilc')
     expect(command).toContain('exec /bin/sh -lc')
     expect(command).toContain("printf '\\''hello'\\''")
   })
 
   it('preserves command-scoped environment variables through the outer WSL shell', () => {
-    const command = buildWslLoginShellCommand('HISTFILE=/tmp/orca-history printf "$HISTFILE"')
+    const command = buildWslLoginShellCommand('HISTFILE=/tmp/oak-history printf "$HISTFILE"')
     const escaped = escapeWslShCommandForWindows(command)
 
-    expect(command).toContain('\'HISTFILE=/tmp/orca-history printf "$HISTFILE"\'')
-    expect(escaped).toContain('\\$_orca_wsl_shell')
+    expect(command).toContain('\'HISTFILE=/tmp/oak-history printf "$HISTFILE"\'')
+    expect(escaped).toContain('\\$_oak_wsl_shell')
     expect(escaped).toContain('\\${SHELL:-/bin/bash}')
     expect(escaped).toContain('\\$(getent passwd "\\$(id -un)"')
     expect(escaped).toContain('\\$HISTFILE')
@@ -77,21 +77,19 @@ describe('wsl login shell command helpers', () => {
   }, 30_000)
 
   it('does not double-escape wrapper shell variables', () => {
-    const command = 'echo \\$_orca_wsl_shell "$_orca_wsl_shell"'
+    const command = 'echo \\$_oak_wsl_shell "$_oak_wsl_shell"'
 
-    expect(escapeWslShCommandForWindows(command)).toBe(
-      'echo \\$_orca_wsl_shell "\\$_orca_wsl_shell"'
-    )
+    expect(escapeWslShCommandForWindows(command)).toBe('echo \\$_oak_wsl_shell "\\$_oak_wsl_shell"')
   })
 
   it('escapes user command dollars inside POSIX-quoted payloads for WSL argv', () => {
     const command = buildWslLoginShellCommand(
-      'HISTFILE=/tmp/orca-history printf "$HISTFILE"; printf \'%s\' "$SHELL"'
+      'HISTFILE=/tmp/oak-history printf "$HISTFILE"; printf \'%s\' "$SHELL"'
     )
     const escaped = escapeWslShCommandForWindows(command)
 
     expect(escaped).toContain(
-      "'HISTFILE=/tmp/orca-history printf \"\\$HISTFILE\"; printf '\\''%s'\\'' \"\\$SHELL\"'"
+      "'HISTFILE=/tmp/oak-history printf \"\\$HISTFILE\"; printf '\\''%s'\\'' \"\\$SHELL\"'"
     )
     expectValidShSyntax(command)
   }, 30_000)
@@ -101,7 +99,7 @@ describe('wsl login shell command helpers', () => {
       return
     }
 
-    const command = buildWslLoginShellCommand('orca_value=ok; printf "<%s>" "$orca_value"')
+    const command = buildWslLoginShellCommand('oak_value=ok; printf "<%s>" "$oak_value"')
     const escaped = escapeWslShCommandForWindows(command)
 
     expect(
@@ -116,7 +114,7 @@ describe('wsl login shell command helpers', () => {
     const command = buildWslInteractiveLoginShellCommand()
 
     expect(command).toContain('getent passwd')
-    expect(command).toContain('if [ -z "$_orca_wsl_shell" ] || [ ! -x "$_orca_wsl_shell" ]; then')
-    expect(command).toContain('exec "$_orca_wsl_shell" -l')
+    expect(command).toContain('if [ -z "$_oak_wsl_shell" ] || [ ! -x "$_oak_wsl_shell" ]; then')
+    expect(command).toContain('exec "$_oak_wsl_shell" -l')
   })
 })

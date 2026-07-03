@@ -36,7 +36,7 @@ import { translate } from '@/i18n/i18n'
 
 const DOCS_URL = 'https://www.onorca.dev/docs'
 const CHANGELOG_URL = 'https://onorca.dev/changelog'
-const GITHUB_URL = 'https://github.com/stablyai/orca'
+const GITHUB_URL = 'https://github.com/e-yc/oak'
 const DISCORD_URL = 'https://discord.gg/fzjDKHxv8Q'
 const X_URL = 'https://x.com/orca_build'
 
@@ -89,7 +89,7 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
   const [menuOpen, setMenuOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [showAdminOptions, setShowAdminOptions] = useState(false)
-  const [isRestartingOrca, setIsRestartingOrca] = useState(false)
+  const [isRestartingOak, setIsRestartingOak] = useState(false)
   const lastShowOnboardingAtRef = React.useRef(0)
   const mountedRef = useMountedRef()
 
@@ -118,21 +118,21 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
     void showOnboardingFromRenderer()
   }
 
-  const handleRestartOrca = (): void => {
-    if (isRestartingOrca) {
+  const handleRestartOak = (): void => {
+    if (isRestartingOak) {
       return
     }
-    setIsRestartingOrca(true)
+    setIsRestartingOak(true)
     toast.info(
-      translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Orca…')
+      translate('auto.components.sidebar.SidebarSettingsHelpMenu.5161eef55d', 'Restarting Oak…')
     )
     void window.api.app.restart().catch((error) => {
       if (mountedRef.current) {
-        setIsRestartingOrca(false)
+        setIsRestartingOak(false)
         toast.error(
           translate(
             'auto.components.sidebar.SidebarSettingsHelpMenu.4e8f5710d3',
-            "Couldn't restart Orca."
+            "Couldn't restart Oak."
           ),
           {
             description: error instanceof Error ? error.message : undefined
@@ -314,11 +314,11 @@ export function SidebarSettingsHelpMenu(): React.JSX.Element {
             {showAdminOptions ? (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={handleRestartOrca} disabled={isRestartingOrca}>
+                <DropdownMenuItem onSelect={handleRestartOak} disabled={isRestartingOak}>
                   <RotateCw className="size-3.5" />
                   {translate(
                     'auto.components.sidebar.SidebarSettingsHelpMenu.ad3d3ed7f1',
-                    'Restart Orca'
+                    'Restart Oak'
                   )}
                 </DropdownMenuItem>
               </>

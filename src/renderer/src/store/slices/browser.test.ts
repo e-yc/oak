@@ -485,7 +485,7 @@ describe('createBrowserSlice runtime guard', () => {
           {
             id: 'default',
             scope: 'default',
-            partition: 'persist:orca-default',
+            partition: 'persist:oak-default',
             label: 'Default',
             source: null
           }
@@ -511,7 +511,7 @@ describe('createBrowserSlice runtime guard', () => {
       {
         id: 'default',
         scope: 'default',
-        partition: 'persist:orca-default',
+        partition: 'persist:oak-default',
         label: 'Default',
         source: null
       }
@@ -520,7 +520,7 @@ describe('createBrowserSlice runtime guard', () => {
       {
         id: 'default',
         scope: 'default',
-        partition: 'persist:orca-default',
+        partition: 'persist:oak-default',
         label: 'Default',
         source: null
       }
@@ -537,7 +537,7 @@ describe('createBrowserSlice runtime guard', () => {
           {
             id: 'remote-default',
             scope: 'default',
-            partition: 'persist:orca-remote',
+            partition: 'persist:oak-remote',
             label: 'Remote Default',
             source: null
           }
@@ -553,7 +553,7 @@ describe('createBrowserSlice runtime guard', () => {
       {
         id: 'local-default',
         scope: 'default',
-        partition: 'persist:orca-local',
+        partition: 'persist:oak-local',
         label: 'Local Default',
         source: null
       }
@@ -735,7 +735,7 @@ describe('createBrowserSlice runtime guard', () => {
       {
         id: 'default',
         scope: 'default',
-        partition: 'persist:orca-default',
+        partition: 'persist:oak-default',
         label: 'Default',
         source: null
       }
@@ -748,7 +748,7 @@ describe('createBrowserSlice runtime guard', () => {
       {
         id: 'default',
         scope: 'default',
-        partition: 'persist:orca-default',
+        partition: 'persist:oak-default',
         label: 'Default',
         source: null
       }

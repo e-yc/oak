@@ -117,7 +117,7 @@ describe('resolveTabAgent', () => {
     expect(resolveSiblingCompletedTabAgent(map, layout(LEAF_A), 'tab-1')).toBe('codex')
   })
 
-  it('keeps the terminal glyph for an agent Orca has no icon for', () => {
+  it('keeps the terminal glyph for an agent Oak has no icon for', () => {
     const map = { [`tab-1:${LEAF_A}`]: entry(`tab-1:${LEAF_A}`, 'totally-custom-agent') }
     expect(resolveTabAgent(map, layout(LEAF_A), 'tab-1')).toBeNull()
   })

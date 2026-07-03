@@ -1,5 +1,5 @@
 /**
- * Unit tests for repos:create (orca#763).
+ * Unit tests for repos:create (oak#763).
  *
  * Pins the invariants that matter here:
  *   - Name validation catches empty/slash/./.. before any fs I/O.
@@ -107,7 +107,7 @@ describe('repos:create', () => {
     webContents: { send: vi.fn() }
   }
   const tmpPath = (...segments: string[]): string => join('/tmp', ...segments)
-  const defaultProjectParent = join('/Users/alice', 'orca', 'projects')
+  const defaultProjectParent = join('/Users/alice', 'oak', 'projects')
 
   const callCreate = (args: CreateArgs): Promise<CreateResult> => {
     const handler = handlers.get('repos:create')

@@ -82,8 +82,8 @@ vi.mock('./SshDisconnectedDialog', () => ({
 
 vi.mock('./WorktreeContextMenu', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
-  CLOSE_ALL_CONTEXT_MENUS_EVENT: 'orca:test-close-context-menus',
-  WORKTREE_CONTEXT_MENU_SCOPE_ATTR: 'data-orca-context-menu-scope',
+  CLOSE_ALL_CONTEXT_MENUS_EVENT: 'oak:test-close-context-menus',
+  WORKTREE_CONTEXT_MENU_SCOPE_ATTR: 'data-oak-context-menu-scope',
   WORKTREE_NATIVE_CONTEXT_MENU_ATTR: 'data-worktree-native-context-menu'
 }))
 
@@ -170,6 +170,6 @@ describe('WorktreeCard SSH reconnect prompt', () => {
       <WorktreeCard worktree={makeWorktree()} repo={runtimeRepo} isActive={false} />
     )
     expect(markup).not.toContain('Server disconnected')
-    expect(markup).toContain('Project on Orca server')
+    expect(markup).toContain('Project on Oak server')
   })
 })

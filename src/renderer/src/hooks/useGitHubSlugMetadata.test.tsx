@@ -76,7 +76,7 @@ describe('useGitHubSlugMetadata', () => {
 
     function LabelsProbe(): null {
       renders += 1
-      const metadata = useRepoLabelsBySlug('stablyai', 'orca', {
+      const metadata = useRepoLabelsBySlug('stablyai', 'oak', {
         activeRuntimeEnvironmentId: null
       })
       labels = metadata.data
@@ -89,7 +89,7 @@ describe('useGitHubSlugMetadata', () => {
     expect(labels).toEqual(['bug'])
     expect(apiMocks.listLabelsBySlug).toHaveBeenCalledExactlyOnceWith({
       owner: 'stablyai',
-      repo: 'orca'
+      repo: 'oak'
     })
     expect(renders).toBeLessThanOrEqual(4)
   })
@@ -104,7 +104,7 @@ describe('useGitHubSlugMetadata', () => {
 
     function AssigneesProbe(): null {
       renders += 1
-      const metadata = useRepoAssigneesBySlug('stablyai', 'orca', ['jinwoo'], {
+      const metadata = useRepoAssigneesBySlug('stablyai', 'oak', ['jinwoo'], {
         activeRuntimeEnvironmentId: null
       })
       assigneeLogins = metadata.data.map((user) => user.login)
@@ -117,7 +117,7 @@ describe('useGitHubSlugMetadata', () => {
     expect(assigneeLogins).toEqual(['jinwoo'])
     expect(apiMocks.listAssignableUsersBySlug).toHaveBeenCalledExactlyOnceWith({
       owner: 'stablyai',
-      repo: 'orca',
+      repo: 'oak',
       seedLogins: ['jinwoo']
     })
     expect(renders).toBeLessThanOrEqual(4)

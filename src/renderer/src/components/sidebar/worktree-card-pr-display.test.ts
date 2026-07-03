@@ -7,7 +7,7 @@ const pr: HostedReviewInfo = {
   number: 123,
   title: 'Ready PR',
   state: 'open',
-  url: 'https://github.com/stablyai/orca/pull/123',
+  url: 'https://github.com/e-yc/oak/pull/123',
   status: 'success',
   updatedAt: '2026-05-13T00:00:00.000Z',
   mergeable: 'MERGEABLE'
@@ -18,7 +18,7 @@ const gitLabReview: HostedReviewInfo = {
   number: 321,
   title: 'Ready MR',
   state: 'open',
-  url: 'https://gitlab.com/stablyai/orca/-/merge_requests/321',
+  url: 'https://gitlab.com/e-yc/oak/-/merge_requests/321',
   status: 'success',
   updatedAt: '2026-05-13T00:00:00.000Z',
   mergeable: 'MERGEABLE'
@@ -29,7 +29,7 @@ const bitbucketReview: HostedReviewInfo = {
   number: 789,
   title: 'Ready Bitbucket PR',
   state: 'open',
-  url: 'https://bitbucket.org/stablyai/orca/pull-requests/789',
+  url: 'https://bitbucket.org/e-yc/oak/pull-requests/789',
   status: 'success',
   updatedAt: '2026-05-13T00:00:00.000Z',
   mergeable: 'MERGEABLE'

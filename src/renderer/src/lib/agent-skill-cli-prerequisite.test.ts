@@ -4,8 +4,8 @@ import type { CliInstallStatus } from '../../../shared/cli-install-types'
 import {
   CLI_PREREQUISITE_REGISTRATION_TOAST,
   CLI_PREREQUISITE_REGISTRATION_TOAST_DESCRIPTION,
-  ensureOrcaCliAvailableForAgentSkillTerminal,
-  isOrcaCliAvailableOnPath
+  ensureOakCliAvailableForAgentSkillTerminal,
+  isOakCliAvailableOnPath
 } from './agent-skill-cli-prerequisite'
 
 vi.mock('sonner', () => ({
@@ -19,11 +19,11 @@ vi.mock('sonner', () => ({
 function cliStatus(overrides: Partial<CliInstallStatus> = {}): CliInstallStatus {
   return {
     platform: 'darwin',
-    commandName: 'orca',
-    commandPath: '/usr/local/bin/orca',
+    commandName: 'oak',
+    commandPath: '/usr/local/bin/oak',
     pathDirectory: '/usr/local/bin',
     pathConfigured: true,
-    launcherPath: '/Applications/Orca.app/Contents/MacOS/orca',
+    launcherPath: '/Applications/Oak.app/Contents/MacOS/oak',
     installMethod: 'symlink',
     supported: true,
     state: 'installed',
@@ -34,15 +34,15 @@ function cliStatus(overrides: Partial<CliInstallStatus> = {}): CliInstallStatus 
   }
 }
 
-describe('isOrcaCliAvailableOnPath', () => {
+describe('isOakCliAvailableOnPath', () => {
   it('requires the installed CLI command to be visible on PATH', () => {
-    expect(isOrcaCliAvailableOnPath(cliStatus())).toBe(true)
-    expect(isOrcaCliAvailableOnPath(cliStatus({ pathConfigured: false }))).toBe(false)
-    expect(isOrcaCliAvailableOnPath(cliStatus({ state: 'not_installed' }))).toBe(false)
+    expect(isOakCliAvailableOnPath(cliStatus())).toBe(true)
+    expect(isOakCliAvailableOnPath(cliStatus({ pathConfigured: false }))).toBe(false)
+    expect(isOakCliAvailableOnPath(cliStatus({ state: 'not_installed' }))).toBe(false)
   })
 })
 
-describe('ensureOrcaCliAvailableForAgentSkillTerminal', () => {
+describe('ensureOakCliAvailableForAgentSkillTerminal', () => {
   afterEach(() => {
     vi.useRealTimers()
     vi.unstubAllGlobals()
@@ -69,7 +69,7 @@ describe('ensureOrcaCliAvailableForAgentSkillTerminal', () => {
     })
 
     await expect(
-      ensureOrcaCliAvailableForAgentSkillTerminal({
+      ensureOakCliAvailableForAgentSkillTerminal({
         onStatusChange,
         registrationPromptDelayMs: 0
       })
@@ -100,7 +100,7 @@ describe('ensureOrcaCliAvailableForAgentSkillTerminal', () => {
       }
     })
 
-    const pending = ensureOrcaCliAvailableForAgentSkillTerminal({ registrationPromptDelayMs: 700 })
+    const pending = ensureOakCliAvailableForAgentSkillTerminal({ registrationPromptDelayMs: 700 })
     await vi.waitFor(() => {
       expect(toast.message).toHaveBeenCalledWith(CLI_PREREQUISITE_REGISTRATION_TOAST, {
         description: CLI_PREREQUISITE_REGISTRATION_TOAST_DESCRIPTION

@@ -2,15 +2,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { RpcDispatcher } from './dispatcher'
 import { defineMethod, defineStreamingMethod, type RpcRequest } from './core'
-import type { OrcaRuntimeService } from '../orca-runtime'
+import type { OakRuntimeService } from '../oak-runtime'
 import { TERMINAL_METHODS } from './methods/terminal'
 import type { RuntimeTerminalWait } from '../../../shared/runtime-types'
 
-function stubRuntime(overrides: Partial<OrcaRuntimeService> = {}): OrcaRuntimeService {
+function stubRuntime(overrides: Partial<OakRuntimeService> = {}): OakRuntimeService {
   return {
     getRuntimeId: () => 'test-runtime',
     ...overrides
-  } as OrcaRuntimeService
+  } as OakRuntimeService
 }
 
 function makeRequest(method: string, params?: unknown): RpcRequest {
@@ -30,10 +30,10 @@ describe('RpcDispatcher streaming', () => {
           name: 'terminal.subscribe',
           params: z.object({ terminal: z.string() }),
           handler: async (params, { runtime }, emit) => {
-            const read = await (runtime as OrcaRuntimeService).readTerminal(params.terminal)
+            const read = await (runtime as OakRuntimeService).readTerminal(params.terminal)
             emit({ type: 'scrollback', lines: read.tail, truncated: read.truncated })
 
-            const leaf = (runtime as OrcaRuntimeService).resolveLeafForHandle(params.terminal)
+            const leaf = (runtime as OakRuntimeService).resolveLeafForHandle(params.terminal)
             if (!leaf?.ptyId) {
               emit({ type: 'end' })
             }
@@ -133,7 +133,7 @@ describe('RpcDispatcher streaming', () => {
             emit({ type: 'scrollback', lines: '' })
 
             await new Promise<void>((resolve) => {
-              ;(runtime as OrcaRuntimeService).registerSubscriptionCleanup('sub-1', () => {
+              ;(runtime as OakRuntimeService).registerSubscriptionCleanup('sub-1', () => {
                 emit({ type: 'end' })
                 resolve()
               })
@@ -144,7 +144,7 @@ describe('RpcDispatcher streaming', () => {
           name: 'test.unsubscribe',
           params: z.object({ subscriptionId: z.string() }),
           handler: async (params, { runtime }) => {
-            ;(runtime as OrcaRuntimeService).cleanupSubscription(params.subscriptionId)
+            ;(runtime as OakRuntimeService).cleanupSubscription(params.subscriptionId)
             return { unsubscribed: true }
           }
         })

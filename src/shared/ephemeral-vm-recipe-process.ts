@@ -128,17 +128,17 @@ function buildRecipeEnv(
   return {
     ...process.env,
     ...env,
-    ORCA_VM_MODE: mode,
-    ORCA_VM_INSTANCE_ID: context.instanceId ?? '',
-    ORCA_RECIPE_ID: context.recipeId,
-    ORCA_PROJECT_ID: context.projectId ?? '',
-    ORCA_WORKSPACE_ID: context.workspaceId ?? '',
-    ORCA_WORKSPACE_NAME: context.workspaceName ?? '',
-    ORCA_REPO_PATH: context.repoPath,
-    ORCA_REPO_URL: context.repoUrl ?? '',
-    ORCA_REPO_BRANCH: context.branch ?? '',
-    ORCA_REPO_REF: context.ref ?? '',
-    ORCA_VERSION: context.orcaVersion ?? ''
+    OAK_VM_MODE: mode,
+    OAK_VM_INSTANCE_ID: context.instanceId ?? '',
+    OAK_RECIPE_ID: context.recipeId,
+    OAK_PROJECT_ID: context.projectId ?? '',
+    OAK_WORKSPACE_ID: context.workspaceId ?? '',
+    OAK_WORKSPACE_NAME: context.workspaceName ?? '',
+    OAK_REPO_PATH: context.repoPath,
+    OAK_REPO_URL: context.repoUrl ?? '',
+    OAK_REPO_BRANCH: context.branch ?? '',
+    OAK_REPO_REF: context.ref ?? '',
+    OAK_VERSION: context.oakVersion ?? ''
   }
 }
 

@@ -31,7 +31,7 @@ describe('ServeSimStateWatcher', () => {
   })
 
   it('attaches to the serve-sim state directory when it appears after startup', async () => {
-    const parentDir = await mkdtemp(join(tmpdir(), 'orca-serve-sim-watch-'))
+    const parentDir = await mkdtemp(join(tmpdir(), 'oak-serve-sim-watch-'))
     cleanupPaths.push(parentDir)
     const stateDir = join(parentDir, 'serve-sim')
     const watcher = new ServeSimStateWatcher({ stateDir })
@@ -67,7 +67,7 @@ describe('ServeSimStateWatcher', () => {
     watcher.stop()
   })
 
-  it('suppresses Orca-managed sessions only while they are marked managed', async () => {
+  it('suppresses Oak-managed sessions only while they are marked managed', async () => {
     const watcher = new ServeSimStateWatcher()
     const events: ServeSimStateDetectedEvent[] = []
     const payload = JSON.stringify({
@@ -78,7 +78,7 @@ describe('ServeSimStateWatcher', () => {
 
     watcher.bindPty('pty-1', 'worktree-1')
     watcher.onDetected((event) => events.push(event))
-    watcher.markOrcaManaged({
+    watcher.markOakManaged({
       deviceUdid: TEST_UDID,
       streamUrl: 'http://127.0.0.1:3100/stream.mjpeg',
       wsUrl: 'ws://127.0.0.1:3100/ws'
@@ -86,7 +86,7 @@ describe('ServeSimStateWatcher', () => {
     watcher.ingestPtyOutput('pty-1', payload)
     expect(events).toHaveLength(0)
 
-    watcher.unmarkOrcaManaged(TEST_UDID)
+    watcher.unmarkOakManaged(TEST_UDID)
     watcher.ingestPtyOutput('pty-1', payload)
     expect(events).toHaveLength(1)
     expect(events[0]?.info.deviceUdid).toBe(TEST_UDID)

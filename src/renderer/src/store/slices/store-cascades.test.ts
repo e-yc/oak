@@ -464,9 +464,9 @@ describe('removeWorktree cascade', () => {
   })
 
   it.each([
-    'Could not connect to the remote Orca runtime.',
-    'Remote Orca runtime closed the connection.',
-    'Timed out waiting for the remote Orca runtime to respond.'
+    'Could not connect to the remote Oak runtime.',
+    'Remote Oak runtime closed the connection.',
+    'Timed out waiting for the remote Oak runtime to respond.'
   ])(
     'does not offer force delete for wrapped remote runtime failure: %s',
     async (runtimeFailure) => {
@@ -512,7 +512,7 @@ describe('removeWorktree cascade', () => {
     }
   )
 
-  it('offers force delete for orphaned Orca worktree directories', async () => {
+  it('offers force delete for orphaned Oak worktree directories', async () => {
     const store = createTestStore()
     const worktreeId = 'repo1::/path/wt1'
 
@@ -4574,7 +4574,7 @@ describe('shutdownWorktreeTerminals (sleep) — agent status hygiene', () => {
   })
 })
 
-// Why: CLI-spawned background terminals stamp ORCA_PANE_KEY into the PTY env
+// Why: CLI-spawned background terminals stamp OAK_PANE_KEY into the PTY env
 // at spawn time. The renderer must adopt the tab under the same id so hook
 // events route to the correct slot.
 describe('createTab tabId hint', () => {

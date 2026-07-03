@@ -174,10 +174,10 @@ export class SshPtyProvider implements IPtyProvider {
           ? `${this.remoteCliBridgeEnv.binDir}${pathDelimiter}${pathValue}`
           : this.remoteCliBridgeEnv.binDir
     }
-    merged.ORCA_REMOTE_CLI_BIN_DIR = this.remoteCliBridgeEnv.binDir
-    merged.ORCA_RELAY_DIR = this.remoteCliBridgeEnv.relayDir
-    merged.ORCA_RELAY_NODE_PATH = this.remoteCliBridgeEnv.nodePath
-    merged.ORCA_RELAY_SOCKET_PATH = this.remoteCliBridgeEnv.sockPath
+    merged.OAK_REMOTE_CLI_BIN_DIR = this.remoteCliBridgeEnv.binDir
+    merged.OAK_RELAY_DIR = this.remoteCliBridgeEnv.relayDir
+    merged.OAK_RELAY_NODE_PATH = this.remoteCliBridgeEnv.nodePath
+    merged.OAK_RELAY_SOCKET_PATH = this.remoteCliBridgeEnv.sockPath
     return merged
   }
 

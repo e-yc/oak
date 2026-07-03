@@ -11,22 +11,22 @@ export function getRequiredReleaseAssetNames(tag) {
     'latest-linux-arm64.yml',
     'latest-mac.yml',
     'latest.yml',
-    'orca-linux.AppImage',
-    'orca-linux-arm64.AppImage',
-    `orca-ide_${version}_amd64.deb`,
-    `orca-ide_${version}_arm64.deb`,
-    `orca-ide-${version}.x86_64.rpm`,
-    `orca-ide-${version}.aarch64.rpm`,
-    'orca-windows-setup.exe',
-    'orca-windows-setup.exe.blockmap',
-    `Orca-${version}-mac.zip`,
-    `Orca-${version}-mac.zip.blockmap`,
-    `Orca-${version}-arm64-mac.zip`,
-    `Orca-${version}-arm64-mac.zip.blockmap`,
-    'orca-macos-x64.dmg',
-    'orca-macos-x64.dmg.blockmap',
-    'orca-macos-arm64.dmg',
-    'orca-macos-arm64.dmg.blockmap'
+    'oak-linux.AppImage',
+    'oak-linux-arm64.AppImage',
+    `oak-ide_${version}_amd64.deb`,
+    `oak-ide_${version}_arm64.deb`,
+    `oak-ide-${version}.x86_64.rpm`,
+    `oak-ide-${version}.aarch64.rpm`,
+    'oak-windows-setup.exe',
+    'oak-windows-setup.exe.blockmap',
+    `Oak-${version}-mac.zip`,
+    `Oak-${version}-mac.zip.blockmap`,
+    `Oak-${version}-arm64-mac.zip`,
+    `Oak-${version}-arm64-mac.zip.blockmap`,
+    'oak-macos-x64.dmg',
+    'oak-macos-x64.dmg.blockmap',
+    'oak-macos-arm64.dmg',
+    'oak-macos-arm64.dmg.blockmap'
   ]
 }
 
@@ -150,7 +150,7 @@ async function main() {
   if (!token) {
     throw new Error('GH_TOKEN or GITHUB_TOKEN must be set')
   }
-  const repo = process.env.GITHUB_REPOSITORY || 'stablyai/orca'
+  const repo = process.env.GITHUB_REPOSITORY || 'e-yc/oak'
   const result = await verifyRequiredReleaseAssets({ repo, tag, token })
   console.log(`Verified ${result.checked.length} required release assets for ${repo}@${tag}`)
 }

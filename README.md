@@ -1,13 +1,13 @@
 <h1 align="center">
-  <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Orca" width="64" valign="middle" /></a> Orca
+  <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Oak" width="64" valign="middle" /></a> Oak
 </h1>
 
 <p align="center">
-  <a href="https://github.com/stablyai/orca/stargazers"><img src="https://badgen.net/github/stars/stablyai/orca?label=%E2%98%85" alt="GitHub stars" /></a>
-  <a href="https://github.com/stablyai/orca/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
-  <img src="https://badgen.net/github/license/stablyai/orca" alt="License" />
-  <a href="https://discord.gg/fzjDKHxv8Q"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Join the Orca Discord" /></a>
-  <a href="https://x.com/orca_build"><img src="https://img.shields.io/badge/X-000000?logo=x&logoColor=white" alt="Follow Orca on X" /></a>
+  <a href="https://github.com/e-yc/oak/stargazers"><img src="https://badgen.net/github/stars/e-yc/oak?label=%E2%98%85" alt="GitHub stars" /></a>
+  <a href="https://github.com/e-yc/oak/releases"><img src="docs/assets/readme-downloads.svg" alt="Total downloads across all releases" /></a>
+  <img src="https://badgen.net/github/license/e-yc/oak" alt="License" />
+  <a href="https://discord.gg/fzjDKHxv8Q"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Join the Oak Discord" /></a>
+  <a href="https://x.com/orca_build"><img src="https://img.shields.io/badge/X-000000?logo=x&logoColor=white" alt="Follow Oak on X" /></a>
   <img src="https://img.shields.io/badge/macOS%20%7C%20Windows%20%7C%20Linux-4493F8?style=flat-square" alt="Supported platforms: macOS, Windows, and Linux" />
 </p>
 
@@ -20,10 +20,10 @@
   Run Codex, ClaudeCode, OpenCode or Pi side-by-side — each in its own worktree, tracked in one place.
 </p>
 
-<h3 align="center"><a href="https://onorca.dev/download"><ins>Download Orca</ins></a></h3>
+<h3 align="center"><a href="https://onorca.dev/download"><ins>Download Oak</ins></a></h3>
 
 <p align="center">
-  <img src="docs/assets/readme-hero.jpg" alt="Orca desktop app running agents in parallel worktrees, with the Orca mobile companion app in the corner" width="960" />
+  <img src="docs/assets/readme-hero.jpg" alt="Oak desktop app running agents in parallel worktrees, with the Oak mobile companion app in the corner" width="960" />
 </p>
 
 ## Features
@@ -36,11 +36,11 @@
 
 Monitor and steer your agents from your phone — get notified when an agent finishes and send follow-ups from anywhere.
 
-[iOS App Store](https://apps.apple.com/us/app/orca-ide/id6766130217) · [TestFlight](https://testflight.apple.com/join/YjeGMQBA) · [Android APK 0.0.21](https://github.com/stablyai/orca/releases/download/mobile-android-v0.0.21/app-release.apk) · [Docs →](https://www.onorca.dev/docs/mobile)
+[iOS App Store](https://apps.apple.com/us/app/oak-ide/id6766130217) · [TestFlight](https://testflight.apple.com/join/YjeGMQBA) · [Android APK 0.0.21](https://github.com/e-yc/oak/releases/download/mobile-android-v0.0.21/app-release.apk) · [Docs →](https://www.onorca.dev/docs/mobile)
 
 </td>
 <td width="50%">
-  <a href="https://www.onorca.dev/docs/mobile"><picture><source srcset="docs/assets/feature-wall/mobile-companion-app-showcase.gif" type="image/gif"><img src="docs/assets/feature-wall/mobile-companion-app-showcase.jpg" alt="Orca desktop with the mobile companion app" width="100%" /></picture></a>
+  <a href="https://www.onorca.dev/docs/mobile"><picture><source srcset="docs/assets/feature-wall/mobile-companion-app-showcase.gif" type="image/gif"><img src="docs/assets/feature-wall/mobile-companion-app-showcase.jpg" alt="Oak desktop with the mobile companion app" width="100%" /></picture></a>
 </td>
 </tr>
 <tr>
@@ -96,7 +96,7 @@ Browse PRs, issues, and project boards in-app — open a worktree from any task 
 
 </td>
 <td width="50%">
-  <a href="https://www.onorca.dev/docs/review/linear"><picture><source srcset="docs/assets/feature-wall/github-linear.gif" type="image/gif"><img src="docs/assets/feature-wall/github-linear.jpg" alt="GitHub and Linear task workflows in Orca" width="100%" /></picture></a>
+  <a href="https://www.onorca.dev/docs/review/linear"><picture><source srcset="docs/assets/feature-wall/github-linear.gif" type="image/gif"><img src="docs/assets/feature-wall/github-linear.jpg" alt="GitHub and Linear task workflows in Oak" width="100%" /></picture></a>
 </td>
 </tr>
 <tr>
@@ -118,7 +118,7 @@ Run agents on a beefy remote box with full file editing, git, and terminals — 
 
 ### Annotate AI Diffs
 
-Drop comments on any diff line and ship them back to the agent — review, edit, and commit without leaving Orca.
+Drop comments on any diff line and ship them back to the agent — review, edit, and commit without leaving Oak.
 
 [Docs →](https://www.onorca.dev/docs/review/annotate-ai-diff)
 
@@ -144,15 +144,15 @@ VS Code's editor with autosave everywhere — drag files or images straight into
 <tr>
 <td width="50%" valign="middle">
 
-### Orca CLI
+### Oak CLI
 
-Agents drive Orca too — script every workflow with `orca worktree create`, `snapshot`, `click`, and `fill`.
+Agents drive Oak too — script every workflow with `oak worktree create`, `snapshot`, `click`, and `fill`.
 
 [Docs →](https://www.onorca.dev/docs/cli/overview)
 
 </td>
 <td width="50%">
-  <a href="https://www.onorca.dev/docs/cli/overview"><picture><source srcset="docs/assets/feature-wall/orca-cli.gif" type="image/gif"><img src="docs/assets/feature-wall/orca-cli.jpg" alt="Script Orca from the CLI" width="100%" /></picture></a>
+  <a href="https://www.onorca.dev/docs/cli/overview"><picture><source srcset="docs/assets/feature-wall/oak-cli.gif" type="image/gif"><img src="docs/assets/feature-wall/oak-cli.jpg" alt="Script Oak from the CLI" width="100%" /></picture></a>
 </td>
 </tr>
 </table>
@@ -164,13 +164,13 @@ Agents drive Orca too — script every workflow with `orca worktree create`, `sn
 - **[Rich repo previews](https://www.onorca.dev/docs/editing/markdown)** — Preview Markdown, images, PDFs, and repo docs in the workspace.
 - **[Computer Use](https://www.onorca.dev/docs/cli/computer-use)** — Let agents operate desktop apps and visible UI when a workflow needs real interaction.
 - **[Notifications and unread state](https://www.onorca.dev/docs/notifications)** — Know when an agent finishes or needs attention, then mark threads unread to come back later.
-- **And many, many more** — we ship daily, so this list is perpetually behind. The [changelog](https://github.com/stablyai/orca/releases) is the real feature list.
+- **And many, many more** — we ship daily, so this list is perpetually behind. The [changelog](https://github.com/e-yc/oak/releases) is the real feature list.
 
 ---
 
 ## Supported Agents
 
-Works with **any CLI agent** — if it runs in a terminal, it runs in Orca.
+Works with **any CLI agent** — if it runs in a terminal, it runs in Oak.
 
 <p>
   <a href="https://docs.anthropic.com/claude/docs/claude-code"><kbd><img src="docs/assets/claude-logo.svg" alt="Claude Code logo" width="16" valign="middle" /> Claude Code</kbd></a> &nbsp;
@@ -212,25 +212,25 @@ Works with **any CLI agent** — if it runs in a terminal, it runs in Orca.
 ### Desktop — macOS, Windows, Linux
 
 - **[Download from onOrca.dev](https://onorca.dev/download)**
-- Or grab a build directly: [macOS Apple Silicon](https://github.com/stablyai/orca/releases/latest/download/orca-macos-arm64.dmg) · [macOS Intel](https://github.com/stablyai/orca/releases/latest/download/orca-macos-x64.dmg) · [Windows (.exe)](https://github.com/stablyai/orca/releases/latest/download/orca-windows-setup.exe) · [Linux AppImage](https://github.com/stablyai/orca/releases/latest/download/orca-linux.AppImage) · [All builds](https://github.com/stablyai/orca/releases/latest)
-- Running `orca serve` on a headless Linux server? See the [headless Linux server guide](docs/reference/headless-linux-server.md).
+- Or grab a build directly: [macOS Apple Silicon](https://github.com/e-yc/oak/releases/latest/download/oak-macos-arm64.dmg) · [macOS Intel](https://github.com/e-yc/oak/releases/latest/download/oak-macos-x64.dmg) · [Windows (.exe)](https://github.com/e-yc/oak/releases/latest/download/oak-windows-setup.exe) · [Linux AppImage](https://github.com/e-yc/oak/releases/latest/download/oak-linux.AppImage) · [All builds](https://github.com/e-yc/oak/releases/latest)
+- Running `oak serve` on a headless Linux server? See the [headless Linux server guide](docs/reference/headless-linux-server.md).
 
 _Or via a package manager:_
 
 ```bash
 # macOS (Homebrew)
-brew install --cask stablyai/orca/orca
+brew install --cask e-yc/oak/oak
 
-# Arch Linux (AUR) — or stably-orca-git to build from source
-yay -S stably-orca-bin
+# Arch Linux (AUR) — or stably-oak-git to build from source
+yay -S stably-oak-bin
 ```
 
 ### Mobile Companion — iOS, Android
 
 Pair with your desktop app to monitor and steer your agents from your phone.
 
-- **iOS:** [Download on the App Store](https://apps.apple.com/us/app/orca-ide/id6766130217) or [join TestFlight](https://testflight.apple.com/join/YjeGMQBA)
-- **Android:** [Download APK 0.0.21](https://github.com/stablyai/orca/releases/download/mobile-android-v0.0.21/app-release.apk)
+- **iOS:** [Download on the App Store](https://apps.apple.com/us/app/oak-ide/id6766130217) or [join TestFlight](https://testflight.apple.com/join/YjeGMQBA)
+- **Android:** [Download APK 0.0.21](https://github.com/e-yc/oak/releases/download/mobile-android-v0.0.21/app-release.apk)
 
 ---
 
@@ -240,11 +240,11 @@ Pair with your desktop app to monitor and steer your agents from your phone.
 - **Twitter / X:** Follow **[@orca_build](https://x.com/orca_build)** for updates and announcements.
 - **WeChat:** Scan the QR code to join the community.
 
-  <img src="docs/assets/wechat-qr.png" alt="WeChat QR code for the Orca community" width="160" />
+  <img src="docs/assets/wechat-qr.png" alt="WeChat QR code for the Oak community" width="160" />
 
-- **Feedback &amp; Ideas:** We ship fast. Missing something? [Request a new feature](https://github.com/stablyai/orca/issues).
-- **Privacy:** See the [privacy &amp; telemetry docs](https://www.onorca.dev/docs/telemetry) for what anonymous usage data Orca collects and how to opt out.
-- **Show Support:** [Star](https://github.com/stablyai/orca) this repo to follow along with our daily ships.
+- **Feedback &amp; Ideas:** We ship fast. Missing something? [Request a new feature](https://github.com/e-yc/oak/issues).
+- **Privacy:** See the [privacy &amp; telemetry docs](https://www.onorca.dev/docs/telemetry) for what anonymous usage data Oak collects and how to opt out.
+- **Show Support:** [Star](https://github.com/e-yc/oak) this repo to follow along with our daily ships.
 
 ---
 
@@ -252,10 +252,10 @@ Pair with your desktop app to monitor and steer your agents from your phone.
 
 Want to contribute or run locally? See our [CONTRIBUTING.md](.github/CONTRIBUTING.md) guide.
 
-<a href="https://github.com/stablyai/orca/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=stablyai/orca" alt="Orca contributors" />
+<a href="https://github.com/e-yc/oak/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=e-yc/oak" alt="Oak contributors" />
 </a>
 
 ## License
 
-Orca is free and open source under the [MIT License](LICENSE).
+Oak is free and open source under the [MIT License](LICENSE).

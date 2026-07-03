@@ -28,7 +28,7 @@ import { createGitHubWorkItemWorkspaceInBackground } from './github-work-item-ba
 const repo: Repo = {
   id: 'repo-1',
   path: '/repo',
-  displayName: 'orca',
+  displayName: 'oak',
   badgeColor: 'blue',
   addedAt: 1
 }
@@ -54,7 +54,7 @@ function makeIssue(overrides: Partial<GitHubWorkItem> = {}): GitHubWorkItem {
     type: 'issue',
     number: 42,
     title: 'Make issue workspace creation async',
-    url: 'https://github.com/stablyai/orca/issues/42',
+    url: 'https://github.com/e-yc/oak/issues/42',
     state: 'open',
     author: null,
     labels: [],
@@ -540,7 +540,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
 
     const result = await createGitHubWorkItemWorkspaceInBackground(
       {
-        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/stablyai/orca/pull/7' }),
+        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/e-yc/oak/pull/7' }),
         repoId: 'repo-1',
         openModalFallback
       },
@@ -566,7 +566,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
 
     await createGitHubWorkItemWorkspaceInBackground(
       {
-        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/stablyai/orca/pull/7' }),
+        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/e-yc/oak/pull/7' }),
         repoId: 'repo-1',
         openModalFallback: vi.fn()
       },
@@ -640,7 +640,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
     expect(continueCall).toBeDefined()
     const request = continueCall?.[1] as WorktreeCreationRequest
     expect(request.issueCommand?.command).toBe(
-      'gh issue view 42 --repo https://github.com/stablyai/orca/issues/42'
+      'gh issue view 42 --repo https://github.com/e-yc/oak/issues/42'
     )
   })
 
@@ -669,7 +669,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
       effectiveContent: 'echo {{issue}}',
       localContent: 'echo {{issue}}',
       sharedContent: null,
-      localFilePath: '/repo/.orca/issue-command',
+      localFilePath: '/repo/.oak/issue-command',
       source: 'local'
     })
     // Why: the setup confirmHooks call resolves 'skip', which mirrors the
@@ -707,13 +707,13 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
       effectiveContent: 'echo {{issue}}',
       localContent: 'echo {{issue}}',
       sharedContent: null,
-      localFilePath: '/repo/.orca/issue-command',
+      localFilePath: '/repo/.oak/issue-command',
       source: 'local'
     })
 
     await createGitHubWorkItemWorkspaceInBackground(
       {
-        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/stablyai/orca/pull/7' }),
+        item: makeIssue({ type: 'pr', number: 7, url: 'https://github.com/e-yc/oak/pull/7' }),
         repoId: 'repo-1',
         openModalFallback: vi.fn()
       },
@@ -792,7 +792,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
       effectiveContent: 'echo {{issue}}',
       localContent: 'echo {{issue}}',
       sharedContent: null,
-      localFilePath: '/repo/.orca/issue-command',
+      localFilePath: '/repo/.oak/issue-command',
       source: 'local'
     })
 
@@ -810,7 +810,7 @@ describe('createGitHubWorkItemWorkspaceInBackground', () => {
     const request = continueCall?.[1] as WorktreeCreationRequest
     // Why: Brennan's confirmed scope keeps the quick-start prompt the bare link;
     // the issue command runs as a side-pane split, not as the agent prompt.
-    expect(request.startupPlan?.draftPrompt).toBe('https://github.com/stablyai/orca/issues/42')
+    expect(request.startupPlan?.draftPrompt).toBe('https://github.com/e-yc/oak/issues/42')
     expect(request.startupPlan?.draftPrompt ?? '').not.toContain('Complete')
     expect(request.quickPrompt).not.toContain('Complete')
     // The issue command itself still threads through as a side-pane split.

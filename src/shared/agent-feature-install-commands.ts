@@ -1,18 +1,18 @@
-export const ORCA_SKILLS_REPOSITORY_URL = 'https://github.com/stablyai/orca'
+export const OAK_SKILLS_REPOSITORY_URL = 'https://github.com/e-yc/oak'
 
-export const ORCA_CLI_SKILL_NAME = 'orca-cli'
+export const OAK_CLI_SKILL_NAME = 'oak-cli'
 export const COMPUTER_USE_SKILL_NAME = 'computer-use'
 export const ORCHESTRATION_SKILL_NAME = 'orchestration'
-export const EPHEMERAL_VMS_SKILL_NAME = 'orca-per-workspace-env'
-export const ORCA_LINEAR_SKILL_NAME = 'orca-linear'
+export const EPHEMERAL_VMS_SKILL_NAME = 'oak-per-workspace-env'
+export const OAK_LINEAR_SKILL_NAME = 'oak-linear'
 export const LINEAR_TICKETS_SKILL_NAME = 'linear-tickets'
-export const LINEAR_AGENT_SKILL_NAMES = [ORCA_LINEAR_SKILL_NAME, LINEAR_TICKETS_SKILL_NAME] as const
+export const LINEAR_AGENT_SKILL_NAMES = [OAK_LINEAR_SKILL_NAME, LINEAR_TICKETS_SKILL_NAME] as const
 
 export function buildAgentFeatureSkillInstallCommand(skillNames: readonly string[]): string {
   if (skillNames.length === 0) {
     throw new Error('At least one skill name is required.')
   }
-  return `npx skills add ${ORCA_SKILLS_REPOSITORY_URL} --skill ${skillNames.join(' ')} --global`
+  return `npx skills add ${OAK_SKILLS_REPOSITORY_URL} --skill ${skillNames.join(' ')} --global`
 }
 
 export function buildAgentFeatureSkillUpdateCommand(skillName: string): string {
@@ -23,12 +23,11 @@ export function buildAgentFeatureSkillUpdateCommand(skillName: string): string {
   return `npx skills update ${trimmedSkillName} --global`
 }
 
-export const ORCA_CLI_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  ORCA_CLI_SKILL_NAME
+export const OAK_CLI_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
+  OAK_CLI_SKILL_NAME
 ])
 
-export const ORCA_CLI_SKILL_UPDATE_COMMAND =
-  buildAgentFeatureSkillUpdateCommand(ORCA_CLI_SKILL_NAME)
+export const OAK_CLI_SKILL_UPDATE_COMMAND = buildAgentFeatureSkillUpdateCommand(OAK_CLI_SKILL_NAME)
 
 export const COMPUTER_USE_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
   COMPUTER_USE_SKILL_NAME
@@ -51,17 +50,17 @@ export const EPHEMERAL_VMS_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstall
 export const EPHEMERAL_VMS_SKILL_UPDATE_COMMAND =
   buildAgentFeatureSkillUpdateCommand(EPHEMERAL_VMS_SKILL_NAME)
 
-export const ORCA_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  ORCA_CLI_SKILL_NAME,
+export const OAK_CLI_ORCHESTRATION_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
+  OAK_CLI_SKILL_NAME,
   ORCHESTRATION_SKILL_NAME
 ])
 
-export const ORCA_LINEAR_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
-  ORCA_LINEAR_SKILL_NAME
+export const OAK_LINEAR_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
+  OAK_LINEAR_SKILL_NAME
 ])
 
-export const ORCA_LINEAR_SKILL_UPDATE_COMMAND =
-  buildAgentFeatureSkillUpdateCommand(ORCA_LINEAR_SKILL_NAME)
+export const OAK_LINEAR_SKILL_UPDATE_COMMAND =
+  buildAgentFeatureSkillUpdateCommand(OAK_LINEAR_SKILL_NAME)
 
 export const LINEAR_TICKETS_SKILL_INSTALL_COMMAND = buildAgentFeatureSkillInstallCommand([
   LINEAR_TICKETS_SKILL_NAME

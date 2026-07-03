@@ -17,17 +17,17 @@ function repo(id: string, overrides: Partial<Repo> = {}): Repo {
     displayName: id,
     badgeColor: '#111111',
     addedAt: 1,
-    upstream: { owner: 'stablyai', repo: 'orca' },
+    upstream: { owner: 'e-yc', repo: 'oak' },
     ...overrides
   }
 }
 
 function project(overrides: Partial<Project> = {}): Project {
   return {
-    id: 'github:stablyai/orca',
-    displayName: 'orca',
+    id: 'github:e-yc/oak',
+    displayName: 'oak',
     badgeColor: '#111111',
-    providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'orca' },
+    providerIdentity: { provider: 'github', owner: 'e-yc', repo: 'oak' },
     sourceRepoIds: ['local-repo', 'ssh-repo'],
     createdAt: 1,
     updatedAt: 1,
@@ -38,11 +38,11 @@ function project(overrides: Partial<Project> = {}): Project {
 function setup(overrides: Partial<ProjectHostSetup>): ProjectHostSetup {
   return {
     id: overrides.id ?? 'local-setup',
-    projectId: overrides.projectId ?? 'github:stablyai/orca',
+    projectId: overrides.projectId ?? 'github:e-yc/oak',
     hostId: overrides.hostId ?? 'local',
     repoId: overrides.repoId ?? 'local-repo',
-    path: overrides.path ?? '/tmp/orca',
-    displayName: overrides.displayName ?? 'orca',
+    path: overrides.path ?? '/tmp/oak',
+    displayName: overrides.displayName ?? 'oak',
     setupState: overrides.setupState ?? 'ready',
     setupMethod: overrides.setupMethod ?? 'legacy-repo',
     createdAt: 1,
@@ -80,12 +80,12 @@ describe('buildNewWorkspaceProjectOptions', () => {
 
     expect(options).toEqual([
       {
-        id: 'github:stablyai/orca',
+        id: 'github:e-yc/oak',
         kind: 'project',
-        projectId: 'github:stablyai/orca',
-        displayName: 'orca',
+        projectId: 'github:e-yc/oak',
+        displayName: 'oak',
         badgeColor: '#111111',
-        detail: 'stablyai/orca'
+        detail: 'e-yc/oak'
       }
     ])
   })
@@ -105,18 +105,18 @@ describe('buildNewWorkspaceProjectOptions', () => {
       eligibleRepos: [repo('local-repo'), repo('other-repo')]
     })
 
-    expect(options.map((option) => option.id)).toEqual(['github:stablyai/orca'])
+    expect(options.map((option) => option.id)).toEqual(['github:e-yc/oak'])
   })
 
   it('filters project options by display name and detail', () => {
     const options: NewWorkspaceProjectOption[] = [
       {
         kind: 'project',
-        id: 'orca',
-        projectId: 'orca',
-        displayName: 'Orca',
+        id: 'oak',
+        projectId: 'oak',
+        displayName: 'Oak',
         badgeColor: '#111111',
-        detail: 'stablyai/orca'
+        detail: 'e-yc/oak'
       },
       {
         kind: 'project',
@@ -129,7 +129,7 @@ describe('buildNewWorkspaceProjectOptions', () => {
     ]
 
     expect(searchNewWorkspaceProjectOptions(options, 'docs')).toEqual([options[1]])
-    expect(searchNewWorkspaceProjectOptions(options, 'stablyai/orca')).toEqual([options[0]])
+    expect(searchNewWorkspaceProjectOptions(options, 'e-yc/oak')).toEqual([options[0]])
   })
 
   it('rejects oversized pasted searches before reading project options', () => {
@@ -157,10 +157,10 @@ describe('buildNewWorkspaceProjectOptions', () => {
 describe('buildNewWorkspaceFolderSourceOptions', () => {
   it('keeps concrete source repos separate even when they are the same logical project', () => {
     const options = buildNewWorkspaceFolderSourceOptions([
-      repo('local-repo', { displayName: 'orca', path: '/tmp/orca' }),
+      repo('local-repo', { displayName: 'oak', path: '/tmp/oak' }),
       repo('ssh-repo', {
-        displayName: 'orca',
-        path: '/srv/orca',
+        displayName: 'oak',
+        path: '/srv/oak',
         connectionId: 'ssh:builder'
       })
     ])
@@ -169,7 +169,7 @@ describe('buildNewWorkspaceFolderSourceOptions', () => {
       'folder-source:local-repo',
       'folder-source:ssh-repo'
     ])
-    expect(options.map((option) => option.detail).sort()).toEqual(['/srv/orca', '/tmp/orca'])
+    expect(options.map((option) => option.detail).sort()).toEqual(['/srv/oak', '/tmp/oak'])
     expect(getRepoIdFromNewWorkspaceFolderSourceOptionId('folder-source:ssh-repo')).toBe('ssh-repo')
   })
 })
@@ -188,7 +188,7 @@ describe('buildNewWorkspaceCreateTargetOptions', () => {
     })
 
     expect(options.map((option) => option.id).sort()).toEqual([
-      'github:stablyai/orca',
+      'github:e-yc/oak',
       'project-group:folder-group'
     ])
     expect(options.find((option) => option.id === 'project-group:folder-group')).toMatchObject({

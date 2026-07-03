@@ -32,7 +32,7 @@ export function handleMockFilePreviewRequest(
       respond(
         success(request.id, {
           worktree: request.params?.worktree ?? 'id:mock',
-          rootPath: '/tmp/orca-mobile-repro/orca',
+          rootPath: '/tmp/oak-mobile-repro/oak',
           files: MOCK_FILE_LIST,
           totalCount: MOCK_FILE_LIST.length,
           truncated: false

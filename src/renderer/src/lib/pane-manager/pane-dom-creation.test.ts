@@ -50,7 +50,7 @@ vi.mock('@xterm/xterm', () => ({
 
 describe('createPaneDOM link tooltips', () => {
   it('lets callers replace WebLinks hover text for display-only labels', async () => {
-    const labeledText = 'http://main.orca.localhost:60016/ (localhost:5180; click to open)'
+    const labeledText = 'http://main.oak.localhost:60016/ (localhost:5180; click to open)'
     const leafId = '11111111-1111-4111-8111-111111111111' as TerminalLeafId
     const pane = createPaneDOM(
       1,

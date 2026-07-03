@@ -428,7 +428,7 @@ describe('launchWorkItemDirect', () => {
     mocks.store.repos = [
       {
         id: 'repo-ssh',
-        path: '/home/orca/repo',
+        path: '/home/oak/repo',
         displayName: 'Remote Repo',
         badgeColor: '#000',
         addedAt: 0,
@@ -447,7 +447,7 @@ describe('launchWorkItemDirect', () => {
       launchConfig: { agentArgs: '', agentEnv: {} }
     })
     mocks.store.createWorktree.mockResolvedValue({
-      worktree: { id: 'wt-ssh', path: '/home/orca/repo-worktrees/issue-77' }
+      worktree: { id: 'wt-ssh', path: '/home/oak/repo-worktrees/issue-77' }
     })
 
     await launchWorkItemDirect({
@@ -467,7 +467,7 @@ describe('launchWorkItemDirect', () => {
     expect(mocks.store.ensureRemoteDetectedAgents).toHaveBeenCalledWith('ssh-1')
     expect(mockApi.agentTrust.markTrusted).toHaveBeenCalledWith({
       preset: 'cursor',
-      workspacePath: '/home/orca/repo-worktrees/issue-77',
+      workspacePath: '/home/oak/repo-worktrees/issue-77',
       connectionId: 'ssh-1'
     })
     expect(buildAgentDraftLaunchPlan).toHaveBeenCalledWith({
@@ -566,8 +566,8 @@ describe('launchWorkItemDirect', () => {
 
     expect(mocks.activateAndRevealWorktree).toHaveBeenCalled()
     const activationOptions = mocks.activateAndRevealWorktree.mock.calls.at(-1)?.[1]
-    expect(activationOptions.startup.command).toContain('unset ORCA_PI_PREFILL')
-    expect(activationOptions.startup.command).not.toContain('Remove-Item Env:ORCA_PI_PREFILL')
+    expect(activationOptions.startup.command).toContain('unset OAK_PI_PREFILL')
+    expect(activationOptions.startup.command).not.toContain('Remove-Item Env:OAK_PI_PREFILL')
   })
 
   it('uses the repo SSH connection when the created worktree is not hydrated yet', async () => {
@@ -607,7 +607,7 @@ describe('launchWorkItemDirect', () => {
     expect(mocks.ensureRemoteDetectedAgents).toHaveBeenCalledWith('ssh-1')
     expect(mocks.ensureDetectedAgents).not.toHaveBeenCalled()
     const activationOptions = mocks.activateAndRevealWorktree.mock.calls.at(-1)?.[1]
-    expect(activationOptions.startup.command).toContain('unset ORCA_PI_PREFILL')
+    expect(activationOptions.startup.command).toContain('unset OAK_PI_PREFILL')
   })
 
   it('plans direct local Windows-path launches with POSIX startup for WSL project runtime', async () => {

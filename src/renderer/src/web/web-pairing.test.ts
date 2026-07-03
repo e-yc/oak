@@ -18,33 +18,33 @@ describe('web pairing input', () => {
   }
 
   it('parses query-form pairing URLs', () => {
-    expect(parseWebPairingInput(`orca://pair?code=${encodeOffer()}`)).toEqual(offer)
+    expect(parseWebPairingInput(`oak://pair?code=${encodeOffer()}`)).toEqual(offer)
   })
 
   it('still parses legacy hash-form pairing URLs', () => {
-    expect(parseWebPairingInput(`orca://pair#${encodeOffer()}`)).toEqual(offer)
+    expect(parseWebPairingInput(`oak://pair#${encodeOffer()}`)).toEqual(offer)
   })
 
   it('preserves optional device scope metadata', () => {
-    expect(parseWebPairingInput(`orca://pair?code=${encodeOffer({ scope: 'mobile' })}`)).toEqual({
+    expect(parseWebPairingInput(`oak://pair?code=${encodeOffer({ scope: 'mobile' })}`)).toEqual({
       ...offer,
       scope: 'mobile'
     })
   })
 
   it('treats invalid device scope metadata as unknown', () => {
-    expect(parseWebPairingInput(`orca://pair?code=${encodeOffer({ scope: 'admin' })}`)).toEqual(
+    expect(parseWebPairingInput(`oak://pair?code=${encodeOffer({ scope: 'admin' })}`)).toEqual(
       offer
     )
   })
 
-  it('rejects orca URLs outside the exact pairing route', () => {
-    expect(parseWebPairingInput(`orca://pairing?code=${encodeOffer()}`)).toBeNull()
-    expect(parseWebPairingInput(`orca://pair-extra?code=${encodeOffer()}`)).toBeNull()
+  it('rejects oak URLs outside the exact pairing route', () => {
+    expect(parseWebPairingInput(`oak://pairing?code=${encodeOffer()}`)).toBeNull()
+    expect(parseWebPairingInput(`oak://pair-extra?code=${encodeOffer()}`)).toBeNull()
   })
 
   it('auto-saves scoped runtime offers during web startup', () => {
-    const input = `orca://pair?code=${encodeOffer({ scope: 'runtime' })}`
+    const input = `oak://pair?code=${encodeOffer({ scope: 'runtime' })}`
     expect(
       decideWebPairingStartup({ initialPairingInput: input, hasStoredEnvironment: false })
     ).toEqual({
@@ -54,8 +54,8 @@ describe('web pairing input', () => {
   })
 
   it('shows the connect screen for mobile-scope and legacy unknown-scope offers', () => {
-    const mobileInput = `orca://pair?code=${encodeOffer({ scope: 'mobile' })}`
-    const legacyInput = `orca://pair?code=${encodeOffer()}`
+    const mobileInput = `oak://pair?code=${encodeOffer({ scope: 'mobile' })}`
+    const legacyInput = `oak://pair?code=${encodeOffer()}`
 
     expect(
       decideWebPairingStartup({ initialPairingInput: mobileInput, hasStoredEnvironment: true })

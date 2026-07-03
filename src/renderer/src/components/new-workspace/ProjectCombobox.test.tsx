@@ -40,11 +40,11 @@ let root: Root
 const projects: NewWorkspaceProjectOption[] = [
   {
     kind: 'project',
-    id: 'github:stablyai/orca',
-    projectId: 'github:stablyai/orca',
-    displayName: 'orca',
+    id: 'github:e-yc/oak',
+    projectId: 'github:e-yc/oak',
+    displayName: 'oak',
     badgeColor: '#111111',
-    detail: 'stablyai/orca'
+    detail: 'e-yc/oak'
   },
   {
     kind: 'project',
@@ -83,12 +83,12 @@ describe('ProjectCombobox', () => {
   it('renders a logical project label without host-specific SSH chrome', () => {
     act(() => {
       root.render(
-        <ProjectCombobox options={projects} value="github:stablyai/orca" onValueChange={vi.fn()} />
+        <ProjectCombobox options={projects} value="github:e-yc/oak" onValueChange={vi.fn()} />
       )
     })
 
     const trigger = container.querySelector('[data-project-combobox-root="true"][role="combobox"]')
-    expect(trigger?.textContent).toContain('orca')
+    expect(trigger?.textContent).toContain('oak')
     expect(trigger?.textContent).not.toContain('SSH')
   })
 
@@ -97,11 +97,7 @@ describe('ProjectCombobox', () => {
 
     act(() => {
       root.render(
-        <ProjectCombobox
-          options={projects}
-          value="github:stablyai/orca"
-          onValueChange={onValueChange}
-        />
+        <ProjectCombobox options={projects} value="github:e-yc/oak" onValueChange={onValueChange} />
       )
     })
     act(() => {

@@ -20,7 +20,7 @@ describe('MimoCodeHookService buildPtyEnv', () => {
   let mimocodeHome: string
 
   beforeEach(() => {
-    userDataDir = mkdtempSync(join(tmpdir(), 'orca-mimocode-userdata-'))
+    userDataDir = mkdtempSync(join(tmpdir(), 'oak-mimocode-userdata-'))
     getPathMock.mockImplementation((name) => {
       if (name === 'userData') {
         return userDataDir
@@ -28,12 +28,12 @@ describe('MimoCodeHookService buildPtyEnv', () => {
       throw new Error(`unexpected getPath: ${name}`)
     })
 
-    mimocodeHome = mkdtempSync(join(tmpdir(), 'orca-mimocode-home-'))
+    mimocodeHome = mkdtempSync(join(tmpdir(), 'oak-mimocode-home-'))
     const configDir = join(mimocodeHome, 'config')
     mkdirSync(join(configDir, 'plugins'), { recursive: true })
     writeFileSync(join(configDir, 'mimocode.json'), '{"theme":"dark"}')
     writeFileSync(join(configDir, 'plugins', 'user-plugin.js'), 'export default () => {}')
-    writeFileSync(join(configDir, 'plugins', 'orca-mimocode-status.js'), 'USER PLUGIN')
+    writeFileSync(join(configDir, 'plugins', 'oak-mimocode-status.js'), 'USER PLUGIN')
   })
 
   afterEach(() => {
@@ -41,7 +41,7 @@ describe('MimoCodeHookService buildPtyEnv', () => {
     rmSync(mimocodeHome, { recursive: true, force: true })
   })
 
-  it('mirrors user config into shared overlay and installs Orca status plugin', () => {
+  it('mirrors user config into shared overlay and installs Oak status plugin', () => {
     const service = new MimoCodeHookService()
     const env = service.buildPtyEnv('pty-1', mimocodeHome)
 
@@ -54,12 +54,12 @@ describe('MimoCodeHookService buildPtyEnv', () => {
       'export default () => {}'
     )
 
-    const orcaPlugin = join(overlayHome, 'config', 'plugins', 'orca-mimocode-status.js')
-    expect(existsSync(orcaPlugin)).toBe(true)
-    expect(readFileSync(orcaPlugin, 'utf8')).toContain('/hook/mimo-code')
+    const oakPlugin = join(overlayHome, 'config', 'plugins', 'oak-mimocode-status.js')
+    expect(existsSync(oakPlugin)).toBe(true)
+    expect(readFileSync(oakPlugin, 'utf8')).toContain('/hook/mimo-code')
 
     expect(
-      readFileSync(join(mimocodeHome, 'config', 'plugins', 'orca-mimocode-status.js'), 'utf8')
+      readFileSync(join(mimocodeHome, 'config', 'plugins', 'oak-mimocode-status.js'), 'utf8')
     ).toBe('USER PLUGIN')
   })
 
@@ -72,7 +72,7 @@ describe('MimoCodeHookService buildPtyEnv', () => {
     expect(first.MIMOCODE_HOME).toBe(overlayHome)
     expect(second.MIMOCODE_HOME).toBe(overlayHome)
     expect(
-      readFileSync(join(overlayHome, 'config', 'plugins', 'orca-mimocode-status.js'), 'utf8')
+      readFileSync(join(overlayHome, 'config', 'plugins', 'oak-mimocode-status.js'), 'utf8')
     ).toContain('/hook/mimo-code')
   })
 })

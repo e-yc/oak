@@ -15,7 +15,7 @@ import {
   writeFileSync
 } from 'node:fs'
 import { join } from 'node:path'
-import { ORCA_BROWSER_PARTITION } from '../../shared/constants'
+import { OAK_BROWSER_PARTITION } from '../../shared/constants'
 import type { BrowserSessionProfile, BrowserSessionProfileScope } from '../../shared/types'
 import { browserManager } from './browser-manager'
 import { hasSystemMediaAccess, requestSystemMediaAccess } from './browser-media-access'
@@ -49,7 +49,7 @@ class BrowserSessionRegistry {
     this.profiles.set('default', {
       id: 'default',
       scope: 'default',
-      partition: ORCA_BROWSER_PARTITION,
+      partition: OAK_BROWSER_PARTITION,
       label: 'Default',
       source: persisted
     })
@@ -108,8 +108,8 @@ class BrowserSessionRegistry {
         data && typeof data.userAgentByPartition === 'object' && data.userAgentByPartition
           ? { ...data.userAgentByPartition }
           : {}
-      if (legacyUserAgent && !userAgentByPartition[ORCA_BROWSER_PARTITION]) {
-        userAgentByPartition[ORCA_BROWSER_PARTITION] = legacyUserAgent
+      if (legacyUserAgent && !userAgentByPartition[OAK_BROWSER_PARTITION]) {
+        userAgentByPartition[OAK_BROWSER_PARTITION] = legacyUserAgent
       }
 
       const legacyPendingCookieDbPath =
@@ -118,8 +118,8 @@ class BrowserSessionRegistry {
         data && typeof data.pendingCookieImports === 'object' && data.pendingCookieImports
           ? { ...data.pendingCookieImports }
           : {}
-      if (legacyPendingCookieDbPath && !pendingCookieImports[ORCA_BROWSER_PARTITION]) {
-        pendingCookieImports[ORCA_BROWSER_PARTITION] = legacyPendingCookieDbPath
+      if (legacyPendingCookieDbPath && !pendingCookieImports[OAK_BROWSER_PARTITION]) {
+        pendingCookieImports[OAK_BROWSER_PARTITION] = legacyPendingCookieDbPath
       }
       return {
         defaultSource: data?.defaultSource ?? null,
@@ -168,10 +168,10 @@ class BrowserSessionRegistry {
     // hydrateFromPersisted skips the default partition and createProfile never
     // targets it. Without this, clipboard permissions and other guest policies
     // are denied by default in the default browser partition.
-    this.setupSessionPolicies(ORCA_BROWSER_PARTITION)
+    this.setupSessionPolicies(OAK_BROWSER_PARTITION)
 
     const partitions = new Set([
-      ORCA_BROWSER_PARTITION,
+      OAK_BROWSER_PARTITION,
       ...this.listProfiles().map((p) => p.partition)
     ])
     for (const partition of partitions) {
@@ -208,7 +208,7 @@ class BrowserSessionRegistry {
       }
       // Why: replay writes to partition-derived file paths, so corrupted
       // metadata must pass the same validation as the webview allowlist.
-      const knownPartitions = new Set([ORCA_BROWSER_PARTITION])
+      const knownPartitions = new Set([OAK_BROWSER_PARTITION])
       for (const profile of meta.profiles) {
         if (BrowserSessionRegistry.isValidPersistedProfile(profile)) {
           knownPartitions.add(profile.partition)
@@ -270,7 +270,7 @@ class BrowserSessionRegistry {
       }
       this.persistMeta({
         pendingCookieImports: remainingEntries,
-        pendingCookieDbPath: remainingEntries[ORCA_BROWSER_PARTITION] ?? null
+        pendingCookieDbPath: remainingEntries[OAK_BROWSER_PARTITION] ?? null
       })
     } catch {
       // best-effort — if this fails, CookieMonster loads the old DB
@@ -282,7 +282,7 @@ class BrowserSessionRegistry {
     const pendingCookieImports = { ...meta.pendingCookieImports, [partition]: stagingDbPath }
     this.persistMeta({
       pendingCookieImports,
-      pendingCookieDbPath: pendingCookieImports[ORCA_BROWSER_PARTITION] ?? null
+      pendingCookieDbPath: pendingCookieImports[OAK_BROWSER_PARTITION] ?? null
     })
   }
 
@@ -296,7 +296,7 @@ class BrowserSessionRegistry {
     }
     this.persistMeta({
       userAgentByPartition,
-      userAgent: userAgentByPartition[ORCA_BROWSER_PARTITION] ?? null
+      userAgent: userAgentByPartition[OAK_BROWSER_PARTITION] ?? null
     })
   }
 
@@ -313,7 +313,7 @@ class BrowserSessionRegistry {
   }
 
   isAllowedPartition(partition: string): boolean {
-    if (partition === ORCA_BROWSER_PARTITION) {
+    if (partition === OAK_BROWSER_PARTITION) {
       return true
     }
     return [...this.profiles.values()].some((p) => p.partition === partition)
@@ -321,15 +321,15 @@ class BrowserSessionRegistry {
 
   resolvePartition(profileId: string | null | undefined): string {
     if (!profileId) {
-      return ORCA_BROWSER_PARTITION
+      return OAK_BROWSER_PARTITION
     }
-    return this.profiles.get(profileId)?.partition ?? ORCA_BROWSER_PARTITION
+    return this.profiles.get(profileId)?.partition ?? OAK_BROWSER_PARTITION
   }
 
   createProfile(scope: BrowserSessionProfileScope, label: string): BrowserSessionProfile | null {
     // Why: only the constructor may create the default profile. Allowing the
     // renderer to pass scope:'default' would create a second profile sharing
-    // ORCA_BROWSER_PARTITION, causing confusion on delete (clearing storage
+    // OAK_BROWSER_PARTITION, causing confusion on delete (clearing storage
     // for the shared partition).
     if (scope === 'default') {
       return null
@@ -338,7 +338,7 @@ class BrowserSessionRegistry {
     // Why: partition names are deterministic from the profile id so main can
     // reconstruct the allowlist on restart from persisted profile metadata
     // without needing a separate partition→profile mapping.
-    const partition = `persist:orca-browser-session-${id}`
+    const partition = `persist:oak-browser-session-${id}`
     const profile: BrowserSessionProfile = {
       id,
       scope,
@@ -384,9 +384,9 @@ class BrowserSessionRegistry {
     delete userAgentByPartition[profile.partition]
     this.persistMeta({
       pendingCookieImports,
-      pendingCookieDbPath: pendingCookieImports[ORCA_BROWSER_PARTITION] ?? null,
+      pendingCookieDbPath: pendingCookieImports[OAK_BROWSER_PARTITION] ?? null,
       userAgentByPartition,
-      userAgent: userAgentByPartition[ORCA_BROWSER_PARTITION] ?? null
+      userAgent: userAgentByPartition[OAK_BROWSER_PARTITION] ?? null
     })
 
     // Why: clearing the partition's storage prevents orphaned cookies/cache from
@@ -416,9 +416,9 @@ class BrowserSessionRegistry {
       }
       const meta = this.loadPersistedMeta()
       const pendingCookieImports = { ...meta.pendingCookieImports }
-      delete pendingCookieImports[ORCA_BROWSER_PARTITION]
+      delete pendingCookieImports[OAK_BROWSER_PARTITION]
       const userAgentByPartition = { ...meta.userAgentByPartition }
-      delete userAgentByPartition[ORCA_BROWSER_PARTITION]
+      delete userAgentByPartition[OAK_BROWSER_PARTITION]
       this.persistMeta({
         defaultSource: null,
         userAgent: null,
@@ -427,7 +427,7 @@ class BrowserSessionRegistry {
         pendingCookieImports
       })
 
-      const sess = session.fromPartition(ORCA_BROWSER_PARTITION)
+      const sess = session.fromPartition(OAK_BROWSER_PARTITION)
       await sess.clearStorageData({ storages: ['cookies'] })
       return true
     } catch {
@@ -442,7 +442,7 @@ class BrowserSessionRegistry {
   // tampered file could inject an arbitrary partition into the allowlist that
   // will-attach-webview trusts, so we validate the expected shape before
   // registering anything.
-  private static readonly PARTITION_RE = /^persist:orca-browser-session-[\da-f-]{36}$/
+  private static readonly PARTITION_RE = /^persist:oak-browser-session-[\da-f-]{36}$/
 
   private static isValidPersistedProfile(profile: unknown): profile is BrowserSessionProfile {
     if (!profile || typeof profile !== 'object') {
@@ -465,7 +465,7 @@ class BrowserSessionRegistry {
         continue
       }
       this.profiles.set(profile.id, profile)
-      if (profile.partition !== ORCA_BROWSER_PARTITION) {
+      if (profile.partition !== OAK_BROWSER_PARTITION) {
         this.setupSessionPolicies(profile.partition)
       }
     }
@@ -498,7 +498,7 @@ class BrowserSessionRegistry {
       // Why: `media` (camera/mic) must defer to macOS TCC instead of being
       // denied outright. Denying at the session layer would make pages inside
       // isolated browser profiles throw NotAllowedError even after the user
-      // granted Camera/Microphone to Orca — the same bug we fixed for the
+      // granted Camera/Microphone to Oak — the same bug we fixed for the
       // default partition. macOS TCC still gates the actual stream, so
       // granting here only forwards what the OS has already authorized.
       if (permission === 'media') {

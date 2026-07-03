@@ -9,7 +9,7 @@ const baseSession: AiVaultSession = {
   agent: 'claude',
   sessionId: 'session-1',
   title: 'Implement project history',
-  cwd: '/Users/ada/orca',
+  cwd: '/Users/ada/oak',
   branch: 'feature/history',
   model: 'claude-sonnet-4-5',
   filePath: '/Users/ada/.claude/projects/session-1.jsonl',
@@ -20,7 +20,7 @@ const baseSession: AiVaultSession = {
   messageCount: 4,
   totalTokens: 1200,
   previewMessages: [],
-  resumeCommand: "cd '/Users/ada/orca' && claude --resume 'session-1'"
+  resumeCommand: "cd '/Users/ada/oak' && claude --resume 'session-1'"
 }
 
 describe('toAiVaultProjectKey', () => {
@@ -33,13 +33,13 @@ describe('toAiVaultProjectKey', () => {
 
 describe('buildAiVaultProjectContext', () => {
   it('uses durable worktree project ids before repo fallback', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Legacy Repo', path: '/Users/ada/orca' })
-    const project = makeProject({ id: 'project-1', displayName: 'Canonical Orca' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Legacy Repo', path: '/Users/ada/oak' })
+    const project = makeProject({ id: 'project-1', displayName: 'Canonical Oak' })
     const worktree = makeWorktree({
       id: 'wt-1',
       repoId: repo.id,
       projectId: project.id,
-      path: '/Users/ada/orca'
+      path: '/Users/ada/oak'
     })
 
     const context = buildAiVaultProjectContext({
@@ -58,24 +58,24 @@ describe('buildAiVaultProjectContext', () => {
     expect(context.sessionProjectById.get(baseSession.id)).toMatchObject({
       kind: 'repo',
       key: 'project:project-1',
-      label: 'Canonical Orca'
+      label: 'Canonical Oak'
     })
   })
 
   it('normalizes compatibility project ids to repo keys', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Orca', path: '/Users/ada/orca' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Oak', path: '/Users/ada/oak' })
     const worktree = makeWorktree({
       id: 'wt-1',
       repoId: repo.id,
       projectId: 'repo:repo-1',
-      path: '/Users/ada/orca'
+      path: '/Users/ada/oak'
     })
 
     const context = buildAiVaultProjectContext({
       repos: [repo],
       worktrees: [worktree],
       projectHostSetupProjection: makeProjection({
-        projects: [makeProject({ id: 'repo:repo-1', displayName: 'Compatibility Orca' })],
+        projects: [makeProject({ id: 'repo:repo-1', displayName: 'Compatibility Oak' })],
         setups: [makeSetup({ repoId: repo.id, projectId: 'repo:repo-1', path: repo.path })]
       }),
       activeRepo: repo,
@@ -85,7 +85,7 @@ describe('buildAiVaultProjectContext', () => {
 
     expect(context.activeProjectKey).toBe('repo:repo-1')
     expect(context.sessionProjectById.get(baseSession.id)?.key).toBe('repo:repo-1')
-    expect(context.projectLabelByKey.get('repo:repo-1')).toBe('Orca')
+    expect(context.projectLabelByKey.get('repo:repo-1')).toBe('Oak')
   })
 
   it('falls back to repo ids for legacy records without project metadata', () => {
@@ -110,23 +110,23 @@ describe('buildAiVaultProjectContext', () => {
   })
 
   it('inherits setup project ids for legacy worktrees without project metadata', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Orca Repo', path: '/repo/orca' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Oak Repo', path: '/repo/oak' })
     const worktree = makeWorktree({
       id: 'wt-legacy',
       repoId: repo.id,
-      path: '/repo/orca'
+      path: '/repo/oak'
     })
-    const session = makeSession({ id: 'claude:legacy-worktree', cwd: '/repo/orca/src' })
+    const session = makeSession({ id: 'claude:legacy-worktree', cwd: '/repo/oak/src' })
 
     const context = buildAiVaultProjectContext({
       repos: [repo],
       worktrees: [worktree],
       projectHostSetupProjection: makeProjection({
-        projects: [makeProject({ id: 'github:stablyai/orca', displayName: 'Canonical Orca' })],
+        projects: [makeProject({ id: 'github:e-yc/oak', displayName: 'Canonical Oak' })],
         setups: [
           makeSetup({
             repoId: repo.id,
-            projectId: 'github:stablyai/orca',
+            projectId: 'github:e-yc/oak',
             path: repo.path
           })
         ]
@@ -136,32 +136,32 @@ describe('buildAiVaultProjectContext', () => {
       sessions: [session]
     })
 
-    expect(context.activeProjectKey).toBe('project:github:stablyai/orca')
+    expect(context.activeProjectKey).toBe('project:github:e-yc/oak')
     expect(context.sessionProjectById.get(session.id)).toMatchObject({
       kind: 'repo',
-      key: 'project:github:stablyai/orca',
-      label: 'Canonical Orca'
+      key: 'project:github:e-yc/oak',
+      label: 'Canonical Oak'
     })
   })
 
   it('uses active worktree setup project ids when active repo is unavailable', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Orca Repo', path: '/repo/orca' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Oak Repo', path: '/repo/oak' })
     const worktree = makeWorktree({
       id: 'wt-restored',
       repoId: repo.id,
-      path: '/repo/orca'
+      path: '/repo/oak'
     })
-    const session = makeSession({ id: 'claude:restored', cwd: '/repo/orca/src' })
+    const session = makeSession({ id: 'claude:restored', cwd: '/repo/oak/src' })
 
     const context = buildAiVaultProjectContext({
       repos: [repo],
       worktrees: [worktree],
       projectHostSetupProjection: makeProjection({
-        projects: [makeProject({ id: 'github:stablyai/orca', displayName: 'Canonical Orca' })],
+        projects: [makeProject({ id: 'github:e-yc/oak', displayName: 'Canonical Oak' })],
         setups: [
           makeSetup({
             repoId: repo.id,
-            projectId: 'github:stablyai/orca',
+            projectId: 'github:e-yc/oak',
             path: repo.path
           })
         ]
@@ -171,18 +171,18 @@ describe('buildAiVaultProjectContext', () => {
       sessions: [session]
     })
 
-    expect(context.activeProjectKey).toBe('project:github:stablyai/orca')
-    expect(context.sessionProjectById.get(session.id)?.key).toBe('project:github:stablyai/orca')
+    expect(context.activeProjectKey).toBe('project:github:e-yc/oak')
+    expect(context.sessionProjectById.get(session.id)?.key).toBe('project:github:e-yc/oak')
   })
 
   it('inherits setup host ids for legacy worktrees without host metadata', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Runtime Repo', path: '/runtime/orca' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Runtime Repo', path: '/runtime/oak' })
     const worktree = makeWorktree({
       id: 'wt-runtime',
       repoId: repo.id,
-      path: '/runtime/orca'
+      path: '/runtime/oak'
     })
-    const session = makeSession({ id: 'claude:runtime-worktree', cwd: '/runtime/orca/src' })
+    const session = makeSession({ id: 'claude:runtime-worktree', cwd: '/runtime/oak/src' })
 
     const context = buildAiVaultProjectContext({
       repos: [repo],
@@ -293,14 +293,14 @@ describe('buildAiVaultProjectContext', () => {
   })
 
   it('falls back to folder when a hostless session matches multiple host buckets', () => {
-    const localRepo = makeRepo({ id: 'local', displayName: 'Local', path: '/srv/orca' })
+    const localRepo = makeRepo({ id: 'local', displayName: 'Local', path: '/srv/oak' })
     const sshRepo = makeRepo({
       id: 'ssh',
       displayName: 'SSH',
-      path: '/srv/orca',
+      path: '/srv/oak',
       connectionId: 'target-1'
     })
-    const session = makeSession({ id: 'claude:ambiguous', cwd: '/srv/orca/src' })
+    const session = makeSession({ id: 'claude:ambiguous', cwd: '/srv/oak/src' })
 
     const context = buildAiVaultProjectContext({
       repos: [localRepo, sshRepo],
@@ -325,15 +325,15 @@ describe('buildAiVaultProjectContext', () => {
 
     expect(context.sessionProjectById.get(session.id)).toMatchObject({
       kind: 'folder',
-      key: 'folder:/srv/orca/src',
-      label: 'orca/src'
+      key: 'folder:/srv/oak/src',
+      label: 'oak/src'
     })
   })
 
   it('uses ProjectHostSetup host ids when detecting ambiguous host buckets', () => {
-    const localRepo = makeRepo({ id: 'local', displayName: 'Local', path: '/srv/orca' })
-    const runtimeRepo = makeRepo({ id: 'runtime', displayName: 'Runtime', path: '/srv/orca' })
-    const session = makeSession({ id: 'claude:runtime-ambiguous', cwd: '/srv/orca/src' })
+    const localRepo = makeRepo({ id: 'local', displayName: 'Local', path: '/srv/oak' })
+    const runtimeRepo = makeRepo({ id: 'runtime', displayName: 'Runtime', path: '/srv/oak' })
+    const session = makeSession({ id: 'claude:runtime-ambiguous', cwd: '/srv/oak/src' })
 
     const context = buildAiVaultProjectContext({
       repos: [localRepo, runtimeRepo],
@@ -357,8 +357,8 @@ describe('buildAiVaultProjectContext', () => {
 
     expect(context.sessionProjectById.get(session.id)).toMatchObject({
       kind: 'folder',
-      key: 'folder:/srv/orca/src',
-      label: 'orca/src'
+      key: 'folder:/srv/oak/src',
+      label: 'oak/src'
     })
   })
 
@@ -409,7 +409,7 @@ describe('buildAiVaultProjectContext', () => {
   })
 
   it('maps null cwd sessions to unknown', () => {
-    const repo = makeRepo({ id: 'repo-1', displayName: 'Orca', path: '/repo' })
+    const repo = makeRepo({ id: 'repo-1', displayName: 'Oak', path: '/repo' })
     const session = makeSession({ id: 'claude:unknown', cwd: null })
 
     const context = buildAiVaultProjectContext({
@@ -436,8 +436,8 @@ function makeSession(overrides: Partial<AiVaultSession>): AiVaultSession {
 function makeRepo(overrides: Partial<Repo>): Repo {
   return {
     id: 'repo-1',
-    path: '/Users/ada/orca',
-    displayName: 'Orca',
+    path: '/Users/ada/oak',
+    displayName: 'Oak',
     badgeColor: '#737373',
     addedAt: 1,
     ...overrides
@@ -462,8 +462,8 @@ function makeSetup(overrides: Partial<ProjectHostSetup>): ProjectHostSetup {
     projectId: 'project-1',
     hostId: 'local',
     repoId: 'repo-1',
-    path: '/Users/ada/orca',
-    displayName: 'Orca',
+    path: '/Users/ada/oak',
+    displayName: 'Oak',
     setupState: 'ready',
     setupMethod: 'legacy-repo',
     createdAt: 1,
@@ -486,7 +486,7 @@ function makeWorktree(overrides: Partial<Worktree>): Worktree {
     isPinned: false,
     sortOrder: 0,
     lastActivityAt: 1,
-    path: '/Users/ada/orca',
+    path: '/Users/ada/oak',
     head: 'abc123',
     branch: 'main',
     isBare: false,

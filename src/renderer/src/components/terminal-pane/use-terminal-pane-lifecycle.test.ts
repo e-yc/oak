@@ -22,7 +22,7 @@ describe('splitPaneWithOneShotStartup', () => {
 
     const createdPane = splitPaneWithOneShotStartup(
       deps,
-      { command: 'orca setup', env: { ORCA_ROLE: 'setup' } },
+      { command: 'oak setup', env: { OAK_ROLE: 'setup' } },
       () => {
         seenStartupValues.push(deps.startup ?? null)
         return { id: 2 }
@@ -30,7 +30,7 @@ describe('splitPaneWithOneShotStartup', () => {
     )
 
     expect(createdPane).toEqual({ id: 2 })
-    expect(seenStartupValues).toEqual([{ command: 'orca setup', env: { ORCA_ROLE: 'setup' } }])
+    expect(seenStartupValues).toEqual([{ command: 'oak setup', env: { OAK_ROLE: 'setup' } }])
     expect(deps.startup).toBeNull()
   })
 
@@ -40,25 +40,21 @@ describe('splitPaneWithOneShotStartup', () => {
     }
     const seenStartupValues: (typeof deps.startup)[] = []
 
-    splitPaneWithOneShotStartup(
-      deps,
-      { command: 'orca setup', env: { ORCA_ROLE: 'setup' } },
-      () => {
-        seenStartupValues.push(deps.startup ?? null)
-        return { id: 2 }
-      }
-    )
+    splitPaneWithOneShotStartup(deps, { command: 'oak setup', env: { OAK_ROLE: 'setup' } }, () => {
+      seenStartupValues.push(deps.startup ?? null)
+      return { id: 2 }
+    })
 
     expect(deps.startup).toBeNull()
 
-    splitPaneWithOneShotStartup(deps, { command: 'orca issue' }, () => {
+    splitPaneWithOneShotStartup(deps, { command: 'oak issue' }, () => {
       seenStartupValues.push(deps.startup ?? null)
       return { id: 3 }
     })
 
     expect(seenStartupValues).toEqual([
-      { command: 'orca setup', env: { ORCA_ROLE: 'setup' } },
-      { command: 'orca issue' }
+      { command: 'oak setup', env: { OAK_ROLE: 'setup' } },
+      { command: 'oak issue' }
     ])
     expect(deps.startup).toBeNull()
 
@@ -77,7 +73,7 @@ describe('splitPaneWithOneShotStartup', () => {
       throw new Error('split failed')
     })
 
-    expect(() => splitPaneWithOneShotStartup(deps, { command: 'orca setup' }, splitPane)).toThrow(
+    expect(() => splitPaneWithOneShotStartup(deps, { command: 'oak setup' }, splitPane)).toThrow(
       'split failed'
     )
 

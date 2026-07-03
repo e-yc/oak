@@ -23,7 +23,7 @@ import {
 } from '../agent-hooks/installer-utils-remote'
 
 // Why: Copilot's user-level hook files can use VS Code-compatible PascalCase
-// names, which match the event vocabulary already normalized by Orca's hook
+// names, which match the event vocabulary already normalized by Oak's hook
 // server and avoid wrapper-side event remapping.
 const COPILOT_EVENTS = [
   'SessionStart',
@@ -34,7 +34,7 @@ const COPILOT_EVENTS = [
   'PostToolUseFailure',
   // Why: GitHub's current reference documents subagentStart with only the
   // camelCase payload shape. The wrapper passes the event name separately, so
-  // Orca can normalize it without depending on a PascalCase payload.
+  // Oak can normalize it without depending on a PascalCase payload.
   'subagentStart',
   'SubagentStop',
   'PreCompact',
@@ -50,7 +50,7 @@ function getCopilotHome(): string {
 }
 
 function getConfigPath(): string {
-  return join(getCopilotHome(), 'hooks', 'orca.json')
+  return join(getCopilotHome(), 'hooks', 'oak.json')
 }
 
 function getManagedScriptFileName(): string {
@@ -67,8 +67,8 @@ function quotePowerShellPath(path: string): string {
 
 function getManagedCommand(scriptPath: string, eventName: string): string {
   return process.platform === 'win32'
-    ? `$env:ORCA_COPILOT_HOOK_EVENT = '${eventName}'; powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${quotePowerShellPath(scriptPath)}`
-    : wrapPosixHookCommand(scriptPath, { ORCA_COPILOT_HOOK_EVENT: eventName })
+    ? `$env:OAK_COPILOT_HOOK_EVENT = '${eventName}'; powershell.exe -NoProfile -ExecutionPolicy Bypass -File ${quotePowerShellPath(scriptPath)}`
+    : wrapPosixHookCommand(scriptPath, { OAK_COPILOT_HOOK_EVENT: eventName })
 }
 
 function getManagedHookDefinition(command: string): HookDefinition {
@@ -119,32 +119,32 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     return [
       "Write-Output '{}'",
       // Why: endpoint.cmd is cmd syntax, not PowerShell. Parse its `set KEY=...`
-      // lines so surviving PTYs can refresh to the current Orca server.
-      'if ($env:ORCA_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:ORCA_AGENT_HOOK_ENDPOINT)) {',
+      // lines so surviving PTYs can refresh to the current Oak server.
+      'if ($env:OAK_AGENT_HOOK_ENDPOINT -and (Test-Path -LiteralPath $env:OAK_AGENT_HOOK_ENDPOINT)) {',
       '  try {',
-      '    Get-Content -LiteralPath $env:ORCA_AGENT_HOOK_ENDPOINT | ForEach-Object {',
+      '    Get-Content -LiteralPath $env:OAK_AGENT_HOOK_ENDPOINT | ForEach-Object {',
       "      if ($_ -match '^set ([A-Za-z0-9_]+)=(.*)$') {",
       "        [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process')",
       '      }',
       '    }',
       '  } catch {}',
       '}',
-      'if (-not $env:ORCA_AGENT_HOOK_PORT -or -not $env:ORCA_AGENT_HOOK_TOKEN -or -not $env:ORCA_PANE_KEY) { exit 0 }',
+      'if (-not $env:OAK_AGENT_HOOK_PORT -or -not $env:OAK_AGENT_HOOK_TOKEN -or -not $env:OAK_PANE_KEY) { exit 0 }',
       '$inputData = [Console]::In.ReadToEnd()',
       'if ([string]::IsNullOrWhiteSpace($inputData)) { exit 0 }',
       'try {',
       '  $payload = $inputData | ConvertFrom-Json',
       '  $body = @{',
-      '    paneKey = $env:ORCA_PANE_KEY',
-      '    launchToken = $env:ORCA_AGENT_LAUNCH_TOKEN',
-      '    tabId = $env:ORCA_TAB_ID',
-      '    worktreeId = $env:ORCA_WORKTREE_ID',
-      '    hookEventName = $env:ORCA_COPILOT_HOOK_EVENT',
-      '    env = $env:ORCA_AGENT_HOOK_ENV',
-      '    version = $env:ORCA_AGENT_HOOK_VERSION',
+      '    paneKey = $env:OAK_PANE_KEY',
+      '    launchToken = $env:OAK_AGENT_LAUNCH_TOKEN',
+      '    tabId = $env:OAK_TAB_ID',
+      '    worktreeId = $env:OAK_WORKTREE_ID',
+      '    hookEventName = $env:OAK_COPILOT_HOOK_EVENT',
+      '    env = $env:OAK_AGENT_HOOK_ENV',
+      '    version = $env:OAK_AGENT_HOOK_VERSION',
       '    payload = $payload',
       '  } | ConvertTo-Json -Depth 100',
-      "  Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:ORCA_AGENT_HOOK_PORT + '/hook/copilot') -Headers @{ 'Content-Type'='application/json'; 'X-Orca-Agent-Hook-Token'=$env:ORCA_AGENT_HOOK_TOKEN } -Body $body -TimeoutSec 2 | Out-Null",
+      "  Invoke-WebRequest -UseBasicParsing -Method Post -Uri ('http://127.0.0.1:' + $env:OAK_AGENT_HOOK_PORT + '/hook/copilot') -Headers @{ 'Content-Type'='application/json'; 'X-Oak-Agent-Hook-Token'=$env:OAK_AGENT_HOOK_TOKEN } -Body $body -TimeoutSec 2 | Out-Null",
       '} catch {}',
       'exit 0',
       ''
@@ -156,27 +156,27 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     "printf '{}\\n'",
     // Why: Copilot consumes stdout for some hooks, so stdout is emitted before
     // endpoint refresh, stdin parsing, or the network POST can fail.
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$OAK_AGENT_HOOK_ENDPOINT" ] && [ -r "$OAK_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$OAK_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$OAK_AGENT_HOOK_PORT" ] || [ -z "$OAK_AGENT_HOOK_TOKEN" ] || [ -z "$OAK_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     'payload=$(cat)',
     'if [ -z "$payload" ]; then',
     '  exit 0',
     'fi',
-    'curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/copilot" \\',
+    'curl -sS -X POST "http://127.0.0.1:${OAK_AGENT_HOOK_PORT}/hook/copilot" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "hookEventName=${ORCA_COPILOT_HOOK_EVENT}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
+    '  -H "X-Oak-Agent-Hook-Token: ${OAK_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${OAK_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${OAK_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${OAK_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${OAK_WORKTREE_ID}" \\',
+    '  --data-urlencode "hookEventName=${OAK_COPILOT_HOOK_EVENT}" \\',
+    '  --data-urlencode "env=${OAK_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${OAK_AGENT_HOOK_VERSION}" \\',
     '  --data-urlencode "payload=${payload}" >/dev/null 2>&1 || true',
     'exit 0',
     ''
@@ -194,7 +194,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/oak.json'
       }
     }
 
@@ -261,7 +261,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/oak.json'
       }
     }
 
@@ -300,8 +300,8 @@ export class CopilotHookService {
 
   async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
     const home = remoteHome.replace(/\/$/, '')
-    const remoteConfigPath = `${home}/.copilot/hooks/orca.json`
-    const remoteScriptPath = `${home}/.orca/agent-hooks/copilot-hook.sh`
+    const remoteConfigPath = `${home}/.copilot/hooks/oak.json`
+    const remoteScriptPath = `${home}/.oak/agent-hooks/copilot-hook.sh`
 
     try {
       const config = await readHooksJsonRemote(sftp, remoteConfigPath)
@@ -311,7 +311,7 @@ export class CopilotHookService {
           state: 'error',
           configPath: remoteConfigPath,
           managedHooksPresent: false,
-          detail: 'Could not parse remote Copilot hooks/orca.json'
+          detail: 'Could not parse remote Copilot hooks/oak.json'
         }
       }
 
@@ -337,7 +337,7 @@ export class CopilotHookService {
         nextHooks[eventName] = [
           ...cleaned,
           getRemoteManagedHookDefinition(
-            wrapPosixHookCommand(remoteScriptPath, { ORCA_COPILOT_HOOK_EVENT: eventName })
+            wrapPosixHookCommand(remoteScriptPath, { OAK_COPILOT_HOOK_EVENT: eventName })
           )
         ]
       }
@@ -345,8 +345,8 @@ export class CopilotHookService {
       config.version = 1
       delete config.disableAllHooks
       config.hooks = nextHooks
-      // Why: SSH remotes use POSIX scripts regardless of Orca's local OS. Write
-      // the script before hooks/orca.json so a partial install cannot point
+      // Why: SSH remotes use POSIX scripts regardless of Oak's local OS. Write
+      // the script before hooks/oak.json so a partial install cannot point
       // Copilot at a missing managed command.
       await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
       await writeHooksJsonRemote(sftp, remoteConfigPath, config)
@@ -381,7 +381,7 @@ export class CopilotHookService {
         state: 'error',
         configPath,
         managedHooksPresent: false,
-        detail: 'Could not parse Copilot hooks/orca.json'
+        detail: 'Could not parse Copilot hooks/oak.json'
       }
     }
 

@@ -23,7 +23,7 @@ export function getComputerUseSummary({
       ),
       description: translate(
         'auto.components.settings.computerUseSummary.checkingDescription',
-        'Orca is checking macOS privacy permissions for the Computer Use helper.'
+        'Oak is checking macOS privacy permissions for the Computer Use helper.'
       )
     }
   }

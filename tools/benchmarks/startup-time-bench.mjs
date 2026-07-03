@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Orca startup-time benchmark.
+ * Oak startup-time benchmark.
  *
  * Launches the built app (out/) against a synthetic userData fixture that
  * mimics a long-lived real profile (tens of thousands of Chromium cache
  * files — the documented pathological case for the win32 startup ACL grant),
- * parses `ORCA_STARTUP_DIAGNOSTICS=1` milestone lines from stderr, and
+ * parses `OAK_STARTUP_DIAGNOSTICS=1` milestone lines from stderr, and
  * reports per-phase timings across iterations.
  *
  * Usage:
@@ -13,7 +13,7 @@
  *     [--iterations 5] [--files 28000] [--fixture-dir <path>]
  *     [--state-profile none|restored-local-tabs] [--session-tabs 200]
  *     [--wait-for-event renderer-startup-hydration-done]
- *     [--exe <path-to-packaged-Orca>] [--timeout-ms 240000]
+ *     [--exe <path-to-packaged-Oak>] [--timeout-ms 240000]
  *
  * Prereq (when not using --exe): `pnpm build:electron-vite` so out/ exists.
  * Results: tools/benchmarks/results/startup-<label>-<timestamp>.json
@@ -94,7 +94,7 @@ function parseArgs(argv) {
 /**
  * Build a userData tree shaped like a real long-lived profile. The file count
  * drives the win32 icacls walk cost; contents are irrelevant, so files are
- * tiny. Layout mirrors Chromium cache dirs plus a few Orca-owned dirs.
+ * tiny. Layout mirrors Chromium cache dirs plus a few Oak-owned dirs.
  */
 function ensureFixture(fixtureDir, options) {
   const { fileCount, stateProfile, sessionTabs } = options
@@ -155,7 +155,7 @@ function ensureFixture(fixtureDir, options) {
 }
 
 function writePersistedStateFixture(fixtureDir, { stateProfile, sessionTabs }) {
-  const dataPath = join(fixtureDir, 'orca-data.json')
+  const dataPath = join(fixtureDir, 'oak-data.json')
   if (stateProfile === 'none') {
     try {
       unlinkSync(dataPath)
@@ -295,9 +295,9 @@ function runIteration({ exe, fixtureDir, timeoutMs, lingerMs, waitForEvent }) {
     const child = spawn(command, commandArgs, {
       env: {
         ...process.env,
-        ORCA_STARTUP_DIAGNOSTICS: '1',
-        ORCA_E2E_USER_DATA_DIR: fixtureDir,
-        ORCA_E2E_HEADLESS: '1'
+        OAK_STARTUP_DIAGNOSTICS: '1',
+        OAK_E2E_USER_DATA_DIR: fixtureDir,
+        OAK_E2E_HEADLESS: '1'
       },
       stdio: ['ignore', 'ignore', 'pipe']
     })
@@ -424,7 +424,7 @@ async function main() {
     args.fixtureDir ??
       join(
         os.tmpdir(),
-        'orca-startup-bench',
+        'oak-startup-bench',
         `userdata-${args.files}-${args.stateProfile}-${args.sessionTabs}`
       )
   )

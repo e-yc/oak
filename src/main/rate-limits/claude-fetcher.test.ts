@@ -71,7 +71,7 @@ describe('fetchClaudeRateLimits', () => {
     vi.mocked(readActiveClaudeKeychainCredentials).mockResolvedValue(null)
     vi.mocked(readActiveClaudeKeychainCredentialsStrict).mockResolvedValue(null)
     vi.mocked(readManagedClaudeKeychainCredentials).mockResolvedValue(null)
-    appGetPathMock.mockReturnValue('/tmp/orca-claude-fetcher-test')
+    appGetPathMock.mockReturnValue('/tmp/oak-claude-fetcher-test')
     resolveProxyMock.mockResolvedValue('DIRECT')
     netFetchMock.mockResolvedValue(
       new Response(
@@ -920,11 +920,11 @@ describe('fetchClaudeRateLimits', () => {
 
   it('does not read inactive managed credentials from unowned auth paths', async () => {
     setPlatform('linux')
-    tempDir = mkdtempSync(join(tmpdir(), 'orca-claude-fetcher-'))
+    tempDir = mkdtempSync(join(tmpdir(), 'oak-claude-fetcher-'))
     appGetPathMock.mockReturnValue(tempDir)
     const unownedAuthPath = join(tempDir, 'unowned', 'auth')
     mkdirSync(unownedAuthPath, { recursive: true })
-    writeFileSync(join(unownedAuthPath, '.orca-managed-claude-auth'), 'account-1\n', 'utf-8')
+    writeFileSync(join(unownedAuthPath, '.oak-managed-claude-auth'), 'account-1\n', 'utf-8')
     writeFileSync(
       join(unownedAuthPath, '.credentials.json'),
       JSON.stringify({
@@ -950,11 +950,11 @@ describe('fetchClaudeRateLimits', () => {
 
   it('refreshes and persists an expiring inactive account before fetching usage', async () => {
     setPlatform('linux')
-    tempDir = mkdtempSync(join(tmpdir(), 'orca-claude-fetcher-'))
+    tempDir = mkdtempSync(join(tmpdir(), 'oak-claude-fetcher-'))
     appGetPathMock.mockReturnValue(tempDir)
     const ownedAuthPath = join(tempDir, 'claude-accounts', 'account-1', 'auth')
     mkdirSync(ownedAuthPath, { recursive: true })
-    writeFileSync(join(ownedAuthPath, '.orca-managed-claude-auth'), 'account-1\n', 'utf-8')
+    writeFileSync(join(ownedAuthPath, '.oak-managed-claude-auth'), 'account-1\n', 'utf-8')
     const credentialsPath = join(ownedAuthPath, '.credentials.json')
     writeFileSync(
       credentialsPath,

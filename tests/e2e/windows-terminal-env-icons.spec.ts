@@ -1,4 +1,4 @@
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import {
   execInTerminal,
@@ -8,29 +8,29 @@ import {
 } from './helpers/terminal'
 
 test.describe('Windows terminal env and shell identity', () => {
-  test.beforeEach(async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
+  test.beforeEach(async ({ oakPage }) => {
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
+    await ensureTerminalVisible(oakPage)
   })
 
-  test('dev terminal preserves parent PATH so PATH commands resolve', async ({ orcaPage }) => {
-    await waitForActiveTerminalManager(orcaPage)
+  test('dev terminal preserves parent PATH so PATH commands resolve', async ({ oakPage }) => {
+    await waitForActiveTerminalManager(oakPage)
 
-    const ptyId = await waitForActivePanePtyId(orcaPage)
-    const marker = `__ORCA_E2E_NODE_PATH_${Date.now()}__`
+    const ptyId = await waitForActivePanePtyId(oakPage)
+    const marker = `__OAK_E2E_NODE_PATH_${Date.now()}__`
 
     // Why: before the dev PATH fallback, daemon-spawned PTYs could get PATH set
-    // to only Orca's dev CLI bin. A real terminal command catches that failure.
-    await execInTerminal(orcaPage, ptyId, `node -e "console.log('${marker}')"`)
+    // to only Oak's dev CLI bin. A real terminal command catches that failure.
+    await execInTerminal(oakPage, ptyId, `node -e "console.log('${marker}')"`)
 
-    await waitForTerminalOutput(orcaPage, marker, 15_000)
+    await waitForTerminalOutput(oakPage, marker, 15_000)
   })
 
-  test('Windows tab icons stay pinned to the shell used at tab creation', async ({ orcaPage }) => {
+  test('Windows tab icons stay pinned to the shell used at tab creation', async ({ oakPage }) => {
     test.skip(process.platform !== 'win32', 'Windows shell icons only render on Windows')
 
-    const tabIds = await orcaPage.evaluate(() => {
+    const tabIds = await oakPage.evaluate(() => {
       const store = window.__store
       if (!store) {
         throw new Error('Store unavailable')
@@ -58,7 +58,7 @@ test.describe('Windows terminal env and shell identity', () => {
       return { wslTabId: wslTab.id, cmdTabId: cmdTab.id }
     })
 
-    const tabSnapshot = await orcaPage.evaluate(({ wslTabId, cmdTabId }) => {
+    const tabSnapshot = await oakPage.evaluate(({ wslTabId, cmdTabId }) => {
       const state = window.__store!.getState()
       const tabs = Object.values(state.tabsByWorktree).flat()
       return {
@@ -72,12 +72,8 @@ test.describe('Windows terminal env and shell identity', () => {
       cmdShell: 'cmd.exe'
     })
 
-    const wslTab = orcaPage.locator(
-      `[data-testid="sortable-tab"][data-tab-id="${tabIds.wslTabId}"]`
-    )
-    const cmdTab = orcaPage.locator(
-      `[data-testid="sortable-tab"][data-tab-id="${tabIds.cmdTabId}"]`
-    )
+    const wslTab = oakPage.locator(`[data-testid="sortable-tab"][data-tab-id="${tabIds.wslTabId}"]`)
+    const cmdTab = oakPage.locator(`[data-testid="sortable-tab"][data-tab-id="${tabIds.cmdTabId}"]`)
     await expect(wslTab).toBeVisible()
     await expect(cmdTab).toBeVisible()
 

@@ -400,7 +400,7 @@ async function fetchViaOAuth(token: string): Promise<ProviderRateLimits> {
         Authorization: `Bearer ${token}`,
         'anthropic-beta': OAUTH_BETA_HEADER,
         // Why: Claude's OAuth usage endpoint is the Claude Code usage API;
-        // matching the CLI user-agent keeps Orca aligned with that contract.
+        // matching the CLI user-agent keeps Oak aligned with that contract.
         'User-Agent': CLAUDE_CODE_USER_AGENT
       },
       signal: controller.signal
@@ -946,13 +946,13 @@ function resolveOwnedWslClaudeManagedAuthPath(account: InactiveClaudeAccountInfo
   }
   const linuxPath = account.wslLinuxAuthPath ?? wslInfo.linuxPath
   if (
-    !linuxPath.includes('/.local/share/orca/claude-accounts/') ||
+    !linuxPath.includes('/.local/share/oak/claude-accounts/') ||
     !linuxPath.endsWith(`/${account.id}/auth`)
   ) {
     return null
   }
   try {
-    const markerPath = path.join(account.managedAuthPath, '.orca-managed-claude-auth')
+    const markerPath = path.join(account.managedAuthPath, '.oak-managed-claude-auth')
     if (
       !existsSync(markerPath) ||
       lstatSync(markerPath).isSymbolicLink() ||

@@ -15,9 +15,8 @@ import {
 } from '../../../shared/feature-wall-setup-steps'
 import { track } from './telemetry'
 
-const SETUP_GUIDE_TELEMETRY_COMPLETED_STEPS_STORAGE_KEY =
-  'orca.setupGuideTelemetryCompletedSteps.v1'
-const TERMINAL_PANE_SPLIT_TELEMETRY_STORAGE_KEY = 'orca.terminalPaneSplitTelemetry.v1'
+const SETUP_GUIDE_TELEMETRY_COMPLETED_STEPS_STORAGE_KEY = 'oak.setupGuideTelemetryCompletedSteps.v1'
+const TERMINAL_PANE_SPLIT_TELEMETRY_STORAGE_KEY = 'oak.terminalPaneSplitTelemetry.v1'
 
 type FeatureEducationTelemetryEventName = Extract<
   EventName,

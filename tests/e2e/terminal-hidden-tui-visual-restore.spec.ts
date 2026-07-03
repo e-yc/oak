@@ -2,7 +2,7 @@ import type { Page, TestInfo } from '@stablyai/playwright-test'
 import { randomUUID } from 'node:crypto'
 import { rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import {
   ensureTerminalVisible,
   getActiveWorktreeId,
@@ -210,30 +210,28 @@ async function writeHiddenSideEffectBurst(
 
 test.describe('Hidden terminal TUI visual restore', () => {
   test('restores hidden full-screen TUI output without visible corruption', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo: TestInfo) => {
-    await waitForSessionReady(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
-      (id) => id !== firstWorktreeId
-    )
+    await waitForSessionReady(oakPage)
+    const firstWorktreeId = await waitForActiveWorktree(oakPage)
+    const secondWorktreeId = (await getAllWorktreeIds(oakPage)).find((id) => id !== firstWorktreeId)
     test.skip(!secondWorktreeId, 'hidden TUI restore needs the seeded secondary worktree')
     if (!secondWorktreeId) {
       return
     }
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const hiddenSnapshot = await waitForPaneIdentitySnapshot(orcaPage, 1)
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    const hiddenSnapshot = await waitForPaneIdentitySnapshot(oakPage, 1)
     const hiddenPane = hiddenSnapshot.panes[0]
     if (!hiddenPane?.ptyId) {
       throw new Error('hidden visual restore pane did not bind a PTY')
     }
-    await switchToWorktree(orcaPage, firstWorktreeId)
+    await switchToWorktree(oakPage, firstWorktreeId)
     await expect
-      .poll(() => getActiveWorktreeId(orcaPage), {
+      .poll(() => getActiveWorktreeId(oakPage), {
         timeout: 10_000,
         message: 'first worktree did not become active before hidden TUI injection'
       })
@@ -241,37 +239,37 @@ test.describe('Hidden terminal TUI visual restore', () => {
 
     const runId = randomUUID()
     const finalMarker = `VISUAL_RESTORE_FINAL_${runId}_24`
-    const scriptPath = path.join(testRepoPath, `.orca-hidden-tui-visual-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.oak-hidden-tui-visual-${runId}.mjs`)
     writeHiddenFrameScript(scriptPath, runId)
-    await resetHiddenDebug(orcaPage)
-    await writeHiddenFrames(orcaPage, hiddenPane.ptyId, scriptPath)
+    await resetHiddenDebug(oakPage)
+    await writeHiddenFrames(oakPage, hiddenPane.ptyId, scriptPath)
 
     await expect
-      .poll(async () => (await readHiddenDebug(orcaPage))?.hiddenRendererSkipCount ?? 0, {
+      .poll(async () => (await readHiddenDebug(oakPage))?.hiddenRendererSkipCount ?? 0, {
         timeout: 10_000,
         message: 'visually rich hidden TUI output should stay on the live xterm path'
       })
       .toBe(0)
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
 
     await expect
-      .poll(() => getTerminalContent(orcaPage, 12_000), {
+      .poll(() => getTerminalContent(oakPage, 12_000), {
         timeout: 10_000,
         message: 'hidden TUI final frame did not restore when the workspace became visible'
       })
       .toContain(finalMarker)
 
-    const content = await getTerminalContent(orcaPage, 12_000)
+    const content = await getTerminalContent(oakPage, 12_000)
     expect(content).toContain(`Frame 024`)
     expect(content).toContain('╭')
     expect(content).toContain('├')
     expect(content).toContain('█')
-    expect(content).not.toContain('Orca skipped hidden terminal output')
+    expect(content).not.toContain('Oak skipped hidden terminal output')
     await expect
-      .poll(() => readTuiCursorState(orcaPage), {
+      .poll(() => readTuiCursorState(oakPage), {
         timeout: 5_000,
         message: 'restored TUI cursor stayed hidden after final frame'
       })
@@ -280,7 +278,7 @@ test.describe('Hidden terminal TUI visual restore', () => {
         initialized: true
       })
     const screenshotPath = testInfo.outputPath('hidden-tui-restore-final.png')
-    await orcaPage.screenshot({ path: screenshotPath, fullPage: true })
+    await oakPage.screenshot({ path: screenshotPath, fullPage: true })
     await testInfo.attach('hidden-tui-restore-final.png', {
       path: screenshotPath,
       contentType: 'image/png'
@@ -289,31 +287,29 @@ test.describe('Hidden terminal TUI visual restore', () => {
   })
 
   test('keeps newer live output correct after hidden output stayed live', async ({
-    orcaPage
+    oakPage
   }, testInfo: TestInfo) => {
-    await waitForSessionReady(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
-      (id) => id !== firstWorktreeId
-    )
+    await waitForSessionReady(oakPage)
+    const firstWorktreeId = await waitForActiveWorktree(oakPage)
+    const secondWorktreeId = (await getAllWorktreeIds(oakPage)).find((id) => id !== firstWorktreeId)
     test.skip(!secondWorktreeId, 'hidden TUI restore needs the seeded secondary worktree')
     if (!secondWorktreeId) {
       return
     }
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const hiddenSnapshot = await waitForPaneIdentitySnapshot(orcaPage, 1)
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    const hiddenSnapshot = await waitForPaneIdentitySnapshot(oakPage, 1)
     const hiddenPane = hiddenSnapshot.panes[0]
     if (!hiddenPane?.ptyId) {
       throw new Error('hidden visual restore pane did not bind a PTY')
     }
     const paneKey = `${hiddenSnapshot.tabId}:${hiddenPane.leafId}`
 
-    await switchToWorktree(orcaPage, firstWorktreeId)
+    await switchToWorktree(oakPage, firstWorktreeId)
     await expect
-      .poll(() => getActiveWorktreeId(orcaPage), {
+      .poll(() => getActiveWorktreeId(oakPage), {
         timeout: 10_000,
         message: 'first worktree did not become active before hidden TUI injection'
       })
@@ -323,43 +319,43 @@ test.describe('Hidden terminal TUI visual restore', () => {
     const hiddenFrame = lowRiskRestoreFrame(runId, 40)
     const liveFrame = lowRiskRestoreFrame(runId, 41)
     const finalMarker = `VISUAL_RESTORE_FINAL_${runId}_41`
-    await resetHiddenDebug(orcaPage)
-    await injectPaneData(orcaPage, paneKey, hiddenFrame, {
+    await resetHiddenDebug(oakPage)
+    await injectPaneData(oakPage, paneKey, hiddenFrame, {
       seq: hiddenFrame.length,
       rawLength: hiddenFrame.length
     })
 
     await expect
-      .poll(async () => (await readHiddenDebug(orcaPage))?.hiddenRendererSkipCount ?? 0, {
+      .poll(async () => (await readHiddenDebug(oakPage))?.hiddenRendererSkipCount ?? 0, {
         timeout: 10_000,
         message: 'hidden injected output should stay on the live xterm path for release'
       })
       .toBe(0)
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    await injectPaneData(orcaPage, paneKey, liveFrame, {
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    await injectPaneData(oakPage, paneKey, liveFrame, {
       seq: hiddenFrame.length + liveFrame.length,
       rawLength: liveFrame.length
     })
 
     await expect
-      .poll(() => getTerminalContent(orcaPage, 12_000), {
+      .poll(() => getTerminalContent(oakPage, 12_000), {
         timeout: 10_000,
         message: 'newer live TUI frame did not render after hidden output stayed live'
       })
       .toContain(finalMarker)
 
-    const content = await getTerminalContent(orcaPage, 12_000)
+    const content = await getTerminalContent(oakPage, 12_000)
     expect(content).toContain(`LOW_RISK_RESTORE_FRAME_${runId}_41`)
     expect(content).toContain('progress=041')
     expect(content.indexOf(`LOW_RISK_RESTORE_FRAME_${runId}_41`)).toBeGreaterThan(
       content.indexOf(`LOW_RISK_RESTORE_FRAME_${runId}_40`)
     )
-    expect(content).not.toContain('Orca skipped hidden terminal output')
+    expect(content).not.toContain('Oak skipped hidden terminal output')
     await expect
-      .poll(() => readTuiCursorState(orcaPage), {
+      .poll(() => readTuiCursorState(oakPage), {
         timeout: 5_000,
         message: 'live TUI cursor stayed hidden after hidden output stayed live'
       })
@@ -368,7 +364,7 @@ test.describe('Hidden terminal TUI visual restore', () => {
         initialized: true
       })
     const screenshotPath = testInfo.outputPath('hidden-tui-live-output-final.png')
-    await orcaPage.screenshot({ path: screenshotPath, fullPage: true })
+    await oakPage.screenshot({ path: screenshotPath, fullPage: true })
     await testInfo.attach('hidden-tui-live-output-final.png', {
       path: screenshotPath,
       contentType: 'image/png'
@@ -376,30 +372,28 @@ test.describe('Hidden terminal TUI visual restore', () => {
   })
 
   test('keeps hidden terminal side effects live while hidden output stays live', async ({
-    orcaPage
+    oakPage
   }) => {
-    await waitForSessionReady(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
-      (id) => id !== firstWorktreeId
-    )
+    await waitForSessionReady(oakPage)
+    const firstWorktreeId = await waitForActiveWorktree(oakPage)
+    const secondWorktreeId = (await getAllWorktreeIds(oakPage)).find((id) => id !== firstWorktreeId)
     test.skip(!secondWorktreeId, 'hidden side-effect guard needs the seeded secondary worktree')
     if (!secondWorktreeId) {
       return
     }
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const hiddenSnapshot = await waitForPaneIdentitySnapshot(orcaPage, 1)
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    const hiddenSnapshot = await waitForPaneIdentitySnapshot(oakPage, 1)
     const hiddenPane = hiddenSnapshot.panes[0]
     if (!hiddenPane?.ptyId) {
       throw new Error('hidden side-effect pane did not bind a PTY')
     }
 
-    await switchToWorktree(orcaPage, firstWorktreeId)
+    await switchToWorktree(oakPage, firstWorktreeId)
     await expect
-      .poll(() => getActiveWorktreeId(orcaPage), {
+      .poll(() => getActiveWorktreeId(oakPage), {
         timeout: 10_000,
         message: 'first worktree did not become active before hidden side-effect burst'
       })
@@ -408,39 +402,39 @@ test.describe('Hidden terminal TUI visual restore', () => {
     const runId = randomUUID()
     const hiddenTitle = `Hidden model side effects ${runId}`
     const marker = `HIDDEN_SIDE_EFFECT_MARKER_${runId}`
-    await resetHiddenDebug(orcaPage)
-    await writeHiddenSideEffectBurst(orcaPage, hiddenPane.ptyId, hiddenTitle, marker)
+    await resetHiddenDebug(oakPage)
+    await writeHiddenSideEffectBurst(oakPage, hiddenPane.ptyId, hiddenTitle, marker)
 
     await expect
-      .poll(async () => (await readHiddenDebug(orcaPage))?.hiddenRendererSkipCount ?? 0, {
+      .poll(async () => (await readHiddenDebug(oakPage))?.hiddenRendererSkipCount ?? 0, {
         timeout: 10_000,
         message: 'hidden side-effect output should stay on the live xterm path for release'
       })
       .toBe(0)
     await expect
-      .poll(() => getRuntimePaneTitle(orcaPage, hiddenSnapshot.tabId, hiddenPane.numericPaneId), {
+      .poll(() => getRuntimePaneTitle(oakPage, hiddenSnapshot.tabId, hiddenPane.numericPaneId), {
         timeout: 10_000,
         message: 'hidden OSC title did not update renderer-visible model state'
       })
       .toBe(hiddenTitle)
     await expect
-      .poll(async () => (await getUnreadTerminalTabIds(orcaPage)).includes(hiddenSnapshot.tabId), {
+      .poll(async () => (await getUnreadTerminalTabIds(oakPage)).includes(hiddenSnapshot.tabId), {
         timeout: 10_000,
         message: 'hidden BEL did not mark the hidden terminal tab unread'
       })
       .toBe(true)
     await expect
-      .poll(() => readMainSnapshotSource(orcaPage, hiddenPane.ptyId!), {
+      .poll(() => readMainSnapshotSource(oakPage, hiddenPane.ptyId!), {
         timeout: 10_000,
         message: 'hidden side-effect restore did not use the runtime headless snapshot'
       })
       .toBe('headless')
 
-    await switchToWorktree(orcaPage, secondWorktreeId)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
+    await switchToWorktree(oakPage, secondWorktreeId)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
     await expect
-      .poll(() => getTerminalContent(orcaPage, 12_000), {
+      .poll(() => getTerminalContent(oakPage, 12_000), {
         timeout: 10_000,
         message: 'hidden side-effect marker did not restore when the workspace became visible'
       })

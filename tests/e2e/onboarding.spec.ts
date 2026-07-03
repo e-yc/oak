@@ -8,7 +8,7 @@
  * the overlay renders on first paint without any setup.
  */
 
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { waitForSessionReady } from './helpers/store'
 import type { Page } from '@stablyai/playwright-test'
 import type { GlobalSettings, TuiAgent } from '../../src/shared/types'
@@ -148,29 +148,29 @@ test.describe('Onboarding flow', () => {
   // spec actually exercises the first-launch flow.
   test.use({ dismissOnboarding: false })
 
-  test.beforeEach(async ({ orcaPage }) => {
-    // Per-test userData is freshly minted by the orcaPage fixture, so persisted
+  test.beforeEach(async ({ oakPage }) => {
+    // Per-test userData is freshly minted by the oakPage fixture, so persisted
     // onboarding state defaults to `closedAt: null, lastCompletedStep: -1` and
     // the overlay paints on its own once App's bootstrap effect resolves.
-    await waitForSessionReady(orcaPage)
+    await waitForSessionReady(oakPage)
   })
 
-  test('renders on first launch with the agent step active', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('renders on first launch with the agent step active', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    await expectOnboardingProgress(orcaPage, /^1 of [345]$/)
-    await expect(onboardingFooterButton(orcaPage, /^Continue\b/)).toBeVisible()
-    await expect(onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toBeVisible()
+    await expectOnboardingProgress(oakPage, /^1 of [345]$/)
+    await expect(onboardingFooterButton(oakPage, /^Continue\b/)).toBeVisible()
+    await expect(onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toBeVisible()
     // Why: Back is not rendered on the first step (was previously rendered-but-
     // disabled with `disabled:invisible`, now conditionally mounted).
-    await expect(orcaPage.getByRole('button', { name: 'Back', exact: true })).toHaveCount(0)
+    await expect(oakPage.getByRole('button', { name: 'Back', exact: true })).toHaveCount(0)
     // Footer hint shows the platform-correct continue shortcut (⌘ on Mac,
     // Ctrl elsewhere). Match either form so the test runs cross-platform.
     // Why: scope to the footer action so background UI shortcut hints cannot
     // false-positive this assertion.
     await expect(
-      onboardingFooterButton(orcaPage, /^Continue\b/)
+      onboardingFooterButton(oakPage, /^Continue\b/)
         .locator('span')
         .filter({ hasText: /⌘|Ctrl/ })
         .first()
@@ -178,9 +178,9 @@ test.describe('Onboarding flow', () => {
   })
 
   test('Continue advances steps, persists progress, and applies user-visible settings', async ({
-    orcaPage
+    oakPage
   }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
 
@@ -191,7 +191,7 @@ test.describe('Onboarding flow', () => {
     // agents are detected, otherwise behind the "Show N more agents" details
     // expander — open it if codex isn't visible.
     const targetAgent: TuiAgent = 'codex'
-    const codexButton = orcaPage.getByRole('button', { name: /^Codex\s/ })
+    const codexButton = oakPage.getByRole('button', { name: /^Codex\s/ })
     // Why: isVisible() is a one-shot probe — on slow renderer paint it would
     // race the wizard mount and falsely take the "show more agents" branch.
     // waitFor with a small timeout actually retries until the button paints.
@@ -201,15 +201,15 @@ test.describe('Onboarding flow', () => {
       .then(() => true)
       .catch(() => false)
     if (!codexVisible) {
-      await orcaPage.getByText(/Show \d+ more agents/).click()
+      await oakPage.getByText(/Show \d+ more agents/).click()
     }
     await codexButton.click()
 
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
-    await expectOnboardingProgress(orcaPage, /^2 of [345]$/)
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await expectOnboardingProgress(oakPage, /^2 of [345]$/)
     await expect
-      .poll(async () => (await getOnboardingState(orcaPage)).lastCompletedStep, {
+      .poll(async () => (await getOnboardingState(oakPage)).lastCompletedStep, {
         timeout: 5_000,
         message: 'lastCompletedStep did not advance to 1 after first Continue'
       })
@@ -217,7 +217,7 @@ test.describe('Onboarding flow', () => {
     // The agent choice must be persisted to settings (the user will see this
     // pre-selected when they later open a new tab / agent picker).
     await expect
-      .poll(async () => (await getSettings(orcaPage)).defaultTuiAgent, { timeout: 5_000 })
+      .poll(async () => (await getSettings(oakPage)).defaultTuiAgent, { timeout: 5_000 })
       .toBe(targetAgent)
 
     // --- Step 2: theme ---
@@ -227,51 +227,51 @@ test.describe('Onboarding flow', () => {
     // applies the choice immediately, not just on Continue.
     // Why: 'system' resolves async on mount, so wait for the class to settle
     // before snapshotting — otherwise startingTheme can be stale.
-    await orcaPage.waitForFunction(
+    await oakPage.waitForFunction(
       () =>
         document.documentElement.classList.contains('dark') ||
         document.documentElement.classList.contains('light')
     )
-    const startingTheme = await getDocumentThemeClass(orcaPage)
+    const startingTheme = await getDocumentThemeClass(oakPage)
     const oppositeTheme: 'dark' | 'light' = startingTheme === 'dark' ? 'light' : 'dark'
     const oppositeTileName = oppositeTheme === 'light' ? /Bright & crisp/ : /Easy on the eyes/
-    await orcaPage.getByRole('button', { name: oppositeTileName }).click()
+    await oakPage.getByRole('button', { name: oppositeTileName }).click()
     await expect
-      .poll(async () => getDocumentThemeClass(orcaPage), { timeout: 5_000 })
+      .poll(async () => getDocumentThemeClass(oakPage), { timeout: 5_000 })
       .toBe(oppositeTheme)
 
-    await continueOnboarding(orcaPage)
+    await continueOnboarding(oakPage)
     await expect
-      .poll(async () => [2, 3].includes((await getOnboardingState(orcaPage)).lastCompletedStep), {
+      .poll(async () => [2, 3].includes((await getOnboardingState(oakPage)).lastCompletedStep), {
         timeout: 5_000,
         message: 'lastCompletedStep did not advance after second Continue'
       })
       .toBe(true)
     await expect
-      .poll(async () => (await getSettings(orcaPage)).theme, { timeout: 5_000 })
+      .poll(async () => (await getSettings(oakPage)).theme, { timeout: 5_000 })
       .toBe(oppositeTheme)
-    await continueThroughOptionalTaskSourcesAndWindowsTerminal(orcaPage)
-    await expectOnboardingProgress(orcaPage, /^[345] of [345]$/)
+    await continueThroughOptionalTaskSourcesAndWindowsTerminal(oakPage)
+    await expectOnboardingProgress(oakPage, /^[345] of [345]$/)
     await expect
-      .poll(async () => [3, 4].includes((await getOnboardingState(orcaPage)).lastCompletedStep), {
+      .poll(async () => [3, 4].includes((await getOnboardingState(oakPage)).lastCompletedStep), {
         timeout: 5_000,
         message: 'lastCompletedStep did not include optional setup progress'
       })
       .toBe(true)
 
     // --- Step 3: notifications ---
-    await expectOnboardingNotificationSound(orcaPage, /System Default/i)
-    await expect(orcaPage.getByRole('button', { name: /Send Test Notification/i })).toBeVisible()
-    await expectOnboardingCustomSoundOption(orcaPage)
+    await expectOnboardingNotificationSound(oakPage, /System Default/i)
+    await expect(oakPage.getByRole('button', { name: /Send Test Notification/i })).toBeVisible()
+    await expectOnboardingCustomSoundOption(oakPage)
 
-    await continueFromPostNotificationsToRepo(orcaPage)
+    await continueFromPostNotificationsToRepo(oakPage)
 
     // Verify the source defaults land without asking users to configure each
     // source in the onboarding UI.
     await expect
       .poll(
         async () => {
-          const s = await getSettings(orcaPage)
+          const s = await getSettings(oakPage)
           return {
             agentTaskComplete: s.notifications.agentTaskComplete,
             terminalBell: s.notifications.terminalBell,
@@ -291,7 +291,7 @@ test.describe('Onboarding flow', () => {
     await expect
       .poll(
         async () => {
-          const state = await getOnboardingState(orcaPage)
+          const state = await getOnboardingState(oakPage)
           return {
             closedAt: state.closedAt === null ? null : 'set',
             outcome: state.outcome,
@@ -309,54 +309,54 @@ test.describe('Onboarding flow', () => {
       })
   })
 
-  test('Cmd/Ctrl+Enter advances steps like Continue', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('Cmd/Ctrl+Enter advances steps like Continue', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
 
     // Why: the OS the renderer reports drives whether Cmd or Ctrl is the
     // accelerator (OnboardingFlow.tsx checks navigator.userAgent).
-    const isMac = await orcaPage.evaluate(() => navigator.userAgent.includes('Mac'))
+    const isMac = await oakPage.evaluate(() => navigator.userAgent.includes('Mac'))
     const accelerator = isMac ? 'Meta+Enter' : 'Control+Enter'
 
     // Why: in headless Linux CI the window-level capture-phase listener can
     // miss synthetic keyboard events when no element holds focus. Click an
     // inert area inside the overlay first to anchor focus, then press.
-    await orcaPage.locator('footer').click({ position: { x: 1, y: 1 } })
-    await orcaPage.keyboard.press(accelerator)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await oakPage.locator('footer').click({ position: { x: 1, y: 1 } })
+    await oakPage.keyboard.press(accelerator)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
     await expect
-      .poll(async () => (await getOnboardingState(orcaPage)).lastCompletedStep, {
+      .poll(async () => (await getOnboardingState(oakPage)).lastCompletedStep, {
         timeout: 5_000
       })
       .toBe(1)
   })
 
   test('Skip opens Add Project, saves the selected agent, and completes onboarding', async ({
-    orcaPage
+    oakPage
   }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    const codexButton = orcaPage.getByRole('button', { name: /^Codex\s/ })
+    const codexButton = oakPage.getByRole('button', { name: /^Codex\s/ })
     const codexVisible = await codexButton
       .first()
       .waitFor({ state: 'visible', timeout: 1_000 })
       .then(() => true)
       .catch(() => false)
     if (!codexVisible) {
-      await orcaPage.getByText(/Show \d+ more agents/).click()
+      await oakPage.getByText(/Show \d+ more agents/).click()
     }
     await codexButton.click()
 
-    await onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
+    await onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
 
-    await expectAddProjectDialog(orcaPage)
+    await expectAddProjectDialog(oakPage)
 
     await expect
       .poll(
         async () => {
-          const state = await getOnboardingState(orcaPage)
+          const state = await getOnboardingState(oakPage)
           return {
             closedAt: state.closedAt === null ? null : 'set',
             outcome: state.outcome,
@@ -373,109 +373,109 @@ test.describe('Onboarding flow', () => {
         lastCompletedStep: ONBOARDING_FINAL_STEP
       })
     await expect
-      .poll(async () => (await getSettings(orcaPage)).defaultTuiAgent, { timeout: 5_000 })
+      .poll(async () => (await getSettings(oakPage)).defaultTuiAgent, { timeout: 5_000 })
       .toBe('codex')
   })
 
-  test('Skip from theme restores the entry theme choice', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('Skip from theme restores the entry theme choice', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
 
-    await orcaPage.waitForFunction(
+    await oakPage.waitForFunction(
       () =>
         document.documentElement.classList.contains('dark') ||
         document.documentElement.classList.contains('light')
     )
-    const entryTheme = (await getSettings(orcaPage)).theme
-    const startingTheme = await getDocumentThemeClass(orcaPage)
+    const entryTheme = (await getSettings(oakPage)).theme
+    const startingTheme = await getDocumentThemeClass(oakPage)
     const oppositeTheme: 'dark' | 'light' = startingTheme === 'dark' ? 'light' : 'dark'
     const oppositeTileName = oppositeTheme === 'light' ? /Bright & crisp/ : /Easy on the eyes/
-    await orcaPage.getByRole('button', { name: oppositeTileName }).click()
+    await oakPage.getByRole('button', { name: oppositeTileName }).click()
     await expect
-      .poll(async () => getDocumentThemeClass(orcaPage), { timeout: 5_000 })
+      .poll(async () => getDocumentThemeClass(oakPage), { timeout: 5_000 })
       .toBe(oppositeTheme)
 
-    await onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
+    await onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
 
-    await expectAddProjectDialog(orcaPage)
+    await expectAddProjectDialog(oakPage)
     await expect
-      .poll(async () => (await getSettings(orcaPage)).theme, { timeout: 5_000 })
+      .poll(async () => (await getSettings(oakPage)).theme, { timeout: 5_000 })
       .toBe(entryTheme)
     await expect
-      .poll(async () => getDocumentThemeClass(orcaPage), { timeout: 5_000 })
+      .poll(async () => getDocumentThemeClass(oakPage), { timeout: 5_000 })
       .toBe(startingTheme)
   })
 
-  test('Skip preserves runtime server project setup UI', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('Skip preserves runtime server project setup UI', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    await orcaPage.evaluate(async () => {
+    await oakPage.evaluate(async () => {
       await window.__store?.getState().updateSettings({ activeRuntimeEnvironmentId: 'env-e2e' })
     })
     await expect
-      .poll(async () => (await getSettings(orcaPage)).activeRuntimeEnvironmentId, {
+      .poll(async () => (await getSettings(oakPage)).activeRuntimeEnvironmentId, {
         timeout: 5_000
       })
       .toBe('env-e2e')
 
-    await onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
+    await onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON).click()
 
-    await expectAddProjectDialog(orcaPage)
-    await expect(orcaPage.getByRole('button', { name: /Browse server/i })).toBeVisible()
-    await expect(orcaPage.getByRole('button', { name: /Clone from URL/i })).toBeVisible()
-    await expect(orcaPage.getByRole('button', { name: /Create on server/i })).toBeVisible()
-    await expect(orcaPage.getByText(/Or enter a server path manually/i)).toBeVisible()
-    await expect(onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
-    expect((await getOnboardingState(orcaPage)).closedAt).not.toBeNull()
+    await expectAddProjectDialog(oakPage)
+    await expect(oakPage.getByRole('button', { name: /Browse server/i })).toBeVisible()
+    await expect(oakPage.getByRole('button', { name: /Clone from URL/i })).toBeVisible()
+    await expect(oakPage.getByRole('button', { name: /Create on server/i })).toBeVisible()
+    await expect(oakPage.getByText(/Or enter a server path manually/i)).toBeVisible()
+    await expect(onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
+    expect((await getOnboardingState(oakPage)).closedAt).not.toBeNull()
   })
 
-  test('Skip from notifications does not request permission', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('Skip from notifications does not request permission', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
-    await continueFromThemeToNotifications(orcaPage)
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await continueFromThemeToNotifications(oakPage)
 
-    await orcaPage.evaluate(() => {
-      localStorage.removeItem('orca.e2e.notificationPermissionRequested')
+    await oakPage.evaluate(() => {
+      localStorage.removeItem('oak.e2e.notificationPermissionRequested')
       window.api.notifications.requestPermission = async () => {
-        localStorage.setItem('orca.e2e.notificationPermissionRequested', '1')
+        localStorage.setItem('oak.e2e.notificationPermissionRequested', '1')
         return { supported: true, platform: 'darwin', requested: true }
       }
     })
-    await expectOnboardingNotificationSound(orcaPage, /System Default/i)
+    await expectOnboardingNotificationSound(oakPage, /System Default/i)
 
-    await expect(onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
-    await continueOnboarding(orcaPage)
+    await expect(onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
+    await continueOnboarding(oakPage)
 
-    await expectAddProjectDialog(orcaPage)
+    await expectAddProjectDialog(oakPage)
     await expect
       .poll(
         async () =>
-          orcaPage.evaluate(() => localStorage.getItem('orca.e2e.notificationPermissionRequested')),
+          oakPage.evaluate(() => localStorage.getItem('oak.e2e.notificationPermissionRequested')),
         { timeout: 5_000 }
       )
       .toBeNull()
   })
 
-  test('selected agent button reports aria-pressed=true', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('selected agent button reports aria-pressed=true', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
 
-    const codexButton = orcaPage.getByRole('button', { name: /^Codex\s/ })
+    const codexButton = oakPage.getByRole('button', { name: /^Codex\s/ })
     const codexVisible = await codexButton
       .first()
       .waitFor({ state: 'visible', timeout: 1_000 })
       .then(() => true)
       .catch(() => false)
     if (!codexVisible) {
-      await orcaPage.getByText(/Show \d+ more agents/).click()
+      await oakPage.getByText(/Show \d+ more agents/).click()
     }
     await codexButton.click()
     // Why: AgentButton now sets aria-pressed so screen readers and assistive
@@ -483,21 +483,21 @@ test.describe('Onboarding flow', () => {
     await expect(codexButton).toHaveAttribute('aria-pressed', 'true')
   })
 
-  test('notification sound choice persists on Continue', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('notification sound choice persists on Continue', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
-    await continueFromThemeToNotifications(orcaPage)
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await continueFromThemeToNotifications(oakPage)
 
-    await chooseOnboardingNotificationSound(orcaPage, /^Ding$/i)
+    await chooseOnboardingNotificationSound(oakPage, /^Ding$/i)
 
-    await continueFromPostNotificationsToRepo(orcaPage)
+    await continueFromPostNotificationsToRepo(oakPage)
     await expect
       .poll(
         async () => {
-          const s = await getSettings(orcaPage)
+          const s = await getSettings(oakPage)
           return {
             agentTaskComplete: s.notifications.agentTaskComplete,
             terminalBell: s.notifications.terminalBell,
@@ -510,84 +510,84 @@ test.describe('Onboarding flow', () => {
   })
 
   test('typing in the clone-url input does not hijack Enter as a global shortcut', async ({
-    orcaPage
+    oakPage
   }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
     // Advance to the Add Project dialog.
-    await continueOnboarding(orcaPage)
-    await continueOnboarding(orcaPage)
-    await continueFromPostNotificationsToRepo(orcaPage)
-    await orcaPage.getByRole('button', { name: /Clone from URL/i }).click()
+    await continueOnboarding(oakPage)
+    await continueOnboarding(oakPage)
+    await continueFromPostNotificationsToRepo(oakPage)
+    await oakPage.getByRole('button', { name: /Clone from URL/i }).click()
 
     // Why: focus the clone-url input and press Cmd/Ctrl+Enter. The capture-
     // phase keydown handler should bail via isEditableTarget, so the dialog
     // should remain visible and the empty clone form must not submit.
-    const isMac = await orcaPage.evaluate(() => navigator.userAgent.includes('Mac'))
+    const isMac = await oakPage.evaluate(() => navigator.userAgent.includes('Mac'))
     const accelerator = isMac ? 'Meta+Enter' : 'Control+Enter'
-    const input = orcaPage.getByPlaceholder('https://github.com/user/repo.git')
+    const input = oakPage.getByPlaceholder('https://github.com/user/repo.git')
     await input.click()
     await input.press(accelerator)
     // Brief wait so any (incorrect) handler firing would have already happened.
-    await orcaPage.waitForTimeout(250)
-    await expect(orcaPage.getByRole('heading', { name: /Clone from URL/i })).toBeVisible()
+    await oakPage.waitForTimeout(250)
+    await expect(oakPage.getByRole('heading', { name: /Clone from URL/i })).toBeVisible()
     await expect(input).toBeVisible()
-    expect((await getOnboardingState(orcaPage)).closedAt).not.toBeNull()
+    expect((await getOnboardingState(oakPage)).closedAt).not.toBeNull()
   })
 
-  test('Back returns to the previous step without losing progress', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('Back returns to the previous step without losing progress', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
 
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
     await expect
-      .poll(async () => (await getOnboardingState(orcaPage)).lastCompletedStep, {
+      .poll(async () => (await getOnboardingState(oakPage)).lastCompletedStep, {
         timeout: 5_000
       })
       .toBe(1)
 
     // Why: exact match — the app sidebar also exposes a "Go back" button that
     // would otherwise match this regex.
-    await orcaPage.getByRole('button', { name: 'Back', exact: true }).click()
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible()
-    await expectOnboardingProgress(orcaPage, /^1 of [345]$/)
+    await oakPage.getByRole('button', { name: 'Back', exact: true }).click()
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible()
+    await expectOnboardingProgress(oakPage, /^1 of [345]$/)
 
     // Why: "without losing progress" means persisted lastCompletedStep stays
     // at 1 — Back rewinds the visible step but must not roll persistence back.
     // Poll because persistence flushes async via IPC after the Back click.
     await expect
-      .poll(async () => (await getOnboardingState(orcaPage)).lastCompletedStep, {
+      .poll(async () => (await getOnboardingState(oakPage)).lastCompletedStep, {
         timeout: 5_000
       })
       .toBe(1)
   })
 
-  test('final notification step does not offer a skip or dismiss action', async ({ orcaPage }) => {
-    await expect(orcaPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
+  test('final notification step does not offer a skip or dismiss action', async ({ oakPage }) => {
+    await expect(oakPage.getByRole('heading', { name: /Pick your default agent/i })).toBeVisible({
       timeout: 15_000
     })
 
     // Advance through the optional preference step. The final notification step
     // finishes onboarding, so no skip/dismiss path should be available there.
-    await continueOnboarding(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
-    await continueFromThemeToNotifications(orcaPage)
+    await continueOnboarding(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Make it feel like home/i })).toBeVisible()
+    await continueFromThemeToNotifications(oakPage)
 
-    await expect(onboardingFooterButton(orcaPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
-    await expect(onboardingFooterButton(orcaPage, /Skip all onboarding/i)).toHaveCount(0)
-    await orcaPage.keyboard.press('Escape')
-    await expectOnboardingSkipConfirmationClosed(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Set up notifications/i })).toBeVisible()
-    await orcaPage.locator('[data-onboarding-overlay]').click({ position: { x: 8, y: 40 } })
-    await expectOnboardingSkipConfirmationClosed(orcaPage)
-    await expect(orcaPage.getByRole('heading', { name: /Set up notifications/i })).toBeVisible()
+    await expect(onboardingFooterButton(oakPage, SKIP_TO_PROJECT_SETUP_BUTTON)).toHaveCount(0)
+    await expect(onboardingFooterButton(oakPage, /Skip all onboarding/i)).toHaveCount(0)
+    await oakPage.keyboard.press('Escape')
+    await expectOnboardingSkipConfirmationClosed(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Set up notifications/i })).toBeVisible()
+    await oakPage.locator('[data-onboarding-overlay]').click({ position: { x: 8, y: 40 } })
+    await expectOnboardingSkipConfirmationClosed(oakPage)
+    await expect(oakPage.getByRole('heading', { name: /Set up notifications/i })).toBeVisible()
 
-    await continueOnboarding(orcaPage)
-    await expectAddProjectDialog(orcaPage)
-    const final = await getOnboardingState(orcaPage)
+    await continueOnboarding(oakPage)
+    await expectAddProjectDialog(oakPage)
+    const final = await getOnboardingState(oakPage)
     expect(final.closedAt).not.toBeNull()
     expect(final.outcome).toBe('completed')
     expect(final.checklist.dismissed).toBe(false)

@@ -15,7 +15,7 @@ const builderConfig = require('../../../config/electron-builder.config.cjs') as 
   linux?: { extraResources?: { from?: string; to?: string }[] }
   win?: { extraResources?: { from?: string; to?: string }[] }
 }
-const linuxLauncherAsset = new URL('../../../resources/linux/bin/orca-ide', import.meta.url)
+const linuxLauncherAsset = new URL('../../../resources/linux/bin/oak-ide', import.meta.url)
 
 describe('packaged CLI assets', () => {
   it('copies runtime dependencies used before Electron asar integration is available', () => {
@@ -54,14 +54,14 @@ describe('packaged CLI assets', () => {
   itRunsUnixShell(
     'runs the Linux launcher from its packaged path and installed symlink',
     async () => {
-      const root = await mkdtemp(join(tmpdir(), 'orca-linux-cli-'))
+      const root = await mkdtemp(join(tmpdir(), 'oak-linux-cli-'))
       try {
-        const appDir = join(root, 'Orca')
+        const appDir = join(root, 'Oak')
         const resourcesDir = join(appDir, 'resources')
         const launcherDir = join(resourcesDir, 'bin')
         const cliDir = join(resourcesDir, 'app.asar.unpacked', 'out', 'cli')
-        const launcherPath = join(launcherDir, 'orca-ide')
-        const electronPath = join(appDir, 'orca-ide')
+        const launcherPath = join(launcherDir, 'oak-ide')
+        const electronPath = join(appDir, 'oak-ide')
         const cliPath = join(cliDir, 'index.js')
 
         await mkdir(launcherDir, { recursive: true })
@@ -87,9 +87,9 @@ printf 'arg=%s\\n' "$@"
 
         const homeDir = join(root, 'home')
         const commandDir = join(homeDir, '.local', 'bin')
-        const commandPath = join(commandDir, 'orca-ide')
+        const commandPath = join(commandDir, 'oak-ide')
         await mkdir(commandDir, { recursive: true })
-        await mkdir(join(homeDir, 'orca'), { recursive: true })
+        await mkdir(join(homeDir, 'oak'), { recursive: true })
         await symlink(launcherPath, commandPath)
 
         const symlinked = await execFileAsync(commandPath, ['--help'], {
@@ -106,13 +106,13 @@ printf 'arg=%s\\n' "$@"
   )
 
   itRunsUnixShell('runs the AppImage CLI wrapper through APPDIR at runtime', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'orca-appimage-cli-'))
+    const root = await mkdtemp(join(tmpdir(), 'oak-appimage-cli-'))
     try {
-      const appDir = join(root, 'Orca.AppDir')
+      const appDir = join(root, 'Oak.AppDir')
       const cliDir = join(appDir, 'resources', 'app.asar.unpacked', 'out', 'cli')
       const cliPath = join(cliDir, 'index.js')
-      const appImagePath = join(root, "Orca's AppImage.AppImage")
-      const commandPath = join(root, 'orca-ide')
+      const appImagePath = join(root, "Oak's AppImage.AppImage")
+      const commandPath = join(root, 'oak-ide')
       await mkdir(cliDir, { recursive: true })
       await writeFile(
         cliPath,
@@ -122,9 +122,9 @@ printf 'arg=%s\\n' "$@"
     appDir: process.env.APPDIR,
     runAsNode: process.env.ELECTRON_RUN_AS_NODE,
     nodeOptions: process.env.NODE_OPTIONS ?? null,
-    orcaNodeOptions: process.env.ORCA_NODE_OPTIONS ?? null,
+    oakNodeOptions: process.env.OAK_NODE_OPTIONS ?? null,
     nodeReplExternalModule: process.env.NODE_REPL_EXTERNAL_MODULE ?? null,
-    orcaNodeReplExternalModule: process.env.ORCA_NODE_REPL_EXTERNAL_MODULE ?? null
+    oakNodeReplExternalModule: process.env.OAK_NODE_REPL_EXTERNAL_MODULE ?? null
   }))
 }
 `,
@@ -156,18 +156,18 @@ exec node "$@"
         appDir: string
         runAsNode: string
         nodeOptions: string | null
-        orcaNodeOptions: string | null
+        oakNodeOptions: string | null
         nodeReplExternalModule: string | null
-        orcaNodeReplExternalModule: string | null
+        oakNodeReplExternalModule: string | null
       }
 
       expect(payload.argv).toEqual(['--help', 'two words'])
       expect(payload.appDir).toBe(appDir)
       expect(payload.runAsNode).toBe('1')
       expect(payload.nodeOptions).toBeNull()
-      expect(payload.orcaNodeOptions).toBe('--trace-warnings')
+      expect(payload.oakNodeOptions).toBe('--trace-warnings')
       expect(payload.nodeReplExternalModule).toBeNull()
-      expect(payload.orcaNodeReplExternalModule).toBe('external-loader')
+      expect(payload.oakNodeReplExternalModule).toBe('external-loader')
     } finally {
       await rm(root, { recursive: true, force: true })
     }

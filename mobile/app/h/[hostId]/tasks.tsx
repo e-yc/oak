@@ -91,7 +91,7 @@ import { WORKTREE_CREATE_TIMEOUT_MS } from '../../../src/tasks/workspace-create-
 import {
   isSetupHookTrusted,
   normalizeSetupHookTrust,
-  trustedOrcaHooksWithSetupApproval,
+  trustedOakHooksWithSetupApproval,
   wasSetupHookPreviouslyApproved
 } from '../../../src/tasks/setup-hook-trust'
 import { colors, radii, spacing, typography } from '../../../src/theme/mobile-theme'
@@ -129,7 +129,7 @@ import {
 } from '../../../src/tasks/mobile-task-copy-feedback-timer'
 import type {
   BaseRefSearchResult,
-  PersistedTrustedOrcaHooks,
+  PersistedTrustedOakHooks,
   SparsePreset,
   TuiAgent
 } from '../../../../src/shared/types'
@@ -660,7 +660,7 @@ type WorkspaceCreateArgs = {
   sparseCheckoutOverride?: { directories: string[]; presetId?: string }
 }
 
-type OrcaYamlTrustPrompt = WorkspaceCreateArgs & {
+type OakYamlTrustPrompt = WorkspaceCreateArgs & {
   repoId: string
   repoName: string
   scriptContent: string
@@ -688,7 +688,7 @@ function workspaceAgentIconId(agent: WorkspaceAgentChoice): string {
   return agent === 'blank' ? '__blank__' : agent
 }
 
-type ProjectRepoNotInOrcaPrompt = {
+type ProjectRepoNotInOakPrompt = {
   owner: string
   repo: string
   url: string | null
@@ -2140,8 +2140,8 @@ function getRepoBadgeColor(repo: RepoSummary | undefined, fallbackName: string):
 }
 
 function setupSourceLabel(source: string | null): string {
-  if (source === 'orca.yaml') {
-    return 'orca.yaml'
+  if (source === 'oak.yaml') {
+    return 'oak.yaml'
   }
   if (source === 'legacy') {
     return 'local hooks'
@@ -2386,8 +2386,8 @@ export default function MobileTasksScreen() {
   const [linearSubIssueTitle, setLinearSubIssueTitle] = useState('')
   const [taskStateHydrated, setTaskStateHydrated] = useState(false)
   const [runtimeTaskSettings, setRuntimeTaskSettings] = useState<RuntimeTaskSettings>({})
-  const [trustedOrcaHooks, setTrustedOrcaHooks] = useState<PersistedTrustedOrcaHooks>({})
-  const [orcaYamlTrustPrompt, setOrcaYamlTrustPrompt] = useState<OrcaYamlTrustPrompt | null>(null)
+  const [trustedOakHooks, setTrustedOakHooks] = useState<PersistedTrustedOakHooks>({})
+  const [oakYamlTrustPrompt, setOakYamlTrustPrompt] = useState<OakYamlTrustPrompt | null>(null)
   const [githubProjectSettings, setGithubProjectSettings] = useState<GitHubProjectSettings>(
     EMPTY_GITHUB_PROJECT_SETTINGS
   )
@@ -2443,8 +2443,9 @@ export default function MobileTasksScreen() {
   const [projectIssueTypesLoading, setProjectIssueTypesLoading] = useState(false)
   const [projectIssueTypesError, setProjectIssueTypesError] = useState('')
   const [projectMutating, setProjectMutating] = useState(false)
-  const [projectRepoNotInOrca, setProjectRepoNotInOrca] =
-    useState<ProjectRepoNotInOrcaPrompt | null>(null)
+  const [projectRepoNotInOak, setProjectRepoNotInOak] = useState<ProjectRepoNotInOakPrompt | null>(
+    null
+  )
   // Why: project detail text inputs rerender this screen while comments stay
   // unchanged; keep grouping out of the typing path.
   const projectDetailCommentGroups = useMemo(
@@ -2833,19 +2834,19 @@ export default function MobileTasksScreen() {
       if (!client) {
         return
       }
-      const next = trustedOrcaHooksWithSetupApproval({
-        trust: trustedOrcaHooks,
+      const next = trustedOakHooksWithSetupApproval({
+        trust: trustedOakHooks,
         repoId,
         contentHash,
         alwaysTrust
       })
-      const response = await client.sendRequest('ui.set', { trustedOrcaHooks: next })
+      const response = await client.sendRequest('ui.set', { trustedOakHooks: next })
       if (!isSuccess(response)) {
         throw new Error(response.error.message)
       }
-      setTrustedOrcaHooks(next)
+      setTrustedOakHooks(next)
     },
-    [client, trustedOrcaHooks]
+    [client, trustedOakHooks]
   )
 
   const resetWorkspaceCreateState = useCallback((): void => {
@@ -2879,7 +2880,7 @@ export default function MobileTasksScreen() {
     setShowWorkspaceBaseBranchPicker(false)
     setShowWorkspaceSparsePicker(false)
     setSetupPrompt(null)
-    setOrcaYamlTrustPrompt(null)
+    setOakYamlTrustPrompt(null)
   }, [])
 
   useEffect(() => {
@@ -2888,8 +2889,8 @@ export default function MobileTasksScreen() {
       defaultRepoSelectionRef.current = null
       repoSelectionHydratedRef.current = false
       setRuntimeTaskSettings({})
-      setTrustedOrcaHooks({})
-      setOrcaYamlTrustPrompt(null)
+      setTrustedOakHooks({})
+      setOakYamlTrustPrompt(null)
       setGithubProjectHiddenFieldIdsByView({})
       setTaskStateHydrated(false)
       setTasksSupportState({ kind: 'unknown', client: null })
@@ -2917,7 +2918,7 @@ export default function MobileTasksScreen() {
       setPendingGitHubProjectViewSelection(null)
       setActionItem(null)
       setProjectRowItem(null)
-      setProjectRepoNotInOrca(null)
+      setProjectRepoNotInOak(null)
       setDetailPayload(null)
       setProjectRowDetail(null)
       setShowCreateTask(false)
@@ -2959,7 +2960,7 @@ export default function MobileTasksScreen() {
     setPendingGitHubProjectViewSelection(null)
     setActionItem(null)
     setProjectRowItem(null)
-    setProjectRepoNotInOrca(null)
+    setProjectRepoNotInOak(null)
     setDetailPayload(null)
     setProjectRowDetail(null)
     setShowCreateTask(false)
@@ -3012,7 +3013,7 @@ export default function MobileTasksScreen() {
         setPendingGitHubProjectViewSelection(null)
         setActionItem(null)
         setProjectRowItem(null)
-        setProjectRepoNotInOrca(null)
+        setProjectRepoNotInOak(null)
         setDetailPayload(null)
         setProjectRowDetail(null)
         setShowCreateTask(false)
@@ -3024,7 +3025,7 @@ export default function MobileTasksScreen() {
         setMergeMethodTaskItem(null)
         setMergeMethodProjectRow(null)
         resetWorkspaceCreateState()
-        setError('Update Orca desktop to use Tasks on mobile.')
+        setError('Update Oak desktop to use Tasks on mobile.')
         setTaskStateHydrated(false)
         return
       }
@@ -3051,12 +3052,12 @@ export default function MobileTasksScreen() {
             uiResponse.result as {
               ui?: {
                 taskResumeState?: TaskResumeState
-                trustedOrcaHooks?: PersistedTrustedOrcaHooks
+                trustedOakHooks?: PersistedTrustedOakHooks
               }
             }
           ).ui
         : null
-      setTrustedOrcaHooks(uiState?.trustedOrcaHooks ?? {})
+      setTrustedOakHooks(uiState?.trustedOakHooks ?? {})
       const resume = uiState?.taskResumeState ?? {}
       taskResumeRef.current = resume
       setGithubProjectHiddenFieldIdsByView(resume.githubProjectHiddenFieldIdsByView ?? {})
@@ -3891,7 +3892,7 @@ export default function MobileTasksScreen() {
           return
         }
         if (explicitView && explicitView.layout !== 'TABLE_LAYOUT') {
-          throw new Error("Orca doesn't support this GitHub Project layout yet.")
+          throw new Error("Oak doesn't support this GitHub Project layout yet.")
         }
         if (!explicitView && !rememberedView) {
           // Why: desktop asks which Project view to open the first time a project
@@ -4892,7 +4893,7 @@ export default function MobileTasksScreen() {
     setWorkspaceSparseSaving(false)
     setWorkspaceAgentOverridden(false)
     setWorkspaceAgent(null)
-    setOrcaYamlTrustPrompt(null)
+    setOakYamlTrustPrompt(null)
     setShowWorkspaceAgentPicker(false)
     setShowWorkspaceCreateRepoPicker(false)
     setShowWorkspaceAdvanced(false)
@@ -5481,16 +5482,16 @@ export default function MobileTasksScreen() {
           setupResolution.setupTrust &&
           setupResolution.setupTrust.contentHash !== approvedSetupContentHash &&
           !isSetupHookTrusted(
-            trustedOrcaHooks,
+            trustedOakHooks,
             targetRepo.id,
             setupResolution.setupTrust.contentHash
           )
         ) {
-          // Why: desktop prompts before running repo-owned orca.yaml hooks. Mobile
+          // Why: desktop prompts before running repo-owned oak.yaml hooks. Mobile
           // stores the same trust hash in persisted UI state so either surface can
           // approve the script version for future workspace creates.
           setSetupPrompt(null)
-          setOrcaYamlTrustPrompt({
+          setOakYamlTrustPrompt({
             item,
             ...(repoIdOverride ? { repoIdOverride } : {}),
             setupOverride: 'run',
@@ -5504,7 +5505,7 @@ export default function MobileTasksScreen() {
             repoName: targetRepo.displayName,
             scriptContent: setupResolution.setupTrust.scriptContent,
             contentHash: setupResolution.setupTrust.contentHash,
-            previouslyApproved: wasSetupHookPreviouslyApproved(trustedOrcaHooks, targetRepo.id)
+            previouslyApproved: wasSetupHookPreviouslyApproved(trustedOakHooks, targetRepo.id)
           })
           return
         }
@@ -5647,7 +5648,7 @@ export default function MobileTasksScreen() {
       runtimeTaskSettings,
       taskStateHydrated,
       tasksSupported,
-      trustedOrcaHooks,
+      trustedOakHooks,
       workspaceDetectedAgentIds
     ]
   )
@@ -5660,12 +5661,12 @@ export default function MobileTasksScreen() {
       const kind = projectRowType(row)
       const repo = findProjectRowRepo(row)
       if (!kind || !row.content.number || !row.content.url) {
-        setError('Add the project item repository to Orca before creating a workspace.')
+        setError('Add the project item repository to Oak before creating a workspace.')
         return
       }
       if (!repo) {
         const slug = splitRepositorySlug(row.content.repository)
-        setProjectRepoNotInOrca({
+        setProjectRepoNotInOak({
           owner: slug?.owner ?? 'Unknown',
           repo: slug?.repo ?? row.content.repository ?? 'repository',
           url: row.content.url ?? null
@@ -9202,7 +9203,7 @@ export default function MobileTasksScreen() {
       {!tasksSupported ? (
         tasksUnsupported ? (
           <View style={styles.centered}>
-            <Text style={styles.emptyText}>Update Orca desktop</Text>
+            <Text style={styles.emptyText}>Update Oak desktop</Text>
             <Text style={styles.centeredHint}>
               This mobile Tasks view needs a newer desktop runtime.
             </Text>
@@ -10283,7 +10284,7 @@ export default function MobileTasksScreen() {
         onSelect={(viewId) => {
           const view = githubProjectViews.find((candidate) => candidate.id === viewId)
           if (view && view.layout !== 'TABLE_LAYOUT') {
-            setGithubProjectError("Orca doesn't support this GitHub Project layout yet.")
+            setGithubProjectError("Oak doesn't support this GitHub Project layout yet.")
             return
           }
           if (pendingGitHubProjectViewSelection) {
@@ -11447,20 +11448,20 @@ export default function MobileTasksScreen() {
       </BottomDrawer>
 
       <BottomDrawer
-        visible={taskUiReady && orcaYamlTrustPrompt != null}
-        onClose={() => setOrcaYamlTrustPrompt(null)}
+        visible={taskUiReady && oakYamlTrustPrompt != null}
+        onClose={() => setOakYamlTrustPrompt(null)}
         zIndex={TASK_SECONDARY_DRAWER_Z_INDEX + 1}
       >
-        {orcaYamlTrustPrompt ? (
+        {oakYamlTrustPrompt ? (
           <View>
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>
-                {orcaYamlTrustPrompt.previouslyApproved
-                  ? `${orcaYamlTrustPrompt.repoName}'s setup script changed`
-                  : `Run setup from ${orcaYamlTrustPrompt.repoName}?`}
+                {oakYamlTrustPrompt.previouslyApproved
+                  ? `${oakYamlTrustPrompt.repoName}'s setup script changed`
+                  : `Run setup from ${oakYamlTrustPrompt.repoName}?`}
               </Text>
               <Text style={styles.sheetSubtitle}>
-                This repository's orca.yaml runs on your machine before the workspace starts. Only
+                This repository's oak.yaml runs on your machine before the workspace starts. Only
                 run it if you trust this repository.
               </Text>
             </View>
@@ -11468,36 +11469,36 @@ export default function MobileTasksScreen() {
             <View style={styles.setupPromptBox}>
               <View style={styles.detailSectionHeader}>
                 <Text style={styles.detailSectionTitle}>
-                  {orcaYamlTrustPrompt.previouslyApproved ? 'New setup script' : 'Setup script'}
+                  {oakYamlTrustPrompt.previouslyApproved ? 'New setup script' : 'Setup script'}
                 </Text>
               </View>
-              <Text style={styles.setupPromptCommand}>{orcaYamlTrustPrompt.scriptContent}</Text>
+              <Text style={styles.setupPromptCommand}>{oakYamlTrustPrompt.scriptContent}</Text>
             </View>
 
             <View style={styles.actionGroup}>
               <Pressable
                 style={styles.actionRow}
-                disabled={creatingKey === orcaYamlTrustPrompt.item.key}
+                disabled={creatingKey === oakYamlTrustPrompt.item.key}
                 onPress={() =>
                   void (async () => {
                     try {
                       await persistSetupHookTrust(
-                        orcaYamlTrustPrompt.repoId,
-                        orcaYamlTrustPrompt.contentHash,
+                        oakYamlTrustPrompt.repoId,
+                        oakYamlTrustPrompt.contentHash,
                         false
                       )
-                      setOrcaYamlTrustPrompt(null)
+                      setOakYamlTrustPrompt(null)
                       await createWorkspace(
-                        orcaYamlTrustPrompt.item,
-                        orcaYamlTrustPrompt.repoIdOverride,
+                        oakYamlTrustPrompt.item,
+                        oakYamlTrustPrompt.repoIdOverride,
                         'run',
-                        orcaYamlTrustPrompt.agentOverride,
-                        orcaYamlTrustPrompt.workspaceNameOverride,
-                        orcaYamlTrustPrompt.noteOverride,
-                        orcaYamlTrustPrompt.baseBranchOverride,
-                        orcaYamlTrustPrompt.branchNameOverride,
-                        orcaYamlTrustPrompt.sparseCheckoutOverride,
-                        orcaYamlTrustPrompt.contentHash
+                        oakYamlTrustPrompt.agentOverride,
+                        oakYamlTrustPrompt.workspaceNameOverride,
+                        oakYamlTrustPrompt.noteOverride,
+                        oakYamlTrustPrompt.baseBranchOverride,
+                        oakYamlTrustPrompt.branchNameOverride,
+                        oakYamlTrustPrompt.sparseCheckoutOverride,
+                        oakYamlTrustPrompt.contentHash
                       )
                     } catch (err) {
                       setError(err instanceof Error ? err.message : 'Failed to trust setup script.')
@@ -11511,27 +11512,27 @@ export default function MobileTasksScreen() {
               <View style={styles.actionSeparator} />
               <Pressable
                 style={styles.actionRow}
-                disabled={creatingKey === orcaYamlTrustPrompt.item.key}
+                disabled={creatingKey === oakYamlTrustPrompt.item.key}
                 onPress={() =>
                   void (async () => {
                     try {
                       await persistSetupHookTrust(
-                        orcaYamlTrustPrompt.repoId,
-                        orcaYamlTrustPrompt.contentHash,
+                        oakYamlTrustPrompt.repoId,
+                        oakYamlTrustPrompt.contentHash,
                         true
                       )
-                      setOrcaYamlTrustPrompt(null)
+                      setOakYamlTrustPrompt(null)
                       await createWorkspace(
-                        orcaYamlTrustPrompt.item,
-                        orcaYamlTrustPrompt.repoIdOverride,
+                        oakYamlTrustPrompt.item,
+                        oakYamlTrustPrompt.repoIdOverride,
                         'run',
-                        orcaYamlTrustPrompt.agentOverride,
-                        orcaYamlTrustPrompt.workspaceNameOverride,
-                        orcaYamlTrustPrompt.noteOverride,
-                        orcaYamlTrustPrompt.baseBranchOverride,
-                        orcaYamlTrustPrompt.branchNameOverride,
-                        orcaYamlTrustPrompt.sparseCheckoutOverride,
-                        orcaYamlTrustPrompt.contentHash
+                        oakYamlTrustPrompt.agentOverride,
+                        oakYamlTrustPrompt.workspaceNameOverride,
+                        oakYamlTrustPrompt.noteOverride,
+                        oakYamlTrustPrompt.baseBranchOverride,
+                        oakYamlTrustPrompt.branchNameOverride,
+                        oakYamlTrustPrompt.sparseCheckoutOverride,
+                        oakYamlTrustPrompt.contentHash
                       )
                     } catch (err) {
                       setError(err instanceof Error ? err.message : 'Failed to trust setup script.')
@@ -11545,10 +11546,10 @@ export default function MobileTasksScreen() {
               <View style={styles.actionSeparator} />
               <Pressable
                 style={styles.actionRow}
-                disabled={creatingKey === orcaYamlTrustPrompt.item.key}
+                disabled={creatingKey === oakYamlTrustPrompt.item.key}
                 onPress={() => {
-                  const prompt = orcaYamlTrustPrompt
-                  setOrcaYamlTrustPrompt(null)
+                  const prompt = oakYamlTrustPrompt
+                  setOakYamlTrustPrompt(null)
                   void createWorkspace(
                     prompt.item,
                     prompt.repoIdOverride,
@@ -11571,28 +11572,28 @@ export default function MobileTasksScreen() {
       </BottomDrawer>
 
       <BottomDrawer
-        visible={taskUiReady && projectRepoNotInOrca != null}
+        visible={taskUiReady && projectRepoNotInOak != null}
         onClose={() => {
-          setProjectRepoNotInOrca(null)
+          setProjectRepoNotInOak(null)
         }}
       >
-        {projectRepoNotInOrca ? (
+        {projectRepoNotInOak ? (
           <View>
             <View style={styles.sheetHeader}>
-              <Text style={styles.sheetTitle}>Repository not in Orca</Text>
+              <Text style={styles.sheetTitle}>Repository not in Oak</Text>
               <Text style={styles.sheetSubtitle}>
-                {projectRepoNotInOrca.owner}/{projectRepoNotInOrca.repo} is not added to Orca. Add
-                this repository from the desktop app, then refresh mobile Tasks.
+                {projectRepoNotInOak.owner}/{projectRepoNotInOak.repo} is not added to Oak. Add this
+                repository from the desktop app, then refresh mobile Tasks.
               </Text>
             </View>
 
             <View style={styles.actionGroup}>
-              {projectRepoNotInOrca.url ? (
+              {projectRepoNotInOak.url ? (
                 <Pressable
                   style={styles.actionRow}
                   onPress={() => {
-                    if (projectRepoNotInOrca.url) {
-                      void Linking.openURL(projectRepoNotInOrca.url)
+                    if (projectRepoNotInOak.url) {
+                      void Linking.openURL(projectRepoNotInOak.url)
                     }
                   }}
                 >
@@ -11600,20 +11601,20 @@ export default function MobileTasksScreen() {
                   <Text style={styles.actionText}>Open in GitHub</Text>
                 </Pressable>
               ) : null}
-              {projectRepoNotInOrca.url ? <View style={styles.actionSeparator} /> : null}
+              {projectRepoNotInOak.url ? <View style={styles.actionSeparator} /> : null}
               <Pressable
                 style={styles.actionRow}
                 onPress={() =>
                   void copyTextToClipboard(
-                    `project-repo:${projectRepoNotInOrca.owner}/${projectRepoNotInOrca.repo}`,
-                    `${projectRepoNotInOrca.owner}/${projectRepoNotInOrca.repo}`
+                    `project-repo:${projectRepoNotInOak.owner}/${projectRepoNotInOak.repo}`,
+                    `${projectRepoNotInOak.owner}/${projectRepoNotInOak.repo}`
                   )
                 }
               >
                 <Copy size={16} color={colors.textPrimary} />
                 <Text style={styles.actionText}>
                   {copiedLinkKey ===
-                  `project-repo:${projectRepoNotInOrca.owner}/${projectRepoNotInOrca.repo}`
+                  `project-repo:${projectRepoNotInOak.owner}/${projectRepoNotInOak.repo}`
                     ? 'Copied'
                     : 'Copy repository'}
                 </Text>
@@ -12649,7 +12650,7 @@ export default function MobileTasksScreen() {
                   </Pressable>
                   {!projectRowHostedRepo ? (
                     <Text style={styles.emptyInlineText}>
-                      Merge requires this repository in Orca.
+                      Merge requires this repository in Oak.
                     </Text>
                   ) : null}
                 </>

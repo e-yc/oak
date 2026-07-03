@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import type { Page, TestInfo } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import {
   ensureTerminalVisible,
   getAllWorktreeIds,
@@ -419,7 +419,7 @@ async function readTerminalRenderDiagnostics(page: Page): Promise<{
 async function closeFeatureTips(page: Page): Promise<void> {
   await page.evaluate(() => {
     const store = window.__store
-    store?.getState().markFeatureTipsSeen(['orca-cli', 'cmd-j-palette', 'voice-dictation'])
+    store?.getState().markFeatureTipsSeen(['oak-cli', 'cmd-j-palette', 'voice-dictation'])
     if (store?.getState().activeModal === 'feature-tips') {
       store.getState().closeModal()
     }
@@ -449,8 +449,8 @@ async function expectAutoWebgl(page: Page): Promise<boolean> {
 }
 
 test.describe('Terminal raw emoji table scroll restore repro', () => {
-  test.beforeEach(async ({ orcaPage }) => {
-    await orcaPage.evaluate(() => {
+  test.beforeEach(async ({ oakPage }) => {
+    await oakPage.evaluate(() => {
       ;(window as RawTableDebugWindow).getActiveTestPane = () => {
         const store = window.__store
         const state = store?.getState()
@@ -474,48 +474,46 @@ test.describe('Terminal raw emoji table scroll restore repro', () => {
   // Why: `auto` should start on the fast renderer for ordinary terminal output;
   // the emoji table golden below proves complex output does not disable it.
   test('uses WebGL by default for ordinary terminal output when available @terminal-rendering-golden', async ({
-    orcaPage
+    oakPage
   }) => {
-    await waitForSessionReady(orcaPage)
-    await closeFeatureTips(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const ptyId = await waitForActivePanePtyId(orcaPage)
-    const marker = `ORCA_AUTO_WEBGL_SMOKE_${randomUUID()}`
+    await waitForSessionReady(oakPage)
+    await closeFeatureTips(oakPage)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    const ptyId = await waitForActivePanePtyId(oakPage)
+    const marker = `OAK_AUTO_WEBGL_SMOKE_${randomUUID()}`
 
-    await sendToTerminal(orcaPage, ptyId, `printf ${JSON.stringify(`${marker}\\n`)}\r`)
-    await waitForTerminalOutput(orcaPage, marker, 10_000)
+    await sendToTerminal(oakPage, ptyId, `printf ${JSON.stringify(`${marker}\\n`)}\r`)
+    await waitForTerminalOutput(oakPage, marker, 10_000)
 
-    const diagnostics = await readTerminalRenderDiagnostics(orcaPage)
+    const diagnostics = await readTerminalRenderDiagnostics(oakPage)
     expect(diagnostics.hasComplexScriptOutput).toBe(false)
-    expect(diagnostics.hasWebgl).toBe(await expectAutoWebgl(orcaPage))
+    expect(diagnostics.hasWebgl).toBe(await expectAutoWebgl(oakPage))
     expect(diagnostics.cursorHidden).toBe(false)
   })
 
   // Why: this is the minimal golden for the v1.4.51 regression. It fails if
   // xterm underfits by one scrollbar column or counts ZWJ emoji as width 4.
   test('keeps raw emoji box table aligned after restore and scroll @terminal-rendering-golden', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo: TestInfo) => {
-    await waitForSessionReady(orcaPage)
-    await closeFeatureTips(orcaPage)
-    const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-    const secondWorktreeId = (await getAllWorktreeIds(orcaPage)).find(
-      (id) => id !== firstWorktreeId
-    )
+    await waitForSessionReady(oakPage)
+    await closeFeatureTips(oakPage)
+    const firstWorktreeId = await waitForActiveWorktree(oakPage)
+    const secondWorktreeId = (await getAllWorktreeIds(oakPage)).find((id) => id !== firstWorktreeId)
     test.skip(!secondWorktreeId, 'raw emoji table repro needs the seeded secondary worktree')
     if (!secondWorktreeId) {
       return
     }
 
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    await setWideRenderedTableViewport(orcaPage)
-    await waitForActiveTerminalColumns(orcaPage, RAW_EMOJI_BOX_TABLE_WIDTH)
-    const ptyId = await waitForActivePanePtyId(orcaPage)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    await setWideRenderedTableViewport(oakPage)
+    await waitForActiveTerminalColumns(oakPage, RAW_EMOJI_BOX_TABLE_WIDTH)
+    const ptyId = await waitForActivePanePtyId(oakPage)
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-raw-emoji-fixture-table-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.oak-raw-emoji-fixture-table-${runId}.mjs`)
     writeFileSync(scriptPath, rawEmojiFixtureBoxTableScript(EMOJI_TABLE_FIXTURE, runId))
 
     try {
@@ -523,40 +521,40 @@ test.describe('Terminal raw emoji table scroll restore repro', () => {
       const frameTailMarker = rawEmojiFixtureFrameTailMarker(runId)
       // Why: the fixture marker is the shell-readiness signal here; an extra
       // Ctrl+C/Ctrl+U preflight can race Windows ConPTY startup and eat input.
-      await sendToTerminal(orcaPage, ptyId, `${nodeTerminalCommand([scriptPath])}\r`)
+      await sendToTerminal(oakPage, ptyId, `${nodeTerminalCommand([scriptPath])}\r`)
       // Why: Windows ConPTY can return the PowerShell prompt while xterm is
       // still flushing synchronized output if the pane is hidden immediately.
       // This golden is about restored table geometry, not shell-flush timing.
-      await waitForTerminalOutput(orcaPage, completionMarker, 20_000, 30_000)
+      await waitForTerminalOutput(oakPage, completionMarker, 20_000, 30_000)
       await expect
-        .poll(() => getTerminalContent(orcaPage, 30_000), {
+        .poll(() => getTerminalContent(oakPage, 30_000), {
           timeout: 10_000,
           message: 'raw emoji table synchronized frame tail was not rendered'
         })
         .toContain(frameTailMarker)
-      await switchToWorktree(orcaPage, secondWorktreeId)
-      await waitForActiveTerminalManager(orcaPage, 30_000)
-      await orcaPage.waitForTimeout(1_000)
-      await switchToWorktree(orcaPage, firstWorktreeId)
+      await switchToWorktree(oakPage, secondWorktreeId)
+      await waitForActiveTerminalManager(oakPage, 30_000)
+      await oakPage.waitForTimeout(1_000)
+      await switchToWorktree(oakPage, firstWorktreeId)
       // Why: activating another worktree can restore the right sidebar. This
       // golden is about terminal renderer restore at a deliberately wide width.
-      await ensureTerminalVisible(orcaPage)
-      await waitForActiveTerminalManager(orcaPage, 30_000)
-      await setWideRenderedTableViewport(orcaPage)
-      await waitForActiveTerminalColumns(orcaPage, RAW_EMOJI_BOX_TABLE_WIDTH)
+      await ensureTerminalVisible(oakPage)
+      await waitForActiveTerminalManager(oakPage, 30_000)
+      await setWideRenderedTableViewport(oakPage)
+      await waitForActiveTerminalColumns(oakPage, RAW_EMOJI_BOX_TABLE_WIDTH)
       await expect
-        .poll(() => getTerminalContent(orcaPage, 30_000), {
+        .poll(() => getTerminalContent(oakPage, 30_000), {
           timeout: 30_000,
           message: 'raw emoji table marker did not survive workspace switch'
         })
         .toContain(completionMarker)
 
-      await scrollActiveTerminalToText(orcaPage, 'Singer')
-      await closeFeatureTips(orcaPage)
-      const diagnostics = await readTerminalRenderDiagnostics(orcaPage)
-      const overpaint = await readTerminalRightEdgeOverpaint(orcaPage)
-      const wrapDiagnostics = await readTerminalBoxTableWrapDiagnostics(orcaPage)
-      const singerGeometry = await readVisibleSingerRowGeometry(orcaPage)
+      await scrollActiveTerminalToText(oakPage, 'Singer')
+      await closeFeatureTips(oakPage)
+      const diagnostics = await readTerminalRenderDiagnostics(oakPage)
+      const overpaint = await readTerminalRightEdgeOverpaint(oakPage)
+      const wrapDiagnostics = await readTerminalBoxTableWrapDiagnostics(oakPage)
+      const singerGeometry = await readVisibleSingerRowGeometry(oakPage)
       testInfo.annotations.push({
         type: 'raw-emoji-table-singer-geometry',
         description: JSON.stringify(singerGeometry)
@@ -571,7 +569,7 @@ test.describe('Terminal raw emoji table scroll restore repro', () => {
       })
 
       const screenshotPath = testInfo.outputPath('raw-emoji-table-after-switch-scroll.png')
-      await orcaPage.screenshot({ path: screenshotPath, fullPage: true })
+      await oakPage.screenshot({ path: screenshotPath, fullPage: true })
       await testInfo.attach('raw-emoji-table-after-switch-scroll.png', {
         path: screenshotPath,
         contentType: 'image/png'
@@ -579,7 +577,7 @@ test.describe('Terminal raw emoji table scroll restore repro', () => {
 
       expect(wrapDiagnostics.cols).toBeGreaterThanOrEqual(RAW_EMOJI_BOX_TABLE_WIDTH)
       expect(diagnostics.hasComplexScriptOutput).toBe(false)
-      expect(diagnostics.hasWebgl).toBe(await expectAutoWebgl(orcaPage))
+      expect(diagnostics.hasWebgl).toBe(await expectAutoWebgl(oakPage))
       expect(diagnostics.cursorHidden).toBe(false)
       expect(overpaint.offenders).toEqual([])
       expect(wrapDiagnostics.wrappedBoxLines).toEqual([])

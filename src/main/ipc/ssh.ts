@@ -36,7 +36,7 @@ import {
   getPtyIdsForConnection,
   getSshPtyProvider
 } from './pty'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { OakRuntimeService } from '../runtime/oak-runtime'
 
 let sshStore: SshConnectionStore | null = null
 let connectionManager: SshConnectionManager | null = null
@@ -47,7 +47,7 @@ let persistedStore: Store | null = null
 let advertisedUrlWatcherUnsubscribe: (() => void) | null = null
 let powerMonitorUnsubscribe: (() => void) | null = null
 let currentGetMainWindow: () => BrowserWindow | null = () => null
-let currentRuntime: OrcaRuntimeService | undefined
+let currentRuntime: OakRuntimeService | undefined
 
 const SSH_IPC_CHANNELS = [
   'ssh:listTargets',
@@ -635,7 +635,7 @@ function refreshActiveRelaySessions(): void {
 export function registerSshHandlers(
   store: Store,
   getMainWindow: () => BrowserWindow | null,
-  runtime?: OrcaRuntimeService
+  runtime?: OakRuntimeService
 ): { connectionManager: SshConnectionManager; sshStore: SshConnectionStore } {
   // Why: on macOS, app re-activation creates a new BrowserWindow and re-calls
   // this function. ipcMain.handle() throws if a handler is already registered,

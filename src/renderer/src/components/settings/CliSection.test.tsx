@@ -83,7 +83,7 @@ describe('CliSection project runtime defaults', () => {
     await capturedPanel.props?.onBeforeOpenTerminal()
 
     expect(capturedPanel.useInstalledAgentSkill).toHaveBeenCalledWith(
-      'orca-cli',
+      'oak-cli',
       expect.objectContaining({
         discoveryTarget: { runtime: 'wsl', wslDistro: 'Ubuntu' },
         sourceKinds: ['global']
@@ -92,7 +92,7 @@ describe('CliSection project runtime defaults', () => {
     expect(capturedPanel.props?.command).toContain("wsl.exe -d 'Ubuntu' -- sh -c")
     expect(capturedPanel.props?.command).toContain('npx skills add')
     expect(capturedPanel.props?.installedCommand).toContain("wsl.exe -d 'Ubuntu' -- sh -c")
-    expect(capturedPanel.props?.installedCommand).toContain('npx skills update orca-cli --global')
+    expect(capturedPanel.props?.installedCommand).toContain('npx skills update oak-cli --global')
     expect(getWslInstallStatus).toHaveBeenCalledWith({ distro: 'Ubuntu' })
     expect(getWslInstallStatus).toHaveBeenCalledTimes(2)
   })

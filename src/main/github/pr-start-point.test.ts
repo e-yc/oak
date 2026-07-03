@@ -21,9 +21,9 @@ describe('resolveGitHubPrStartPoint', () => {
   it('falls back to the GitHub PR head ref when a direct branch fetch fails', async () => {
     getPullRequestPushTargetMock.mockResolvedValue({
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'feat/onboarding-model-choice-782',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       }
     })
     const fetchRemoteTrackingRef = vi.fn(async (_remote: string, branch: string) => {
@@ -60,9 +60,9 @@ describe('resolveGitHubPrStartPoint', () => {
       headSha: 'def456',
       branchNameOverride: 'feat/onboarding-model-choice-782',
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'feat/onboarding-model-choice-782',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       }
     })
   })
@@ -134,9 +134,9 @@ describe('resolveGitHubPrStartPoint', () => {
     })
     getPullRequestPushTargetMock.mockResolvedValue({
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'contributor/fix',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       }
     })
     const fetchRemoteTrackingRef = vi.fn(async () => {})
@@ -162,9 +162,9 @@ describe('resolveGitHubPrStartPoint', () => {
       headSha: 'abc123',
       branchNameOverride: 'contributor/fix',
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'contributor/fix',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       }
     })
   })
@@ -172,9 +172,9 @@ describe('resolveGitHubPrStartPoint', () => {
   it('surfaces maintainerCanModify=false for a fork PR so the caller can warn', async () => {
     getPullRequestPushTargetMock.mockResolvedValue({
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'contributor/fix',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       },
       maintainerCanModify: false
     })
@@ -201,9 +201,9 @@ describe('resolveGitHubPrStartPoint', () => {
       headSha: 'abc123',
       branchNameOverride: 'contributor/fix',
       pushTarget: {
-        remoteName: 'pr-contributor-orca',
+        remoteName: 'pr-contributor-oak',
         branchName: 'contributor/fix',
-        remoteUrl: 'git@github.com:contributor/orca.git'
+        remoteUrl: 'git@github.com:contributor/oak.git'
       },
       maintainerCanModify: false
     })

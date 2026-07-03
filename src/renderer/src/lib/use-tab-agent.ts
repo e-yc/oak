@@ -109,7 +109,7 @@ export function resolveTabAgentFromSignals(args: {
  *    a recognized shell authoritatively means "no agent".
  * 2. Hook status — accurate provider identity from native integrations, and
  *    available for SSH/remote panes where foreground polling is too costly.
- * 3. launchAgent — what Orca launched here; instant bootstrap before hooks or
+ * 3. launchAgent — what Oak launched here; instant bootstrap before hooks or
  *    foreground polling arrive, and the owned identity for startup windows.
  * 4. Title — legacy/unknown-session fallback, and the live override when a pane
  *    is reused: once the pane has shown activity, a title that explicitly names
@@ -243,7 +243,7 @@ export function useTabAgent(tab: TerminalTab): TuiAgent | null {
         }
       } else {
         if (process && tab.launchAgent) {
-          // Why: for Orca-owned launches, an unrecognized non-shell process
+          // Why: for Oak-owned launches, an unrecognized non-shell process
           // is enough lifecycle evidence to clear launch intent when the pane
           // later returns to a shell, without using title text as identity.
           hasObservedAgentSignalRef.current = true

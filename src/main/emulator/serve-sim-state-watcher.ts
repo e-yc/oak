@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import type { FSWatcher } from 'node:fs'
 
 // Why: terminal-started `serve-sim --detach` writes state under $TMPDIR/serve-sim/ and may
-// print JSON to the PTY. Orca-managed attach (CLI/pane) already registers via EmulatorBridge;
+// print JSON to the PTY. Oak-managed attach (CLI/pane) already registers via EmulatorBridge;
 // this watcher only reacts to *external* helper starts so the UI can open a simulator tab
 // without focus-steal (mirror advertised-url-watcher PTY binding model).
 
@@ -71,7 +71,7 @@ export class ServeSimStateWatcher {
   private readonly ptyToWorktree = new Map<string, string>()
   private readonly ptyBuffers = new Map<string, string>()
   private readonly seenExternalKeys = new Set<string>()
-  private readonly orcaManagedHelperKeys = new Set<string>()
+  private readonly oakManagedHelperKeys = new Set<string>()
   private readonly listeners = new Set<(event: ServeSimStateDetectedEvent) => void>()
   private stateWatcher: FSWatcher | null = null
   private stateDirPoll: ReturnType<typeof setInterval> | null = null
@@ -85,15 +85,15 @@ export class ServeSimStateWatcher {
     return () => this.listeners.delete(listener)
   }
 
-  // Why: bridge calls this when Orca CLI/pane attaches so we do not duplicate-tab on our own session.
-  markOrcaManaged(info: ServeSimHelperInfo): void {
-    this.orcaManagedHelperKeys.add(helperInstanceKey(info))
+  // Why: bridge calls this when Oak CLI/pane attaches so we do not duplicate-tab on our own session.
+  markOakManaged(info: ServeSimHelperInfo): void {
+    this.oakManagedHelperKeys.add(helperInstanceKey(info))
   }
 
-  unmarkOrcaManaged(deviceUdid: string): void {
-    for (const key of this.orcaManagedHelperKeys) {
+  unmarkOakManaged(deviceUdid: string): void {
+    for (const key of this.oakManagedHelperKeys) {
       if (key.startsWith(`${deviceUdid}::`)) {
-        this.orcaManagedHelperKeys.delete(key)
+        this.oakManagedHelperKeys.delete(key)
       }
     }
   }
@@ -187,7 +187,7 @@ export class ServeSimStateWatcher {
     this.ptyToWorktree.clear()
     this.ptyBuffers.clear()
     this.seenExternalKeys.clear()
-    this.orcaManagedHelperKeys.clear()
+    this.oakManagedHelperKeys.clear()
     this.listeners.clear()
   }
 
@@ -252,7 +252,7 @@ export class ServeSimStateWatcher {
     source: ServeSimStateDetectedEvent['source']
   ): void {
     const instanceKey = helperInstanceKey(info)
-    if (this.orcaManagedHelperKeys.has(instanceKey)) {
+    if (this.oakManagedHelperKeys.has(instanceKey)) {
       return
     }
     const dedupeKey = `${worktreeId}::${instanceKey}`

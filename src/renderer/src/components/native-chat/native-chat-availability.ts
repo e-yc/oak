@@ -29,7 +29,7 @@ export type NativeChatAvailabilityInput = {
   /** Feature flag: hidden unless enabled from Settings > Experimental. */
   experimentalNativeChatEnabled?: boolean
   contentType: Tab['contentType']
-  /** The coding-agent Orca launched in this terminal, if any (from TerminalTab). */
+  /** The coding-agent Oak launched in this terminal, if any (from TerminalTab). */
   launchAgent?: TuiAgent | null
   /** The agent identity from a live agent-status entry for any pane of this tab,
    *  when one exists — i.e. an agent detected at runtime even though
@@ -49,7 +49,7 @@ export type NativeChatAvailabilityInput = {
  *  shells, non-terminal surfaces (editor, browser, …), and unsupported agents
  *  (Grok, Gemini, …) never qualify. Eligibility is the union of the launch-time
  *  hint, live detection, and title resolution — but only when that signal names
- *  a supported agent — so the control appears for both Orca-launched and
+ *  a supported agent — so the control appears for both Oak-launched and
  *  user-started Claude/Codex sessions. */
 export function canToggleNativeChat(input: NativeChatAvailabilityInput): boolean {
   if (input.experimentalNativeChatEnabled !== true) {

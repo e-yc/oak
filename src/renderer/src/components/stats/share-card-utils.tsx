@@ -127,7 +127,7 @@ export function getLegendItems(provider: 'claude' | 'codex') {
   ]
 }
 
-export function OrcaLogo(): React.JSX.Element {
+export function OakLogo(): React.JSX.Element {
   return (
     <svg
       width={26}
@@ -213,10 +213,7 @@ export function CardFooter(props: {
             marginLeft: 5
           }}
         >
-          {translate(
-            'auto.components.stats.share.card.utils.19f4b4dc75',
-            'github.com/stablyai/orca'
-          )}
+          {translate('auto.components.stats.share.card.utils.19f4b4dc75', 'github.com/e-yc/oak')}
         </span>
       </div>
     </div>

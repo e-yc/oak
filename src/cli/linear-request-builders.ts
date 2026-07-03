@@ -181,10 +181,8 @@ export function buildLinearCurrentContext(
   return {
     remote,
     ...(remote ? {} : { cwd }),
-    ...(process.env.ORCA_WORKTREE_ID ? { worktreeId: process.env.ORCA_WORKTREE_ID } : {}),
-    ...(process.env.ORCA_TERMINAL_HANDLE
-      ? { terminalHandle: process.env.ORCA_TERMINAL_HANDLE }
-      : {})
+    ...(process.env.OAK_WORKTREE_ID ? { worktreeId: process.env.OAK_WORKTREE_ID } : {}),
+    ...(process.env.OAK_TERMINAL_HANDLE ? { terminalHandle: process.env.OAK_TERMINAL_HANDLE } : {})
   }
 }
 

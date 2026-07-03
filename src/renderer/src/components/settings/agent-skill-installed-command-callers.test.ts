@@ -29,15 +29,15 @@ const updateCapableCallers = new Map<string, readonly string[]>([
   ],
   [
     'src/renderer/src/components/settings/CliAgentSkillSetup.tsx',
-    ['ORCA_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
+    ['OAK_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
   ],
   [
     'src/renderer/src/components/settings/CliSection.tsx',
-    ['ORCA_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
+    ['OAK_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
   ],
   [
     'src/renderer/src/components/settings/BrowserUsePane.tsx',
-    ['ORCA_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={browserUseUpdateCommand}']
+    ['OAK_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={browserUseUpdateCommand}']
   ],
   [
     'src/renderer/src/components/settings/BrowserUseSkillStep.tsx',
@@ -45,11 +45,11 @@ const updateCapableCallers = new Map<string, readonly string[]>([
   ],
   [
     'src/renderer/src/components/feature-wall/BrowserUseSkillSetupCard.tsx',
-    ['ORCA_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
+    ['OAK_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={updateCommand}']
   ],
   [
     'src/renderer/src/components/sidebar/LinearAgentSkillSetupPrompt.tsx',
-    ['ORCA_LINEAR_SKILL_UPDATE_COMMAND', 'installedCommand={installedCommand}']
+    ['OAK_LINEAR_SKILL_UPDATE_COMMAND', 'installedCommand={installedCommand}']
   ],
   [
     'src/renderer/src/components/sidebar/LinearAgentSkillSetupDialog.tsx',
@@ -57,7 +57,7 @@ const updateCapableCallers = new Map<string, readonly string[]>([
   ],
   [
     'src/renderer/src/components/settings/MobileEmulatorAgentControlRow.tsx',
-    ['ORCA_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
+    ['OAK_CLI_SKILL_UPDATE_COMMAND', 'installedCommand={cliSkillUpdateCommand}']
   ]
 ])
 

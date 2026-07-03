@@ -2,14 +2,14 @@ import { useCallback, useMemo } from 'react'
 import type { CliInstallStatus } from '../../../../shared/cli-install-types'
 import type { GlobalSettings } from '../../../../shared/types'
 import {
-  ORCA_CLI_SKILL_INSTALL_COMMAND,
-  ORCA_CLI_SKILL_NAME,
-  ORCA_CLI_SKILL_UPDATE_COMMAND
+  OAK_CLI_SKILL_INSTALL_COMMAND,
+  OAK_CLI_SKILL_NAME,
+  OAK_CLI_SKILL_UPDATE_COMMAND
 } from '@/lib/agent-feature-install-commands'
 import {
   AGENT_SKILL_CLI_PREREQUISITE_NOTICE,
-  ensureOrcaCliAvailableForAgentSkillTerminal,
-  isOrcaCliAvailableOnPath
+  ensureOakCliAvailableForAgentSkillTerminal,
+  isOakCliAvailableOnPath
 } from '@/lib/agent-skill-cli-prerequisite'
 import {
   GLOBAL_AGENT_SKILL_SOURCE_KINDS,
@@ -58,16 +58,16 @@ export function CliAgentSkillSetup({
     loading: cliSkillLoading,
     error: cliSkillError,
     refresh: refreshCliSkill
-  } = useInstalledAgentSkill(ORCA_CLI_SKILL_NAME, {
+  } = useInstalledAgentSkill(OAK_CLI_SKILL_NAME, {
     discoveryTarget: cliSkillDiscoveryTarget,
     sourceKinds: GLOBAL_AGENT_SKILL_SOURCE_KINDS
   })
   const cliSkillInstallCommand = buildSkillCommandForRuntime(
-    ORCA_CLI_SKILL_INSTALL_COMMAND,
+    OAK_CLI_SKILL_INSTALL_COMMAND,
     agentRuntime
   )
   const cliSkillUpdateCommand = buildSkillCommandForRuntime(
-    ORCA_CLI_SKILL_UPDATE_COMMAND,
+    OAK_CLI_SKILL_UPDATE_COMMAND,
     agentRuntime
   )
   const cliSkillTerminalShellOverride = getAgentSkillTerminalShellOverride(
@@ -90,7 +90,7 @@ export function CliAgentSkillSetup({
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.CliSection.36a6f919ba',
-            'Give agents Orca-aware workspace, terminal, and progress workflows.'
+            'Give agents Oak-aware workspace, terminal, and progress workflows.'
           )}
         </p>
       </div>
@@ -101,7 +101,7 @@ export function CliAgentSkillSetup({
         title={translate('auto.components.settings.CliSection.6053cf736c', 'CLI skill')}
         description={translate(
           'auto.components.settings.CliSection.e8012c03a1',
-          'Enables agents to use Orca workspace, terminal, and progress commands.'
+          'Enables agents to use Oak workspace, terminal, and progress commands.'
         )}
         command={cliSkillInstallCommand}
         installedCommand={cliSkillUpdateCommand}
@@ -120,11 +120,11 @@ export function CliAgentSkillSetup({
         error={cliSkillError}
         preInstallNotice={AGENT_SKILL_CLI_PREREQUISITE_NOTICE}
         getPrerequisiteStatus={getCliSkillPrerequisiteStatus}
-        isPrerequisiteAvailable={isOrcaCliAvailableOnPath}
+        isPrerequisiteAvailable={isOakCliAvailableOnPath}
         onBeforeOpenTerminal={async () => {
           await (agentRuntime.runtime === 'wsl'
             ? ensureWslCliAvailableForAgentSkillTerminal(agentRuntime)
-            : ensureOrcaCliAvailableForAgentSkillTerminal({
+            : ensureOakCliAvailableForAgentSkillTerminal({
                 onStatusChange: onHostStatusChange
               }))
         }}

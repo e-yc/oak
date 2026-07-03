@@ -1,12 +1,12 @@
 {
-  "name": "orca",
+  "name": "oak",
   "version": "1.4.120-rc.3",
   "description": "Next-gen IDE for parallel agentic development",
-  "homepage": "https://github.com/stablyai/orca",
+  "homepage": "https://github.com/e-yc/oak",
   "author": "stablyai",
   "bin": {
-    "orca": "./out/cli/index.js",
-    "orca-dev": "./config/scripts/orca-dev.mjs"
+    "oak": "./out/cli/index.js",
+    "oak-dev": "./config/scripts/oak-dev.mjs"
   },
   "main": "./out/main/index.js",
   "scripts": {
@@ -37,6 +37,7 @@
     "start": "pnpm run ensure:electron-runtime && electron-vite preview",
     "dev": "pnpm run ensure:electron-runtime && node config/scripts/run-electron-vite-dev.mjs",
     "dev-stable-name": "pnpm run ensure:electron-runtime && node config/scripts/run-electron-vite-dev.mjs --stable-name",
+    "install:dev-app": "node config/scripts/install-macos-dev-launcher.mjs",
     "dev:web": "vite --config vite.web.config.ts --host 127.0.0.1",
     "build:relay": "node config/scripts/build-relay.mjs",
     "build:computer-macos": "node config/scripts/build-computer-macos.mjs",
@@ -67,7 +68,7 @@
     "build:win": "pnpm run build:desktop && pnpm run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --win",
     "build:icons": "bash resources/icon-source/generate.sh",
     "build:mac": "pnpm run build:desktop && pnpm run build:computer-macos && pnpm run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --mac",
-    "build:mac:release": "node config/scripts/verify-macos-release-env.mjs && ORCA_MAC_RELEASE=1 pnpm run build:desktop && ORCA_MAC_RELEASE=1 pnpm run build:computer-macos && pnpm run ensure:electron-runtime && ORCA_MAC_RELEASE=1 electron-builder --config config/electron-builder.config.cjs --mac",
+    "build:mac:release": "node config/scripts/verify-macos-release-env.mjs && OAK_MAC_RELEASE=1 pnpm run build:desktop && OAK_MAC_RELEASE=1 pnpm run build:computer-macos && pnpm run ensure:electron-runtime && OAK_MAC_RELEASE=1 electron-builder --config config/electron-builder.config.cjs --mac",
     "build:linux": "pnpm run build:desktop && pnpm run ensure:electron-runtime && electron-builder --config config/electron-builder.config.cjs --linux AppImage deb",
     "test:e2e": "pnpm run ensure:electron-runtime && npx playwright test --config tests/playwright.config.ts --project electron-headless",
     "test:e2e:floating-mobile-emulator": "pnpm run ensure:electron-runtime && npx playwright test tests/e2e/floating-mobile-emulator-tab.spec.ts --config tests/playwright.config.ts --project electron-headless --workers=1",

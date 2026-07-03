@@ -124,7 +124,7 @@ export function matchFileSearchShortcut(
   e: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'shiftKey' | 'altKey' | 'repeat'>,
   platform: KeybindingPlatform,
   keybindings?: KeybindingOverrides,
-  terminalShortcutPolicy: TerminalShortcutPolicy = 'orca-first'
+  terminalShortcutPolicy: TerminalShortcutPolicy = 'oak-first'
 ): boolean {
   if (e.repeat) {
     return false
@@ -166,7 +166,7 @@ type KeyboardHandlersDeps = {
 /**
  * Installs terminal-pane shortcuts on the tab keyboard scope.
  * Uses the shared shortcut policy before forwarding unmatched input to xterm
- * so configurable Orca actions remain consistent across local and SSH panes.
+ * so configurable Oak actions remain consistent across local and SSH panes.
  */
 export function useTerminalKeyboardShortcuts({
   tabId,
@@ -192,7 +192,7 @@ export function useTerminalKeyboardShortcuts({
   searchStateRef,
   macOptionAsAltRef,
   keybindings,
-  terminalShortcutPolicy = 'orca-first'
+  terminalShortcutPolicy = 'oak-first'
 }: KeyboardHandlersDeps): void {
   useEffect(() => {
     if (!isActive) {

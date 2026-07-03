@@ -7,8 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getOrchestrationUsageExamples } from '@/lib/orchestration-usage-examples'
 import { OrchestrationPane } from './OrchestrationPane'
 
-const INSTALL_COMMAND =
-  'npx skills add https://github.com/stablyai/orca --skill orchestration --global'
+const INSTALL_COMMAND = 'npx skills add https://github.com/e-yc/oak --skill orchestration --global'
 const UPDATE_COMMAND = INSTALL_COMMAND
 
 const mocks = vi.hoisted(() => ({

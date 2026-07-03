@@ -58,7 +58,7 @@ describe('parseEphemeralVmRecipeResult', () => {
     }
   })
 
-  it('parses an orca-server connection result', () => {
+  it('parses an oak-server connection result', () => {
     const pairingCode = makePairingCode()
 
     expect(
@@ -66,7 +66,7 @@ describe('parseEphemeralVmRecipeResult', () => {
         JSON.stringify({
           schemaVersion: 1,
           connection: {
-            type: 'orca-server',
+            type: 'oak-server',
             pairingCode,
             projectRoot: '/workspace/repo'
           }
@@ -77,7 +77,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       result: {
         schemaVersion: 1,
         connection: {
-          type: 'orca-server',
+          type: 'oak-server',
           pairingCode,
           projectRoot: '/workspace/repo'
         }
@@ -165,7 +165,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       )
     ).toEqual({
       ok: false,
-      error: 'Recipe result pairingCode is not a valid Orca pairing code.'
+      error: 'Recipe result pairingCode is not a valid Oak pairing code.'
     })
   })
 
@@ -242,7 +242,7 @@ describe('parseEphemeralVmRecipeResult', () => {
       })
     ).toEqual({
       schemaVersion: 1,
-      pairingCode: 'orca://pair?code=[redacted]',
+      pairingCode: 'oak://pair?code=[redacted]',
       projectRoot: '/workspace/repo',
       userData: {
         providerResourceId: 'sandbox-123',

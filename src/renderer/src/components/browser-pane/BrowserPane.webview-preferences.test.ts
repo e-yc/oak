@@ -28,10 +28,10 @@ describe('BrowserPane webview preferences', () => {
     )
 
     expect(source).toContain(
-      "import { ORCA_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE } from '../../../../shared/browser-guest-web-preferences'"
+      "import { OAK_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE } from '../../../../shared/browser-guest-web-preferences'"
     )
     expect(creationBlock).toContain(
-      "webview.setAttribute('webpreferences', ORCA_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE)"
+      "webview.setAttribute('webpreferences', OAK_BROWSER_GUEST_WEB_PREFERENCES_ATTRIBUTE)"
     )
     expect(creationBlock).not.toContain('disablehtmlfullscreenwindowresize')
   })

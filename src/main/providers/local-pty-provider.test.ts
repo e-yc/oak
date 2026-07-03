@@ -32,7 +32,7 @@ vi.mock('fs', () => ({
 
 vi.mock('electron', () => ({
   app: {
-    getPath: vi.fn(() => '/tmp/orca-user-data')
+    getPath: vi.fn(() => '/tmp/oak-user-data')
   }
 }))
 
@@ -275,7 +275,7 @@ describe('LocalPtyProvider', () => {
         expect(mockProc.write).not.toHaveBeenCalled()
 
         const dataCallback = mockProc.onData.mock.calls[0]?.[0] as (data: string) => void
-        dataCallback('\x1b]777;orca-shell-ready\x07user@host % ')
+        dataCallback('\x1b]777;oak-shell-ready\x07user@host % ')
         await Promise.resolve()
         vi.advanceTimersByTime(29)
         await Promise.resolve()
@@ -297,7 +297,7 @@ describe('LocalPtyProvider', () => {
         await provider.spawn({ cols: 80, rows: 24, command: 'printf ready' })
         const dataCallback = mockProc.onData.mock.calls[0]?.[0] as (data: string) => void
 
-        dataCallback('\x1b]777;orca-shell-ready')
+        dataCallback('\x1b]777;oak-shell-ready')
         expect(onData).not.toHaveBeenCalled()
 
         vi.advanceTimersByTime(1500)
@@ -305,7 +305,7 @@ describe('LocalPtyProvider', () => {
 
         expect(onData).toHaveBeenCalledWith(
           expect.any(String),
-          '\x1b]777;orca-shell-ready',
+          '\x1b]777;oak-shell-ready',
           expect.any(Number)
         )
         expect(mockProc.write).not.toHaveBeenCalled()
@@ -325,14 +325,14 @@ describe('LocalPtyProvider', () => {
       await provider.spawn({ cols: 80, rows: 24, command: 'printf ready' })
       const dataCallback = mockProc.onData.mock.calls[0]?.[0] as (data: string) => void
 
-      dataCallback('\x1b]777;orca-shell-ready')
+      dataCallback('\x1b]777;oak-shell-ready')
       expect(onData).not.toHaveBeenCalled()
 
       exitCb?.({ exitCode: 0 })
 
       expect(onData).toHaveBeenCalledWith(
         expect.any(String),
-        '\x1b]777;orca-shell-ready',
+        '\x1b]777;oak-shell-ready',
         expect.any(Number)
       )
     })
@@ -340,9 +340,9 @@ describe('LocalPtyProvider', () => {
     it('honors explicit terminal env overrides after deleting requested defaults', async () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
-          env.TERM_PROGRAM = 'Orca'
-          env.ORCA_ATTRIBUTION_SHIM_DIR = '/tmp/orca-attribution'
-          env.PATH = `/tmp/orca-attribution:${env.PATH ?? ''}`
+          env.TERM_PROGRAM = 'Oak'
+          env.OAK_ATTRIBUTION_SHIM_DIR = '/tmp/oak-attribution'
+          env.PATH = `/tmp/oak-attribution:${env.PATH ?? ''}`
           return env
         }
       })
@@ -352,18 +352,18 @@ describe('LocalPtyProvider', () => {
         rows: 24,
         env: {
           TERM: 'screen-256color',
-          PATH: '/tmp/orca-agent-teams-bin:/usr/bin',
-          ORCA_AGENT_TEAMS_TEAM_ID: 'team-test'
+          PATH: '/tmp/oak-agent-teams-bin:/usr/bin',
+          OAK_AGENT_TEAMS_TEAM_ID: 'team-test'
         },
-        envToDelete: ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+        envToDelete: ['TERM_PROGRAM', 'OAK_ATTRIBUTION_SHIM_DIR']
       })
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[2].name).toBe('screen-256color')
       expect(spawnCall[2].env.TERM).toBe('screen-256color')
-      expect(spawnCall[2].env.PATH.split(':')[0]).toBe('/tmp/orca-agent-teams-bin')
+      expect(spawnCall[2].env.PATH.split(':')[0]).toBe('/tmp/oak-agent-teams-bin')
       expect(spawnCall[2].env.TERM_PROGRAM).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_ATTRIBUTION_SHIM_DIR).toBeUndefined()
+      expect(spawnCall[2].env.OAK_ATTRIBUTION_SHIM_DIR).toBeUndefined()
     })
 
     it('does not inherit AppImage runtime env into Linux PTY shells', async () => {
@@ -376,17 +376,15 @@ describe('LocalPtyProvider', () => {
         PATH: process.env.PATH,
         LD_LIBRARY_PATH: process.env.LD_LIBRARY_PATH
       }
-      process.env.APPIMAGE = '/data/apps/orca.appimage'
-      process.env.APPDIR = '/tmp/.mount_orca123'
-      process.env.ARGV0 = '/data/apps/orca.appimage'
+      process.env.APPIMAGE = '/data/apps/oak.appimage'
+      process.env.APPDIR = '/tmp/.mount_oak123'
+      process.env.ARGV0 = '/data/apps/oak.appimage'
       process.env.OWD = '/home/user/project'
-      process.env.APPIMAGE_LIBRARY_PATH = '/tmp/.mount_orca123/usr/lib'
-      process.env.PATH = ['/tmp/.mount_orca123', '/tmp/.mount_orca123/usr/sbin', '/usr/bin'].join(
+      process.env.APPIMAGE_LIBRARY_PATH = '/tmp/.mount_oak123/usr/lib'
+      process.env.PATH = ['/tmp/.mount_oak123', '/tmp/.mount_oak123/usr/sbin', '/usr/bin'].join(
         delimiter
       )
-      process.env.LD_LIBRARY_PATH = ['/tmp/.mount_orca123/usr/lib', '/opt/audio/lib'].join(
-        delimiter
-      )
+      process.env.LD_LIBRARY_PATH = ['/tmp/.mount_oak123/usr/lib', '/opt/audio/lib'].join(delimiter)
 
       try {
         await provider.spawn({ cols: 80, rows: 24 })
@@ -413,8 +411,8 @@ describe('LocalPtyProvider', () => {
     it('uses shell wrapper when MiMo home must survive shell startup', async () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
-          env.MIMOCODE_HOME = '/tmp/orca-mimocode-overlay'
-          env.ORCA_MIMOCODE_HOME = '/tmp/orca-mimocode-overlay'
+          env.MIMOCODE_HOME = '/tmp/oak-mimocode-overlay'
+          env.OAK_MIMOCODE_HOME = '/tmp/oak-mimocode-overlay'
           return env
         }
       })
@@ -424,7 +422,7 @@ describe('LocalPtyProvider', () => {
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[1]).toEqual(['-l'])
       expect(spawnCall[2].env.ZDOTDIR).toMatch(/shell-ready[\\/]zsh/)
-      expect(spawnCall[2].env.ORCA_SHELL_READY_MARKER).toBe('0')
+      expect(spawnCall[2].env.OAK_SHELL_READY_MARKER).toBe('0')
     })
 
     it('does not pass a Windows Codex home into WSL terminals', async () => {
@@ -432,7 +430,7 @@ describe('LocalPtyProvider', () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
           env.CODEX_HOME = 'C:\\Users\\jin\\.codex'
-          env.ORCA_CODEX_HOME = 'C:\\Users\\jin\\.codex'
+          env.OAK_CODEX_HOME = 'C:\\Users\\jin\\.codex'
           return env
         }
       })
@@ -446,7 +444,7 @@ describe('LocalPtyProvider', () => {
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[0]).toBe('wsl.exe')
       expect(spawnCall[2].env.CODEX_HOME).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_CODEX_HOME).toBeUndefined()
+      expect(spawnCall[2].env.OAK_CODEX_HOME).toBeUndefined()
     })
 
     it('does not pass a WSL managed Codex home into Windows terminals', async () => {
@@ -454,9 +452,9 @@ describe('LocalPtyProvider', () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
           env.CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
-          env.ORCA_CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
+          env.OAK_CODEX_HOME =
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
           return env
         }
       })
@@ -469,7 +467,7 @@ describe('LocalPtyProvider', () => {
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[2].env.CODEX_HOME).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_CODEX_HOME).toBeUndefined()
+      expect(spawnCall[2].env.OAK_CODEX_HOME).toBeUndefined()
     })
 
     it('preserves an explicit Linux Codex home for WSL terminals', async () => {
@@ -498,9 +496,9 @@ describe('LocalPtyProvider', () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
           env.CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
-          env.ORCA_CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
+          env.OAK_CODEX_HOME =
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
           return env
         }
       })
@@ -513,12 +511,12 @@ describe('LocalPtyProvider', () => {
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[0]).toBe('wsl.exe')
-      expect(spawnCall[2].env.CODEX_HOME).toBe('/home/jin/.local/share/orca/codex-accounts/a/home')
-      expect(spawnCall[2].env.ORCA_CODEX_HOME).toBe(
-        '/home/jin/.local/share/orca/codex-accounts/a/home'
+      expect(spawnCall[2].env.CODEX_HOME).toBe('/home/jin/.local/share/oak/codex-accounts/a/home')
+      expect(spawnCall[2].env.OAK_CODEX_HOME).toBe(
+        '/home/jin/.local/share/oak/codex-accounts/a/home'
       )
       expect(spawnCall[2].env.WSLENV).toContain('CODEX_HOME')
-      expect(spawnCall[2].env.WSLENV).toContain('ORCA_CODEX_HOME')
+      expect(spawnCall[2].env.WSLENV).toContain('OAK_CODEX_HOME')
     })
 
     it('does not pass a WSL managed Codex home into a different WSL distro', async () => {
@@ -526,9 +524,9 @@ describe('LocalPtyProvider', () => {
       provider.configure({
         buildSpawnEnv: (_id, env) => {
           env.CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
-          env.ORCA_CODEX_HOME =
-            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\orca\\codex-accounts\\a\\home'
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
+          env.OAK_CODEX_HOME =
+            '\\\\wsl.localhost\\Ubuntu\\home\\jin\\.local\\share\\oak\\codex-accounts\\a\\home'
           return env
         }
       })
@@ -542,7 +540,7 @@ describe('LocalPtyProvider', () => {
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[0]).toBe('wsl.exe')
       expect(spawnCall[2].env.CODEX_HOME).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_CODEX_HOME).toBeUndefined()
+      expect(spawnCall[2].env.OAK_CODEX_HOME).toBeUndefined()
     })
 
     it('uses the preferred WSL distro for Windows cwd WSL terminals', async () => {
@@ -567,7 +565,7 @@ describe('LocalPtyProvider', () => {
         '-c',
         expect.stringContaining("cd '/mnt/c/Users/jin/repo'")
       ])
-      expect(spawnCall[1][5]).toContain('exec "\\$_orca_wsl_shell" -l')
+      expect(spawnCall[1][5]).toContain('exec "\\$_oak_wsl_shell" -l')
       expect(spawnCall[2].env.HISTFILE).toContain('terminal-history-wsl/Debian')
     })
 
@@ -592,17 +590,17 @@ describe('LocalPtyProvider', () => {
       expect(pwshAvailable).not.toHaveBeenCalled()
     })
 
-    it('marks Orca terminal handle for WSL import when buildSpawnEnv opts in', async () => {
+    it('marks Oak terminal handle for WSL import when buildSpawnEnv opts in', async () => {
       Object.defineProperty(process, 'platform', { configurable: true, value: 'win32' })
       const savedCodexHome = process.env.CODEX_HOME
-      const savedOrcaCodexHome = process.env.ORCA_CODEX_HOME
+      const savedOakCodexHome = process.env.OAK_CODEX_HOME
       delete process.env.CODEX_HOME
-      delete process.env.ORCA_CODEX_HOME
+      delete process.env.OAK_CODEX_HOME
       provider.configure({
         buildSpawnEnv: (_id, env, ctx) => {
-          env.ORCA_TERMINAL_HANDLE = 'term_wsl'
+          env.OAK_TERMINAL_HANDLE = 'term_wsl'
           if (ctx?.isWsl) {
-            env.WSLENV = 'ORCA_TERMINAL_HANDLE/u'
+            env.WSLENV = 'OAK_TERMINAL_HANDLE/u'
           }
           return env
         }
@@ -620,18 +618,18 @@ describe('LocalPtyProvider', () => {
         } else {
           process.env.CODEX_HOME = savedCodexHome
         }
-        if (savedOrcaCodexHome === undefined) {
-          delete process.env.ORCA_CODEX_HOME
+        if (savedOakCodexHome === undefined) {
+          delete process.env.OAK_CODEX_HOME
         } else {
-          process.env.ORCA_CODEX_HOME = savedOrcaCodexHome
+          process.env.OAK_CODEX_HOME = savedOakCodexHome
         }
       }
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
       expect(spawnCall[0]).toBe('wsl.exe')
-      expect(spawnCall[2].env.ORCA_TERMINAL_HANDLE).toBe('term_wsl')
+      expect(spawnCall[2].env.OAK_TERMINAL_HANDLE).toBe('term_wsl')
       expect(spawnCall[2].env.WSLENV).toBe(
-        'ORCA_TERMINAL_HANDLE/u:POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD'
+        'OAK_TERMINAL_HANDLE/u:POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD'
       )
     })
 
@@ -651,15 +649,15 @@ describe('LocalPtyProvider', () => {
       expect(spawnCall[2].env.WSLENV ?? '').not.toContain(POWERLEVEL10K_WIZARD_DISABLE_ENV)
     })
 
-    it('does not inherit parent Orca pane identity when caller omits pane env', async () => {
+    it('does not inherit parent Oak pane identity when caller omits pane env', async () => {
       const saved = {
-        ORCA_PANE_KEY: process.env.ORCA_PANE_KEY,
-        ORCA_TAB_ID: process.env.ORCA_TAB_ID,
-        ORCA_WORKTREE_ID: process.env.ORCA_WORKTREE_ID
+        OAK_PANE_KEY: process.env.OAK_PANE_KEY,
+        OAK_TAB_ID: process.env.OAK_TAB_ID,
+        OAK_WORKTREE_ID: process.env.OAK_WORKTREE_ID
       }
-      process.env.ORCA_PANE_KEY = 'parent-tab:parent-leaf'
-      process.env.ORCA_TAB_ID = 'parent-tab'
-      process.env.ORCA_WORKTREE_ID = 'parent-worktree'
+      process.env.OAK_PANE_KEY = 'parent-tab:parent-leaf'
+      process.env.OAK_TAB_ID = 'parent-tab'
+      process.env.OAK_WORKTREE_ID = 'parent-worktree'
 
       try {
         await provider.spawn({ cols: 80, rows: 24 })
@@ -674,29 +672,29 @@ describe('LocalPtyProvider', () => {
       }
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
-      expect(spawnCall[2].env.ORCA_PANE_KEY).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_TAB_ID).toBeUndefined()
-      expect(spawnCall[2].env.ORCA_WORKTREE_ID).toBeUndefined()
+      expect(spawnCall[2].env.OAK_PANE_KEY).toBeUndefined()
+      expect(spawnCall[2].env.OAK_TAB_ID).toBeUndefined()
+      expect(spawnCall[2].env.OAK_WORKTREE_ID).toBeUndefined()
     })
 
-    it('preserves explicit child Orca pane identity over parent env', async () => {
+    it('preserves explicit child Oak pane identity over parent env', async () => {
       const saved = {
-        ORCA_PANE_KEY: process.env.ORCA_PANE_KEY,
-        ORCA_TAB_ID: process.env.ORCA_TAB_ID,
-        ORCA_WORKTREE_ID: process.env.ORCA_WORKTREE_ID
+        OAK_PANE_KEY: process.env.OAK_PANE_KEY,
+        OAK_TAB_ID: process.env.OAK_TAB_ID,
+        OAK_WORKTREE_ID: process.env.OAK_WORKTREE_ID
       }
-      process.env.ORCA_PANE_KEY = 'parent-tab:parent-leaf'
-      process.env.ORCA_TAB_ID = 'parent-tab'
-      process.env.ORCA_WORKTREE_ID = 'parent-worktree'
+      process.env.OAK_PANE_KEY = 'parent-tab:parent-leaf'
+      process.env.OAK_TAB_ID = 'parent-tab'
+      process.env.OAK_WORKTREE_ID = 'parent-worktree'
 
       try {
         await provider.spawn({
           cols: 80,
           rows: 24,
           env: {
-            ORCA_PANE_KEY: 'child-tab:child-leaf',
-            ORCA_TAB_ID: 'child-tab',
-            ORCA_WORKTREE_ID: 'child-worktree'
+            OAK_PANE_KEY: 'child-tab:child-leaf',
+            OAK_TAB_ID: 'child-tab',
+            OAK_WORKTREE_ID: 'child-worktree'
           }
         })
       } finally {
@@ -710,9 +708,9 @@ describe('LocalPtyProvider', () => {
       }
 
       const spawnCall = spawnMock.mock.calls.at(-1)!
-      expect(spawnCall[2].env.ORCA_PANE_KEY).toBe('child-tab:child-leaf')
-      expect(spawnCall[2].env.ORCA_TAB_ID).toBe('child-tab')
-      expect(spawnCall[2].env.ORCA_WORKTREE_ID).toBe('child-worktree')
+      expect(spawnCall[2].env.OAK_PANE_KEY).toBe('child-tab:child-leaf')
+      expect(spawnCall[2].env.OAK_TAB_ID).toBe('child-tab')
+      expect(spawnCall[2].env.OAK_WORKTREE_ID).toBe('child-worktree')
     })
 
     it('combines HOMEDRIVE and HOMEPATH for Windows default cwd', async () => {
@@ -724,7 +722,7 @@ describe('LocalPtyProvider', () => {
       Object.defineProperty(process, 'platform', { value: 'win32' })
       delete process.env.USERPROFILE
       process.env.HOMEDRIVE = 'D:'
-      process.env.HOMEPATH = '\\Users\\orca'
+      process.env.HOMEPATH = '\\Users\\oak'
 
       try {
         await provider.spawn({ cols: 80, rows: 24 })
@@ -752,7 +750,7 @@ describe('LocalPtyProvider', () => {
       expect(spawnMock).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(Array),
-        expect.objectContaining({ cwd: 'D:\\Users\\orca' })
+        expect.objectContaining({ cwd: 'D:\\Users\\oak' })
       )
     })
 

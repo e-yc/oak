@@ -8,7 +8,7 @@ import {
   isDirectClaudeCommand,
   type ClaudeAgentTeamsMode
 } from '../../shared/claude-agent-teams-tmux-compat'
-import { getOrcaCliCommandNameForPlatform } from '../../shared/orca-cli-command-name'
+import { getOakCliCommandNameForPlatform } from '../../shared/oak-cli-command-name'
 
 export type ClaudeAgentTeamsLaunchPlan = {
   command: string
@@ -47,29 +47,29 @@ export async function buildClaudeAgentTeamsLaunchPlan(args: {
   return {
     command: addClaudeTeammateModeAuto(args.command),
     env,
-    envToDelete: ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+    envToDelete: ['TERM_PROGRAM', 'OAK_ATTRIBUTION_SHIM_DIR']
   }
 }
 
 export function resolveClaudeAgentTeamsShimBin(
   env: Record<string, string | undefined> = process.env
 ): string {
-  if (env.ORCA_AGENT_TEAMS_SHIM_BIN) {
-    return env.ORCA_AGENT_TEAMS_SHIM_BIN
+  if (env.OAK_AGENT_TEAMS_SHIM_BIN) {
+    return env.OAK_AGENT_TEAMS_SHIM_BIN
   }
   const bundled = bundledLauncherPath()
   if (bundled && isExecutableFile(bundled)) {
     return bundled
   }
   return (
-    findExecutableOnPath(process.platform === 'win32' ? 'orca-dev.cmd' : 'orca-dev', env.PATH) ??
-    findExecutableOnPath(getOrcaCliCommandNameForPlatform(process.platform), env.PATH) ??
-    getOrcaCliCommandNameForPlatform(process.platform)
+    findExecutableOnPath(process.platform === 'win32' ? 'oak-dev.cmd' : 'oak-dev', env.PATH) ??
+    findExecutableOnPath(getOakCliCommandNameForPlatform(process.platform), env.PATH) ??
+    getOakCliCommandNameForPlatform(process.platform)
   )
 }
 
 function defaultShimRoot(): string {
-  return join(homedir(), '.orca', 'claude-agent-teams-bin')
+  return join(homedir(), '.oak', 'claude-agent-teams-bin')
 }
 
 function bundledLauncherPath(): string | null {
@@ -77,13 +77,13 @@ function bundledLauncherPath(): string | null {
     return null
   }
   if (process.platform === 'darwin') {
-    return join(process.resourcesPath, 'bin', 'orca')
+    return join(process.resourcesPath, 'bin', 'oak')
   }
   if (process.platform === 'linux') {
-    return join(process.resourcesPath, 'bin', 'orca-ide')
+    return join(process.resourcesPath, 'bin', 'oak-ide')
   }
   if (process.platform === 'win32') {
-    return join(process.resourcesPath, 'bin', 'orca.cmd')
+    return join(process.resourcesPath, 'bin', 'oak.cmd')
   }
   return null
 }
@@ -117,7 +117,7 @@ function unixShimScript(): string {
   return [
     '#!/usr/bin/env sh',
     'set -eu',
-    `exec "\${ORCA_AGENT_TEAMS_SHIM_BIN:-${getOrcaCliCommandNameForPlatform(process.platform)}}" agent-teams-tmux "$@"`,
+    `exec "\${OAK_AGENT_TEAMS_SHIM_BIN:-${getOakCliCommandNameForPlatform(process.platform)}}" agent-teams-tmux "$@"`,
     ''
   ].join('\n')
 }
@@ -126,10 +126,10 @@ function windowsShimScript(): string {
   return [
     '@echo off',
     'setlocal',
-    'if "%ORCA_AGENT_TEAMS_SHIM_BIN%"=="" (',
-    `  set "ORCA_AGENT_TEAMS_SHIM_BIN=${getOrcaCliCommandNameForPlatform(process.platform)}"`,
+    'if "%OAK_AGENT_TEAMS_SHIM_BIN%"=="" (',
+    `  set "OAK_AGENT_TEAMS_SHIM_BIN=${getOakCliCommandNameForPlatform(process.platform)}"`,
     ')',
-    '"%ORCA_AGENT_TEAMS_SHIM_BIN%" agent-teams-tmux %*',
+    '"%OAK_AGENT_TEAMS_SHIM_BIN%" agent-teams-tmux %*',
     ''
   ].join('\r\n')
 }

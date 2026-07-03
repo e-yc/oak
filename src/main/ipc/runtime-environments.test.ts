@@ -82,7 +82,7 @@ describe('registerRuntimeEnvironmentHandlers', () => {
   let userDataPath: string
 
   beforeEach(() => {
-    userDataPath = mkdtempSync(join(tmpdir(), 'orca-runtime-env-ipc-'))
+    userDataPath = mkdtempSync(join(tmpdir(), 'oak-runtime-env-ipc-'))
     getPathMock.mockReset()
     getPathMock.mockReturnValue(userDataPath)
     handleMock.mockReset()
@@ -206,7 +206,7 @@ describe('registerRuntimeEnvironmentHandlers', () => {
     // on the environment record (ephemeral-vm.ts), so the public list reads it
     // straight from the record rather than cross-referencing the VM runtime store.
     const added = environmentStore.addEnvironmentFromPairingCode(userDataPath, {
-      name: 'orca VM abc12345',
+      name: 'oak VM abc12345',
       pairingCode: pairingCode(),
       source: 'ephemeral-vm'
     })
@@ -216,7 +216,7 @@ describe('registerRuntimeEnvironmentHandlers', () => {
     )
 
     expect(await list(null, undefined)).toMatchObject([
-      { id: added.id, name: 'orca VM abc12345', source: 'ephemeral-vm' }
+      { id: added.id, name: 'oak VM abc12345', source: 'ephemeral-vm' }
     ])
   })
 

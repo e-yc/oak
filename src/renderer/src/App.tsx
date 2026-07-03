@@ -152,7 +152,7 @@ import {
 } from './components/feature-tips/feature-tip-startup-gate'
 import {
   trackCmdJPaletteFeatureTipShown,
-  trackOrcaCliFeatureTipShown
+  trackOakCliFeatureTipShown
 } from './components/feature-tips/feature-tip-telemetry'
 import {
   keybindingMatchesAction,
@@ -790,8 +790,8 @@ function App(): React.JSX.Element {
     }
 
     featureTipsPromptedThisSessionRef.current = true
-    if (featureTipsDecision.tipId === 'orca-cli') {
-      trackOrcaCliFeatureTipShown('app_open')
+    if (featureTipsDecision.tipId === 'oak-cli') {
+      trackOakCliFeatureTipShown('app_open')
     } else if (featureTipsDecision.tipId === 'cmd-j-palette') {
       trackCmdJPaletteFeatureTipShown('app_open')
     }
@@ -1039,7 +1039,7 @@ function App(): React.JSX.Element {
         // Why (issue #1158): previously this catch called hydrateWorkspaceSession
         // with empty defaults, which overwrote the in-memory tab map. The
         // debounced session writer then serialized that empty state back to
-        // orca-data.json, silently erasing the user's saved tabs. The fix is
+        // oak-data.json, silently erasing the user's saved tabs. The fix is
         // to leave in-memory state untouched and keep hydrationSucceeded
         // false so the writer stays gated. We still ensure persistedUIReady and
         // workspaceSessionReady flip so the UI can mount without a session.
@@ -1531,7 +1531,7 @@ function App(): React.JSX.Element {
           terminalShortcutPolicy
         })
       const notifyTerminalCapture = (actionId: KeybindingActionId): void => {
-        if (context !== 'terminal' || (terminalShortcutPolicy ?? 'orca-first') !== 'orca-first') {
+        if (context !== 'terminal' || (terminalShortcutPolicy ?? 'oak-first') !== 'oak-first') {
           return
         }
         showTerminalShortcutCaptureNotification({
@@ -1924,7 +1924,7 @@ function App(): React.JSX.Element {
           <div className="titlebar-traffic-light-pad" />
         ) : hasCustomTitleBar ? (
           /* Why: on Windows/Linux the native title bar is removed, so we render
-             the Orca logo as a non-interactive identity anchor and a ··· button
+             the Oak logo as a non-interactive identity anchor and a ··· button
              that pops up the application menu (the same menu revealed by Alt
              on the default autoHideMenuBar). */
           <>
@@ -1954,10 +1954,10 @@ function App(): React.JSX.Element {
                 <ContextMenuTrigger asChild>
                   <div
                     className="titlebar-app-name"
-                    aria-label={translate('auto.App.5096cbbc86', 'Orca')}
+                    aria-label={translate('auto.App.5096cbbc86', 'Oak')}
                   >
                     <span className="titlebar-app-name-main">
-                      {translate('auto.App.5096cbbc86', 'Orca')}
+                      {translate('auto.App.5096cbbc86', 'Oak')}
                     </span>
                   </div>
                 </ContextMenuTrigger>
@@ -2155,7 +2155,7 @@ function App(): React.JSX.Element {
                       leftTitlebarChromeLayout.shouldMount ? (
                         /* Why: left column wraps the sidebar with a titlebar-height
                      header above it. The header holds the same controls
-                     (traffic lights, sidebar toggle, "Orca" title, agent badge)
+                     (traffic lights, sidebar toggle, "Oak" title, agent badge)
                      that the full-width titlebar held while the center and right
                      columns keep their own top strips at the same 36px height.
                      When the sidebar is collapsed, take this header out of flex
@@ -2307,7 +2307,7 @@ function App(): React.JSX.Element {
                               title={translate('auto.App.b7a714db1e', 'This page hit an error.')}
                               description={translate(
                                 'auto.App.03a14f6b5b',
-                                'Retry the page or navigate to another Orca surface.'
+                                'Retry the page or navigate to another Oak surface.'
                               )}
                             >
                               {activeView === 'settings' ? <Settings /> : null}

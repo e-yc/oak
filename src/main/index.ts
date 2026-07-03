@@ -1,4 +1,4 @@
-/* eslint-disable max-lines -- Why: this is Orca's main-process entry point;
+/* eslint-disable max-lines -- Why: this is Oak's main-process entry point;
    it owns app lifecycle, service wiring, window creation, and hook/daemon
    startup. Splitting by line count would fragment tightly coupled startup
    logic across files without a cleaner ownership seam. */
@@ -38,9 +38,9 @@ import { initCohortClassifier } from './telemetry/cohort-classifier'
 import { initOnboardingCohortClassifier } from './telemetry/onboarding-cohort-classifier'
 import { resolveConsent } from './telemetry/consent'
 import { triggerStartupNotificationRegistration } from './ipc/notifications'
-import { OrcaRuntimeService } from './runtime/orca-runtime'
-import { OrcaRuntimeRpcServer } from './runtime/runtime-rpc'
-import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/orca-runtime-files'
+import { OakRuntimeService } from './runtime/oak-runtime'
+import { OakRuntimeRpcServer } from './runtime/runtime-rpc'
+import { awaitRuntimeFileWatcherUnsubscribes } from './runtime/oak-runtime-files'
 import { clearRuntimeMetadataIfOwned } from './runtime/runtime-metadata'
 import { ensureMainI18n, setMainUiLanguage } from './i18n/main-i18n'
 import {
@@ -52,7 +52,7 @@ import { checkForUpdatesFromMenu, isQuittingForUpdate } from './updater'
 import {
   configureElectronNetworkCompatibility,
   configureDevUserDataPath,
-  configureOrcaUserDataPathEnv,
+  configureOakUserDataPathEnv,
   enableMainProcessGpuFeatures,
   installDevParentDisconnectQuit,
   installDevParentSignalQuit,
@@ -196,9 +196,9 @@ let codexAccounts: CodexAccountService | null = null
 let codexRuntimeHome: CodexRuntimeHomeService | null = null
 let claudeAccounts: ClaudeAccountService | null = null
 let claudeRuntimeAuth: ClaudeRuntimeAuthService | null = null
-let runtime: OrcaRuntimeService | null = null
+let runtime: OakRuntimeService | null = null
 let rateLimits: RateLimitService | null = null
-let runtimeRpc: OrcaRuntimeRpcServer | null = null
+let runtimeRpc: OakRuntimeRpcServer | null = null
 // Why: set during early startup; gates whether headless serve installs the
 // offscreen browser backend (and thus advertises browser pane support).
 let headlessBrowserDisplayAvailable = false
@@ -214,7 +214,7 @@ let keybindings: KeybindingService | null = null
 let expectedRendererReload: { webContentsId: number; until: number } | null = null
 let firstWindowStartupServicesReady: Promise<void> = Promise.resolve()
 // Why: GPU child crashes clustered right after launch indicate a broken driver;
-// track them so Orca can move this build onto software rendering.
+// track them so Oak can move this build onto software rendering.
 const gpuLaunchTimeMs = Date.now()
 const gpuCrashFallbackTracker = new GpuCrashFallbackTracker({
   windowMs: DEFAULT_GPU_CRASH_FALLBACK_WINDOW_MS,
@@ -224,7 +224,7 @@ let gpuFallbackActiveThisLaunch = false
 let localPtyStartupReady: Promise<void> = Promise.resolve()
 const AGENT_STATE_CRASH_BREADCRUMB_MIN_INTERVAL_MS = 30_000
 const isServeMode = process.argv.includes('--serve')
-// Why: on Windows a CLI-shaped launch (Orca.exe <unpacked CLI entry>) that lost
+// Why: on Windows a CLI-shaped launch (Oak.exe <unpacked CLI entry>) that lost
 // ELECTRON_RUN_AS_NODE would otherwise boot the GUI, lose the single-instance
 // lock to a running window, and exit silently. Redirect it to node mode here,
 // before the lock gate below can bounce it.
@@ -302,11 +302,11 @@ function maybeAutoRenameBranchOnFirstWorkFromHook(event: {
         }
         return currentStore.getWorktreeMeta(worktreeId)?.pendingFirstAgentMessageRename === true
       },
-      canRenameOrcaCreatedBranch: (worktreeId) => {
+      canRenameOakCreatedBranch: (worktreeId) => {
         const meta = currentStore.getWorktreeMeta(worktreeId)
         // Why: a user/imported branch can coincidentally be named after a creature.
-        // Only worktrees Orca stamped at creation are safe to auto-rename.
-        return !!meta?.orcaCreationSource && meta.preserveBranchOnDelete !== true
+        // Only worktrees Oak stamped at creation are safe to auto-rename.
+        return !!meta?.oakCreationSource && meta.preserveBranchOnDelete !== true
       },
       setDisplayName: (worktreeId, displayName) => {
         const scope = parseWorkspaceKey(worktreeId)
@@ -384,11 +384,11 @@ const devAgentHookEndpointNamespace = devInstanceIdentity.isDev
   : undefined
 
 installUncaughtPipeErrorGuard()
-// Why: propagate the Orca app version into `process.env` so PTY-env
+// Why: propagate the Oak app version into `process.env` so PTY-env
 // construction in both main (local-pty-provider) and the forked daemon
 // (pty-subprocess) can set `TERM_PROGRAM_VERSION` without re-importing
 // electron. The daemon inherits `process.env` via fork (daemon-init.ts:93).
-process.env.ORCA_APP_VERSION = app.getVersion()
+process.env.OAK_APP_VERSION = app.getVersion()
 patchPackagedProcessPath()
 // Why: patchPackagedProcessPath seeds a minimal list of well-known system
 // dirs synchronously so early IPC (e.g. preflight before the shell spawn
@@ -406,7 +406,7 @@ if (app.isPackaged && process.platform !== 'win32') {
   })
 }
 configureDevUserDataPath(is.dev)
-configureOrcaUserDataPathEnv()
+configureOakUserDataPathEnv()
 const startupDiagnosticsEnabled = isStartupDiagnosticsEnabled()
 if (startupDiagnosticsEnabled) {
   logStartupDiagnostic('before-single-instance-lock', {
@@ -415,7 +415,7 @@ if (startupDiagnosticsEnabled) {
     platform: process.platform,
     osRelease: os.release(),
     userData: app.getPath('userData'),
-    e2eUserData: Boolean(process.env.ORCA_E2E_USER_DATA_DIR)
+    e2eUserData: Boolean(process.env.OAK_E2E_USER_DATA_DIR)
   })
   startEventLoopStallProbe()
 }
@@ -477,15 +477,15 @@ function recordAgentStateCrashBreadcrumb(agentType: string, state: string): void
 
 // Why: the lock must be acquired AFTER configureDevUserDataPath — Electron
 // derives the lock identity from the `userData` path, so this placement lets
-// dev (`orca-dev`) and packaged (`orca`) runs lock in separate namespaces
+// dev (`oak-dev`) and packaged (`oak`) runs lock in separate namespaces
 // instead of serialising against each other.
 //
 // Why skip in dev: engineers routinely run `pnpm dev` in parallel from
 // multiple worktrees while shipping features, and the lock makes the second
-// `pnpm dev` exit silently. In dev we accept that `orca-runtime.json` may race
-// (the bundled `orca-dev` CLI routes to whichever instance wrote last). Agent
+// `pnpm dev` exit silently. In dev we accept that `oak-runtime.json` may race
+// (the bundled `oak-dev` CLI routes to whichever instance wrote last). Agent
 // hook endpoint files are namespaced per dev instance when the hook server
-// starts below. Packaged Orca keeps the lock to protect against the corruption
+// starts below. Packaged Oak keeps the lock to protect against the corruption
 // documented in PR #1326 / issue #1312.
 const bypassSingleInstanceLock = shouldBypassSingleInstanceLock({
   isDev: is.dev,
@@ -523,14 +523,14 @@ if (!hasSingleInstanceLock) {
 // prevents from ever dispatching.
 if (hasSingleInstanceLock) {
   // Why: dev parent shutdown coupling is only for electron-vite desktop runs.
-  // `orca serve` may be launched through a CLI shim or background shell whose
+  // `oak serve` may be launched through a CLI shim or background shell whose
   // parent lifetime is not the intended server lifetime.
   const shouldCoupleToDevParent = is.dev && !isServeMode
   installDevParentDisconnectQuit(shouldCoupleToDevParent)
   installDevParentWatchdog(shouldCoupleToDevParent)
   installDevParentSignalQuit(shouldCoupleToDevParent)
   // Why: must run after configureDevUserDataPath (which redirects userData to
-  // orca-dev in dev mode) but before app.setName('Orca') inside whenReady
+  // oak-dev in dev mode) but before app.setName('Oak') inside whenReady
   // (which would change the resolved path on case-sensitive filesystems).
   initDataPath()
   // Why: same timing constraint as initDataPath — capture the userData path
@@ -572,7 +572,7 @@ ipcMain.handle(
 function startDesktopFirstWindowStartupServices(): Promise<void> {
   logStartupMilestone('first-window-startup-services-start')
   const startupServices = startFirstWindowStartupServices({
-    // Why: the persistent-terminal daemon is desktop-only. Headless `orca serve`
+    // Why: the persistent-terminal daemon is desktop-only. Headless `oak serve`
     // registers its PTY runtime separately and must not spawn the desktop daemon
     // or hook loopback listener.
     startDaemonPtyProvider: async (signal) => {
@@ -580,15 +580,15 @@ function startDesktopFirstWindowStartupServices(): Promise<void> {
       await initDaemonPtyProvider(signal)
       logStartupMilestone('startup-service-done', { service: 'daemon-pty-provider' })
     },
-    // Why: PTY spawn env reads ORCA_AGENT_HOOK_* from the live server state, so
+    // Why: PTY spawn env reads OAK_AGENT_HOOK_* from the live server state, so
     // the renderer awaits this barrier before restored terminals reconnect.
     startAgentHookServer: async () => {
       logStartupMilestone('startup-service-start', { service: 'agent-hook-server' })
       await agentHookServer.start({
         env: app.isPackaged ? 'production' : 'development',
         // Why: hooks source this endpoint file at invocation time, so old PTY
-        // env still reaches the current Orca process after an app restart.
-        // Dev uses a namespace because all worktrees share `orca-dev`.
+        // env still reaches the current Oak process after an app restart.
+        // Dev uses a namespace because all worktrees share `oak-dev`.
         userDataPath: app.getPath('userData'),
         endpointNamespace: devAgentHookEndpointNamespace
       })
@@ -599,7 +599,7 @@ function startDesktopFirstWindowStartupServices(): Promise<void> {
     },
     onAgentHookServerError: (error) => {
       // Why: Claude/Codex/Gemini/OpenCode/Cursor hook callbacks are sidebar
-      // enrichment only. Orca must still boot if the loopback receiver fails.
+      // enrichment only. Oak must still boot if the loopback receiver fails.
       console.error('[agent-hooks] Failed to start local hook server:', error)
     }
   })
@@ -661,7 +661,7 @@ function prepareCodexRuntimeHomeForLaunch(target?: CodexAccountSelectionTarget):
   return runtimeHomePath
 }
 
-// Why: tray "Open Orca" / left-click restores the window the close handler may
+// Why: tray "Open Oak" / left-click restores the window the close handler may
 // have hidden to the tray; if the window was fully torn down, reopen it the
 // same way macOS dock re-activation does (guarded against update relaunch).
 function showMainWindowFromTray(): void {
@@ -1153,9 +1153,9 @@ async function presentRendererRecoveryPrompt(recentRecoveryCount: number): Promi
     buttons: ['Reload', 'Quit'],
     defaultId: 0,
     cancelId: 1,
-    title: 'Orca keeps failing to load',
+    title: 'Oak keeps failing to load',
     message: 'The app window crashed repeatedly and stopped reloading automatically.',
-    detail: `Orca tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Orca.`
+    detail: `Oak tried to recover ${recentRecoveryCount} times in a row without success. This is often a graphics-driver or installation problem. Reload to try again, or quit and relaunch Oak.`
   }
   const { response } = window
     ? await dialog.showMessageBox(window, options)
@@ -1468,7 +1468,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
   if (options.json) {
     console.log(
       JSON.stringify({
-        type: 'orca_server_ready',
+        type: 'oak_server_ready',
         runtimeId: runtime.getRuntimeId(),
         endpoint,
         pairing: pairing.available
@@ -1485,7 +1485,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
     )
     return
   }
-  console.log(`Orca server ready: ${endpoint ?? 'websocket unavailable'}`)
+  console.log(`Oak server ready: ${endpoint ?? 'websocket unavailable'}`)
   if (pairing.available) {
     if (pairing.webClientUrl) {
       console.log(`Web client URL: ${pairing.webClientUrl}`)
@@ -1499,7 +1499,7 @@ async function printServeReady(options: ServeOptions): Promise<void> {
 
 function installServeSignalHandlers(): void {
   const quit = (): void => {
-    // Why: foreground `orca serve` is controlled by the parent CLI/terminal,
+    // Why: foreground `oak serve` is controlled by the parent CLI/terminal,
     // so POSIX termination signals should follow Electron's normal quit path
     // and flush runtime metadata, daemon checkpoints, and telemetry.
     app.quit()
@@ -1721,7 +1721,7 @@ app.whenReady().then(async () => {
   // composition root — independent of product telemetry — and must
   // initialize before any IPC handler / runtime span is created so the
   // tracer's active sink is populated at the moment the first span fires.
-  // Honors DO_NOT_TRACK / ORCA_TELEMETRY_DISABLED / ORCA_DIAGNOSTICS_DISABLED
+  // Honors DO_NOT_TRACK / OAK_TELEMETRY_DISABLED / OAK_DIAGNOSTICS_DISABLED
   // / CI internally; those gates do not need to be re-checked here.
   initObservability()
   // Why: cohort-classifier reads the repo count synchronously at every emit
@@ -1792,7 +1792,7 @@ app.whenReady().then(async () => {
       .filter((account) => !activeIds.has(account.id))
       .map((account) => ({ id: account.id, managedHomePath: account.managedHomePath }))
   })
-  const runtimeService = new OrcaRuntimeService(store, stats, {
+  const runtimeService = new OakRuntimeService(store, stats, {
     // Why: resolve the PTY provider lazily. initDaemonPtyProvider() runs later
     // inside attachMainWindowServices and calls setLocalPtyProvider(routedAdapter)
     // to swap the in-process provider for the daemon-routed one. Capturing the
@@ -1906,8 +1906,8 @@ app.whenReady().then(async () => {
   runtimeService.setAutomationService(automations)
   runtimeService.setAccountServices({ claudeAccounts, codexAccounts, rateLimits })
   runtimeService.setCommitMessageAgentEnvironmentResolvers({
-    // Why: local Codex hooks and auth now live in Orca's managed runtime home
-    // even for the system-default path, so every Orca-launched Codex process
+    // Why: local Codex hooks and auth now live in Oak's managed runtime home
+    // even for the system-default path, so every Oak-launched Codex process
     // must resolve CODEX_HOME through the runtime-home service.
     prepareForCodexLaunch: prepareCodexRuntimeHomeForLaunch,
     prepareForClaudeLaunch: (target) => claudeRuntimeAuth!.prepareForClaudeLaunch(target)
@@ -1929,13 +1929,13 @@ app.whenReady().then(async () => {
     runtimeService.getEmulatorBridge()?.registerActiveEmulator(worktreeId, info, {
       managed: false
     })
-    serveSimStateWatcher.markOrcaManaged(info)
+    serveSimStateWatcher.markOakManaged(info)
     runtimeService.notifyEmulatorAutoAttachFromWatcher(worktreeId, info)
   })
   nativeTheme.themeSource = store.getSettings().theme ?? 'system'
   if (shouldInstallManagedHooks(is.dev)) {
     // Why: the persisted off switch must run before any auto-install path so
-    // users who removed Orca-managed hooks do not see them silently reappear on launch.
+    // users who removed Oak-managed hooks do not see them silently reappear on launch.
     if (isAgentStatusHooksEnabled(store.getSettings())) {
       runManagedHookInstallers(MANAGED_AGENT_HOOK_INSTALLERS)
     } else {
@@ -2046,8 +2046,8 @@ app.whenReady().then(async () => {
   // bind the default fixed port, crashing on EADDRINUSE. Port 0 lets the OS
   // assign a random available port per instance while still exercising the
   // full WebSocket startup path.
-  const isE2E = Boolean(process.env.ORCA_E2E_USER_DATA_DIR)
-  // Why: a developer running `pnpm dev` while the packaged Orca is also open
+  const isE2E = Boolean(process.env.OAK_E2E_USER_DATA_DIR)
+  // Why: a developer running `pnpm dev` while the packaged Oak is also open
   // would otherwise race the packaged app for 6768 and silently fall back to
   // a random OS-assigned port — breaking deterministic mobile pairing/repro
   // scripts against the dev instance. Pin the first dev instance to 6769 so
@@ -2066,7 +2066,7 @@ app.whenReady().then(async () => {
   // under the late app.getPath('userData') directory. Copy any missing files
   // forward before the runtime switches exclusively to the canonical path.
   migrateMobilePairingDataToCanonicalUserDataPath(app.getPath('userData'))
-  runtimeRpc = new OrcaRuntimeRpcServer({
+  runtimeRpc = new OakRuntimeRpcServer({
     runtime,
     // Why: mobile pairing (DeviceRegistry + E2EE keypair + runtime metadata)
     // must share the stable path captured before app.setName(), not a late
@@ -2183,7 +2183,7 @@ app.on('will-quit', (e) => {
   setUnreadDockBadgeCount(0)
   agentHookServer.stop()
   stats?.flush()
-  // Why: agent-browser daemon processes would otherwise linger after Orca quits,
+  // Why: agent-browser daemon processes would otherwise linger after Oak quits,
   // holding ports and leaving stale session state on disk.
   runtime?.getAgentBrowserBridge()?.destroyAllSessions()
   // Why: headless offscreen browser windows are main-process owned; tear them
@@ -2255,7 +2255,7 @@ app.on('will-quit', (e) => {
 })
 
 app.on('window-all-closed', () => {
-  // Why: headless `orca serve` has no desktop window, and offscreen browser
+  // Why: headless `oak serve` has no desktop window, and offscreen browser
   // windows are disposable implementation details. Closing/crashing the last
   // one must not take down terminal/runtime RPC for the VM workspace — the
   // policy fn returns false for serve mode so the app stays alive.

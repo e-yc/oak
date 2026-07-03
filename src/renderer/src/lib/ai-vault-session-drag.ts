@@ -2,9 +2,9 @@ import { AI_VAULT_AGENTS, type AiVaultAgent } from '../../../shared/ai-vault-typ
 import type { SleepingAgentLaunchConfig } from '../../../shared/agent-session-resume'
 import { measureClipboardTextByteLength } from '../../../shared/clipboard-text'
 
-export const AI_VAULT_SESSION_DRAG_TYPE = 'application/x-orca-ai-vault-session'
-export const AI_VAULT_SESSION_DRAG_START_EVENT = 'orca-ai-vault-session-drag-start'
-export const AI_VAULT_SESSION_DRAG_END_EVENT = 'orca-ai-vault-session-drag-end'
+export const AI_VAULT_SESSION_DRAG_TYPE = 'application/x-oak-ai-vault-session'
+export const AI_VAULT_SESSION_DRAG_START_EVENT = 'oak-ai-vault-session-drag-start'
+export const AI_VAULT_SESSION_DRAG_END_EVENT = 'oak-ai-vault-session-drag-end'
 export const AI_VAULT_SESSION_DRAG_PAYLOAD_MAX_BYTES = 16 * 1024
 
 export type AiVaultSessionDragPayload = {
@@ -82,7 +82,7 @@ export function writeAiVaultSessionDragData(
   activeAiVaultSessionDragPayload = { ...payload }
   dataTransfer.effectAllowed = 'copy'
   // Why: avoid text/plain so terminal/native drop targets cannot paste the
-  // resume command instead of letting Orca's pane drop layer handle it.
+  // resume command instead of letting Oak's pane drop layer handle it.
   dataTransfer.setData(AI_VAULT_SESSION_DRAG_TYPE, serialized)
 }
 

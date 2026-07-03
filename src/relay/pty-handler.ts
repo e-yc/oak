@@ -56,9 +56,9 @@ type ManagedPty = {
    *  paths can run before node-pty emits onExit; this prevents duplicate
    *  overlay/cache cleanup if onExit arrives later. */
   exitListenerNotified?: boolean
-  /** Renderer-supplied paneKey from spawn env (ORCA_PANE_KEY). Captured so
+  /** Renderer-supplied paneKey from spawn env (OAK_PANE_KEY). Captured so
    *  external observers (the relay-hook-server cache) can evict per-pane
-   *  state when this PTY exits. Symmetric with Orca's local pty.ts. */
+   *  state when this PTY exits. Symmetric with Oak's local pty.ts. */
   paneKey?: string
   tabId?: string
   worktreeId?: string
@@ -203,7 +203,7 @@ export class PtyHandler {
   // disposeManagedPty / map cleanup.
   private exitListener: PtyExitListener | null = null
   // Why: env augmenters injected at relay boot (currently the relay-hook
-  // server's ORCA_AGENT_HOOK_* coords). Run on every spawn so every PTY
+  // server's OAK_AGENT_HOOK_* coords). Run on every spawn so every PTY
   // sees the live hook coordinates without the dispatcher needing to know
   // about agent hooks.
   private envAugmenters: PtyEnvAugmenter[] = []
@@ -230,7 +230,7 @@ export class PtyHandler {
 
   /** Register an env augmenter whose return value is merged into every spawn
    *  env *after* `process.env` and the renderer-supplied env. Used by the
-   *  relay-hook server to inject ORCA_AGENT_HOOK_PORT/TOKEN/ENV/VERSION/
+   *  relay-hook server to inject OAK_AGENT_HOOK_PORT/TOKEN/ENV/VERSION/
    *  ENDPOINT — values the agent CLI inside the PTY needs to find the local
    *  hook receiver. See docs/design/agent-status-over-ssh.md §3. */
   addEnvAugmenter(augmenter: PtyEnvAugmenter): () => void {
@@ -248,7 +248,7 @@ export class PtyHandler {
    *  addEnvAugmenter doc-comment). Used by both spawn() and revive() so the
    *  relationship between process.env, renderer env, and augmenters cannot
    *  drift between the two paths — revived shells after a relay restart must
-   *  see the fresh ORCA_AGENT_HOOK_* coords just like freshly-spawned ones,
+   *  see the fresh OAK_AGENT_HOOK_* coords just like freshly-spawned ones,
    *  otherwise agent-status over SSH silently breaks on every revive. */
   private buildSpawnEnv(
     rendererEnv: Record<string, string> | undefined,
@@ -531,14 +531,14 @@ export class PtyHandler {
     const shell = resolvedShellOverride || resolveDefaultShell()
     const id = `pty-${this.nextId++}`
 
-    // Why: server-side augmenter values (ORCA_AGENT_HOOK_* and plugin overlay
+    // Why: server-side augmenter values (OAK_AGENT_HOOK_* and plugin overlay
     // dirs) override renderer-supplied env so live remote paths and hook coords
     // win over local userData paths. The context lets overlay augmenters derive
     // per-PTY OpenCode/Pi directories from the stable paneKey when present.
     // `command` is usually forwarded by ssh-pty-provider.ts only as a hint
     // for overlay resolution; runtime-owned PTYs opt into relay delivery
     // because no renderer TerminalPane exists to type the command.
-    const paneKey = typeof env?.ORCA_PANE_KEY === 'string' ? env.ORCA_PANE_KEY : undefined
+    const paneKey = typeof env?.OAK_PANE_KEY === 'string' ? env.OAK_PANE_KEY : undefined
     const command = typeof params.command === 'string' ? params.command : undefined
     const terminalWindowsWslDistro =
       typeof params.terminalWindowsWslDistro === 'string' ? params.terminalWindowsWslDistro : null
@@ -570,17 +570,17 @@ export class PtyHandler {
       cols,
       rows,
       cwd,
-      // Why: relay shells inherit process.env; never let an ambient Orca marker
+      // Why: relay shells inherit process.env; never let an ambient Oak marker
       // enable shell-ready behavior unless this spawn explicitly requested it.
-      env: { ...spawnEnv, ORCA_SHELL_READY_MARKER: '0', ...shellLaunch.env }
+      env: { ...spawnEnv, OAK_SHELL_READY_MARKER: '0', ...shellLaunch.env }
     })
 
     // Why: capture the renderer-supplied paneKey on the managed entry so the
     // exit listener can evict per-pane caches without the relay needing a
-    // separate ptyId→paneKey map. ORCA_PANE_KEY is shaped `${tabId}:${paneId}`
+    // separate ptyId→paneKey map. OAK_PANE_KEY is shaped `${tabId}:${paneId}`
     // and is bounded by the renderer; the relay treats it as opaque.
-    const tabId = typeof env?.ORCA_TAB_ID === 'string' ? env.ORCA_TAB_ID : undefined
-    const worktreeId = typeof env?.ORCA_WORKTREE_ID === 'string' ? env.ORCA_WORKTREE_ID : undefined
+    const tabId = typeof env?.OAK_TAB_ID === 'string' ? env.OAK_TAB_ID : undefined
+    const worktreeId = typeof env?.OAK_WORKTREE_ID === 'string' ? env.OAK_WORKTREE_ID : undefined
     const managed: ManagedPty = {
       id,
       pty: term,
@@ -594,11 +594,9 @@ export class PtyHandler {
             startupCommand: {
               command,
               delivered: false,
-              waitForShellReady: shellLaunch.env.ORCA_SHELL_READY_MARKER === '1',
+              waitForShellReady: shellLaunch.env.OAK_SHELL_READY_MARKER === '1',
               scanState:
-                shellLaunch.env.ORCA_SHELL_READY_MARKER === '1'
-                  ? createShellReadyScanState()
-                  : null,
+                shellLaunch.env.OAK_SHELL_READY_MARKER === '1' ? createShellReadyScanState() : null,
               timer: null
             }
           }
@@ -873,16 +871,16 @@ export class PtyHandler {
       // Why: revive must apply the same hook env as spawn(). The hook-server
       // coords come from augmenters, while pane identity comes from the
       // serialized PTY entry because managed hook scripts exit without
-      // ORCA_PANE_KEY.
+      // OAK_PANE_KEY.
       const revivedEnv: Record<string, string> = {}
       if (entry.paneKey) {
-        revivedEnv.ORCA_PANE_KEY = entry.paneKey
+        revivedEnv.OAK_PANE_KEY = entry.paneKey
       }
       if (entry.tabId) {
-        revivedEnv.ORCA_TAB_ID = entry.tabId
+        revivedEnv.OAK_TAB_ID = entry.tabId
       }
       if (entry.worktreeId) {
-        revivedEnv.ORCA_WORKTREE_ID = entry.worktreeId
+        revivedEnv.OAK_WORKTREE_ID = entry.worktreeId
       }
       const shell = resolveDefaultShell()
       // Why: `command` is intentionally absent from this revive path because
@@ -905,7 +903,7 @@ export class PtyHandler {
         cwd: entry.cwd,
         // Why: revived shells should not inherit an ambient shell-ready marker
         // because no provider-delivered startup command is waiting on it.
-        env: { ...spawnEnv, ORCA_SHELL_READY_MARKER: '0', ...shellLaunch.env }
+        env: { ...spawnEnv, OAK_SHELL_READY_MARKER: '0', ...shellLaunch.env }
       })
       this.wireAndStore({
         id: entry.id,

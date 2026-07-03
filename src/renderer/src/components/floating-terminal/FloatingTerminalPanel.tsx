@@ -29,7 +29,7 @@ import { getConnectionId } from '@/lib/connection-context'
 import { createUntitledMarkdownFileWithTemplateSelection } from '@/lib/create-untitled-markdown'
 import { detectLanguage } from '@/lib/language-detect'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
-import { isOrcaCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
+import { isOakCliAvailableOnPath } from '@/lib/agent-skill-cli-prerequisite'
 import {
   isFloatingWorkspacePanelShortcut,
   isFloatingWorkspaceTerminalInputTarget,
@@ -619,7 +619,7 @@ export function FloatingTerminalPanel({
     try {
       const status = await window.api.cli.getInstallStatus()
       if (mountedRef.current) {
-        setShowOrchestrationSetup(!isOrcaCliAvailableOnPath(status))
+        setShowOrchestrationSetup(!isOakCliAvailableOnPath(status))
       }
     } catch {
       if (mountedRef.current) {
@@ -1623,7 +1623,7 @@ export function FloatingTerminalPanel({
               <p className="text-xs leading-5 text-muted-foreground">
                 {translate(
                   'auto.components.floating.terminal.FloatingTerminalPanel.8cf80db43b',
-                  'Set up the Orca CLI and agent skill so agents can coordinate through Orca.'
+                  'Set up the Oak CLI and agent skill so agents can coordinate through Oak.'
                 )}
               </p>
             </div>

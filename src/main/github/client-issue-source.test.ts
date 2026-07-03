@@ -83,8 +83,8 @@ describe('GitHub issue source split', () => {
   })
 
   it('uses upstream for issues and origin for PRs in mixed recent results', async () => {
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock
       .mockResolvedValueOnce({
         stdout: JSON.stringify([
@@ -92,7 +92,7 @@ describe('GitHub issue source split', () => {
             number: 923,
             title: 'Use upstream issues',
             state: 'open',
-            html_url: 'https://github.com/stablyai/orca/issues/923',
+            html_url: 'https://github.com/e-yc/oak/issues/923',
             labels: [],
             updated_at: '2026-04-01T00:00:00Z',
             user: { login: 'octocat' }
@@ -105,7 +105,7 @@ describe('GitHub issue source split', () => {
             number: 42,
             title: 'Fork PR',
             state: 'open',
-            html_url: 'https://github.com/fork/orca/pull/42',
+            html_url: 'https://github.com/fork/oak/pull/42',
             labels: [],
             updated_at: '2026-03-31T00:00:00Z',
             user: { login: 'octocat' },
@@ -124,7 +124,7 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        'repos/stablyai/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+        'repos/e-yc/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
       ],
       { cwd: '/repo-root' }
     )
@@ -134,15 +134,15 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        'repos/fork/orca/pulls?per_page=10&state=open&sort=updated&direction=desc'
+        'repos/fork/oak/pulls?per_page=10&state=open&sort=updated&direction=desc'
       ],
       { cwd: '/repo-root' }
     )
   })
 
   it('omits gh api cache args for no-cache recent work-item requests', async () => {
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
       stdout: '[]'
     })
@@ -151,42 +151,42 @@ describe('GitHub issue source split', () => {
 
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       1,
-      ['api', 'repos/stablyai/orca/issues?per_page=10&state=open&sort=updated&direction=desc'],
+      ['api', 'repos/e-yc/oak/issues?per_page=10&state=open&sort=updated&direction=desc'],
       { cwd: '/repo-root' }
     )
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
-      ['api', 'repos/fork/orca/pulls?per_page=10&state=open&sort=updated&direction=desc'],
+      ['api', 'repos/fork/oak/pulls?per_page=10&state=open&sort=updated&direction=desc'],
       { cwd: '/repo-root' }
     )
   })
 
   it('lists SSH repo work items with explicit owner/repo and no local cwd', async () => {
     resolveIssueSourceMock.mockResolvedValueOnce({
-      source: { owner: 'stablyai', repo: 'orca' },
+      source: { owner: 'e-yc', repo: 'oak' },
       fellBack: false
     })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
       stdout: '[]'
     })
 
-    await listWorkItems('/home/jinwoo/orca', 10, undefined, undefined, 'auto', 'openclaw-2')
+    await listWorkItems('/home/jinwoo/oak', 10, undefined, undefined, 'auto', 'openclaw-2')
 
     expect(resolveIssueSourceMock).toHaveBeenCalledWith(
-      '/home/jinwoo/orca',
+      '/home/jinwoo/oak',
       'auto',
       'openclaw-2',
       {}
     )
-    expect(getOwnerRepoMock).toHaveBeenCalledWith('/home/jinwoo/orca', 'openclaw-2', {})
+    expect(getOwnerRepoMock).toHaveBeenCalledWith('/home/jinwoo/oak', 'openclaw-2', {})
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       1,
       [
         'api',
         '--cache',
         '120s',
-        'repos/stablyai/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+        'repos/e-yc/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
       ],
       {}
     )
@@ -196,44 +196,44 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        'repos/fork/orca/pulls?per_page=10&state=open&sort=updated&direction=desc'
+        'repos/fork/oak/pulls?per_page=10&state=open&sort=updated&direction=desc'
       ],
       {}
     )
   })
 
   it('uses upstream for issue-only queries and origin for PR-only queries', async () => {
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' })
 
     await listWorkItems('/repo-root', 10, 'is:issue')
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      expect.arrayContaining(['--repo', 'stablyai/orca']),
+      expect.arrayContaining(['--repo', 'e-yc/oak']),
       { cwd: '/repo-root' }
     )
 
     ghExecFileAsyncMock.mockClear()
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' })
 
     await listWorkItems('/repo-root', 10, 'is:pr')
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      expect.arrayContaining(['--repo', 'fork/orca']),
+      expect.arrayContaining(['--repo', 'fork/oak']),
       { cwd: '/repo-root' }
     )
   })
 
   it("uses upstream for recent PRs when preference='upstream'", async () => {
     resolveIssueSourceMock.mockResolvedValueOnce({
-      source: { owner: 'stablyai', repo: 'orca' },
+      source: { owner: 'e-yc', repo: 'oak' },
       fellBack: false
     })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
       stdout: '[]'
     })
@@ -246,7 +246,7 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        'repos/stablyai/orca/pulls?per_page=10&state=open&sort=updated&direction=desc'
+        'repos/e-yc/oak/pulls?per_page=10&state=open&sort=updated&direction=desc'
       ],
       { cwd: '/repo-root' }
     )
@@ -254,28 +254,28 @@ describe('GitHub issue source split', () => {
 
   it("uses upstream for queried PRs when preference='upstream'", async () => {
     resolveIssueSourceMock.mockResolvedValueOnce({
-      source: { owner: 'stablyai', repo: 'orca' },
+      source: { owner: 'e-yc', repo: 'oak' },
       fellBack: false
     })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' })
 
     await listWorkItems('/repo-root', 10, 'is:pr is:open', undefined, 'upstream')
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      expect.arrayContaining(['--repo', 'stablyai/orca']),
+      expect.arrayContaining(['--repo', 'e-yc/oak']),
       { cwd: '/repo-root' }
     )
   })
 
   it("uses upstream for PR counts when preference='upstream'", async () => {
     resolveIssueSourceMock.mockResolvedValueOnce({
-      source: { owner: 'stablyai', repo: 'orca' },
+      source: { owner: 'e-yc', repo: 'oak' },
       fellBack: false
     })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
-    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
+    getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '9\n' })
 
     const count = await countWorkItems('/repo-root', 'is:pr is:open', 'upstream')
@@ -287,7 +287,7 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        `search/issues?q=${encodeURIComponent('repo:stablyai/orca is:pull-request is:open')}&per_page=1`,
+        `search/issues?q=${encodeURIComponent('repo:e-yc/oak is:pull-request is:open')}&per_page=1`,
         '--jq',
         '.total_count'
       ],
@@ -297,31 +297,31 @@ describe('GitHub issue source split', () => {
 
   it("falls back to origin for PRs when preference='upstream' and upstream is missing", async () => {
     resolveIssueSourceMock.mockResolvedValueOnce({
-      source: { owner: 'fork', repo: 'orca' },
+      source: { owner: 'fork', repo: 'oak' },
       fellBack: true
     })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     getOwnerRepoForRemoteMock.mockResolvedValueOnce(null)
     ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' })
 
     const result = await listWorkItems('/repo-root', 10, 'is:pr', undefined, 'upstream')
 
     expect(ghExecFileAsyncMock).toHaveBeenCalledWith(
-      expect.arrayContaining(['--repo', 'fork/orca']),
+      expect.arrayContaining(['--repo', 'fork/oak']),
       { cwd: '/repo-root' }
     )
     expect(result.sources).toEqual({
-      issues: { owner: 'fork', repo: 'orca' },
-      prs: { owner: 'fork', repo: 'orca' },
-      originCandidate: { owner: 'fork', repo: 'orca' },
+      issues: { owner: 'fork', repo: 'oak' },
+      prs: { owner: 'fork', repo: 'oak' },
+      originCandidate: { owner: 'fork', repo: 'oak' },
       upstreamCandidate: null
     })
     expect(result.issueSourceFellBack).toBe(true)
   })
 
   it('counts default work items across upstream issues and origin PRs', async () => {
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock
       .mockResolvedValueOnce({ stdout: '7\n' })
       .mockResolvedValueOnce({ stdout: '5\n' })
@@ -335,7 +335,7 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        `search/issues?q=${encodeURIComponent('repo:stablyai/orca is:issue is:open')}&per_page=1`,
+        `search/issues?q=${encodeURIComponent('repo:e-yc/oak is:issue is:open')}&per_page=1`,
         '--jq',
         '.total_count'
       ],
@@ -347,7 +347,7 @@ describe('GitHub issue source split', () => {
         'api',
         '--cache',
         '120s',
-        `search/issues?q=${encodeURIComponent('repo:fork/orca is:pull-request is:open')}&per_page=1`,
+        `search/issues?q=${encodeURIComponent('repo:fork/oak is:pull-request is:open')}&per_page=1`,
         '--jq',
         '.total_count'
       ],
@@ -356,13 +356,13 @@ describe('GitHub issue source split', () => {
   })
 
   it('typed PR lookup does not fetch an upstream issue with the same number', async () => {
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         number: 42,
         title: 'Origin PR',
         state: 'open',
-        html_url: 'https://github.com/fork/orca/pull/42',
+        html_url: 'https://github.com/fork/oak/pull/42',
         labels: [],
         updated_at: '2026-04-02T00:00:00Z',
         user: { login: 'octocat' },
@@ -381,7 +381,7 @@ describe('GitHub issue source split', () => {
         'view',
         '42',
         '--repo',
-        'fork/orca',
+        'fork/oak',
         '--json',
         expect.stringContaining('reviewDecision')
       ],
@@ -391,18 +391,18 @@ describe('GitHub issue source split', () => {
   })
 
   it('raw number lookup tries upstream issue before origin PR', async () => {
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
     // Why: simulate a real gh 404 (the only error type that should fall through).
     // Non-404 errors re-throw so transient upstream failures don't misroute to an
     // unrelated origin PR with the same number.
     ghExecFileAsyncMock.mockRejectedValueOnce(new Error('HTTP 404: Not Found'))
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock.mockResolvedValueOnce({
       stdout: JSON.stringify({
         number: 42,
         title: 'Origin PR',
         state: 'open',
-        html_url: 'https://github.com/fork/orca/pull/42',
+        html_url: 'https://github.com/fork/oak/pull/42',
         labels: [],
         updated_at: '2026-04-02T00:00:00Z',
         user: { login: 'octocat' },
@@ -412,11 +412,9 @@ describe('GitHub issue source split', () => {
 
     const item = await getWorkItem('/repo-root', 42)
 
-    expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
-      1,
-      ['api', 'repos/stablyai/orca/issues/42'],
-      { cwd: '/repo-root' }
-    )
+    expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(1, ['api', 'repos/e-yc/oak/issues/42'], {
+      cwd: '/repo-root'
+    })
     expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
       2,
       [
@@ -424,7 +422,7 @@ describe('GitHub issue source split', () => {
         'view',
         '42',
         '--repo',
-        'fork/orca',
+        'fork/oak',
         '--json',
         expect.stringContaining('reviewDecision')
       ],
@@ -438,8 +436,8 @@ describe('GitHub issue source split', () => {
     // must carry a classified error for the failing side so the renderer can
     // swap the empty-state for a retryable banner. `sources` must stay
     // populated so the banner copy can name the repo that failed.
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock
       .mockRejectedValueOnce(new Error('HTTP 403: Resource not accessible by integration'))
       .mockResolvedValueOnce({ stdout: '[]' })
@@ -448,8 +446,8 @@ describe('GitHub issue source split', () => {
 
     expect(result.items).toEqual([])
     expect(result.sources).toMatchObject({
-      issues: { owner: 'stablyai', repo: 'orca' },
-      prs: { owner: 'fork', repo: 'orca' }
+      issues: { owner: 'e-yc', repo: 'oak' },
+      prs: { owner: 'fork', repo: 'oak' }
     })
     expect(result.errors?.issues?.type).toBe('permission_denied')
   })
@@ -459,8 +457,8 @@ describe('GitHub issue source split', () => {
     // not zero out the succeeding source. The UI renders origin PRs with a
     // banner above the list, not an empty state. Ensures the IPC shape
     // carries both the successful items and the error for the failing side.
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
-    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
+    getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
     ghExecFileAsyncMock
       .mockRejectedValueOnce(new Error('HTTP 403: Resource not accessible by integration'))
       .mockResolvedValueOnce({
@@ -469,7 +467,7 @@ describe('GitHub issue source split', () => {
             number: 42,
             title: 'Fork PR',
             state: 'open',
-            html_url: 'https://github.com/fork/orca/pull/42',
+            html_url: 'https://github.com/fork/oak/pull/42',
             labels: [],
             updated_at: '2026-03-31T00:00:00Z',
             user: { login: 'octocat' },
@@ -489,7 +487,7 @@ describe('GitHub issue source split', () => {
   it('raw number lookup does not fall through on transient upstream errors', async () => {
     // Why: with issue source split, a non-404 upstream failure must not silently
     // route to origin's PR #N — that would return an unrelated item.
-    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+    getIssueOwnerRepoMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
     ghExecFileAsyncMock.mockRejectedValueOnce(new Error('HTTP 500: server error'))
 
     const item = await getWorkItem('/repo-root', 42)
@@ -507,10 +505,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='auto' + upstream exists → queries upstream", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'stablyai', repo: 'orca' },
+        source: { owner: 'e-yc', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -524,7 +522,7 @@ describe('GitHub issue source split', () => {
           'api',
           '--cache',
           '120s',
-          'repos/stablyai/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/e-yc/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ],
         { cwd: '/repo-root' }
       )
@@ -533,10 +531,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='auto' + no upstream → queries origin", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'solo', repo: 'orca' },
+        source: { owner: 'solo', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -549,7 +547,7 @@ describe('GitHub issue source split', () => {
           'api',
           '--cache',
           '120s',
-          'repos/solo/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/solo/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ],
         { cwd: '/repo-root' }
       )
@@ -557,10 +555,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='upstream' + upstream exists → queries upstream", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'stablyai', repo: 'orca' },
+        source: { owner: 'e-yc', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -570,7 +568,7 @@ describe('GitHub issue source split', () => {
       expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
         1,
         expect.arrayContaining([
-          'repos/stablyai/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/e-yc/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ]),
         { cwd: '/repo-root' }
       )
@@ -579,10 +577,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='upstream' + no upstream → falls back to origin with fellBack=true", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'solo', repo: 'orca' },
+        source: { owner: 'solo', repo: 'oak' },
         fellBack: true
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -592,7 +590,7 @@ describe('GitHub issue source split', () => {
       expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
         1,
         expect.arrayContaining([
-          'repos/solo/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/solo/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ]),
         { cwd: '/repo-root' }
       )
@@ -601,10 +599,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='origin' + upstream exists → queries origin (not upstream)", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'fork', repo: 'orca' },
+        source: { owner: 'fork', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -614,7 +612,7 @@ describe('GitHub issue source split', () => {
       expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
         1,
         expect.arrayContaining([
-          'repos/fork/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/fork/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ]),
         { cwd: '/repo-root' }
       )
@@ -622,10 +620,10 @@ describe('GitHub issue source split', () => {
 
     it("preference='origin' + no upstream → queries origin", async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'solo', repo: 'orca' },
+        source: { owner: 'solo', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'solo', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -635,7 +633,7 @@ describe('GitHub issue source split', () => {
       expect(ghExecFileAsyncMock).toHaveBeenNthCalledWith(
         1,
         expect.arrayContaining([
-          'repos/solo/orca/issues?per_page=10&state=open&sort=updated&direction=desc'
+          'repos/solo/oak/issues?per_page=10&state=open&sort=updated&direction=desc'
         ]),
         { cwd: '/repo-root' }
       )
@@ -646,11 +644,11 @@ describe('GitHub issue source split', () => {
       // 'origin'. That requires the envelope to carry the raw upstream even
       // when `sources.issues` has collapsed onto origin.
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'fork', repo: 'orca' },
+        source: { owner: 'fork', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
-      getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
+      getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -658,20 +656,20 @@ describe('GitHub issue source split', () => {
       const result = await listWorkItems('/repo-root', 10, undefined, undefined, 'origin')
 
       expect(result.sources).toEqual({
-        issues: { owner: 'fork', repo: 'orca' },
-        prs: { owner: 'fork', repo: 'orca' },
-        originCandidate: { owner: 'fork', repo: 'orca' },
-        upstreamCandidate: { owner: 'stablyai', repo: 'orca' }
+        issues: { owner: 'fork', repo: 'oak' },
+        prs: { owner: 'fork', repo: 'oak' },
+        originCandidate: { owner: 'fork', repo: 'oak' },
+        upstreamCandidate: { owner: 'e-yc', repo: 'oak' }
       })
     })
 
     it('keeps raw origin metadata when effective PR source is upstream', async () => {
       resolveIssueSourceMock.mockResolvedValueOnce({
-        source: { owner: 'stablyai', repo: 'orca' },
+        source: { owner: 'e-yc', repo: 'oak' },
         fellBack: false
       })
-      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'orca' })
-      getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'stablyai', repo: 'orca' })
+      getOwnerRepoMock.mockResolvedValueOnce({ owner: 'fork', repo: 'oak' })
+      getOwnerRepoForRemoteMock.mockResolvedValueOnce({ owner: 'e-yc', repo: 'oak' })
       ghExecFileAsyncMock.mockResolvedValueOnce({ stdout: '[]' }).mockResolvedValueOnce({
         stdout: '[]'
       })
@@ -679,10 +677,10 @@ describe('GitHub issue source split', () => {
       const result = await listWorkItems('/repo-root', 10, undefined, undefined, 'upstream')
 
       expect(result.sources).toEqual({
-        issues: { owner: 'stablyai', repo: 'orca' },
-        prs: { owner: 'stablyai', repo: 'orca' },
-        originCandidate: { owner: 'fork', repo: 'orca' },
-        upstreamCandidate: { owner: 'stablyai', repo: 'orca' }
+        issues: { owner: 'e-yc', repo: 'oak' },
+        prs: { owner: 'e-yc', repo: 'oak' },
+        originCandidate: { owner: 'fork', repo: 'oak' },
+        upstreamCandidate: { owner: 'e-yc', repo: 'oak' }
       })
     })
   })

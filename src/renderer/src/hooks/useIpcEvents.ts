@@ -849,7 +849,7 @@ export function useIpcEvents(): void {
         useAppStore.getState().migrateWorktreeIdentity(renamed.oldWorktreeId, renamed.newWorktreeId)
       }
       // Why: diff before vs. after fetchWorktrees to detect server-side
-      // deletions (CLI `orca worktree rm`, other window, out-of-band RPC)
+      // deletions (CLI `oak worktree rm`, other window, out-of-band RPC)
       // and purge worktree-scoped state for removed ids. Without this,
       // `ptyIdsByTabId` would retain entries for tabs whose worktree is
       // gone, and SessionsStatusSegment's `boundPtyIds` set would keep
@@ -1947,7 +1947,7 @@ export function useIpcEvents(): void {
       })
     )
 
-    // Why: `orca tab switch --focus` lands here after the bridge's state-only
+    // Why: `oak tab switch --focus` lands here after the bridge's state-only
     // `tabSwitch`. We deliberately DO NOT call `setActiveWorktree` — multiple
     // agents drive browsers in parallel worktrees, so a global focus call from
     // one agent's tab switch would steal the user's view from whichever
@@ -1976,7 +1976,7 @@ export function useIpcEvents(): void {
     )
 
     unsubs.push(
-      window.api.browser.onOpenLinkInOrcaTab(({ browserPageId, url }) => {
+      window.api.browser.onOpenLinkInOakTab(({ browserPageId, url }) => {
         const store = useAppStore.getState()
         const sourcePage = Object.values(store.browserPagesByWorkspace)
           .flat()
@@ -1987,10 +1987,10 @@ export function useIpcEvents(): void {
         if (getRuntimeEnvironmentIdForWorktree(store, sourcePage.worktreeId)) {
           return
         }
-        // Why: the guest process can request "open this link in Orca", but it
-        // does not own Orca's worktree/tab model. Resolve the source page's
+        // Why: the guest process can request "open this link in Oak", but it
+        // does not own Oak's worktree/tab model. Resolve the source page's
         // worktree and create a new outer browser tab so the link opens as a
-        // separate tab in the outer Orca tab bar.
+        // separate tab in the outer Oak tab bar.
         store.createBrowserTab(sourcePage.worktreeId, url, { title: url })
       })
     )
@@ -2095,7 +2095,7 @@ export function useIpcEvents(): void {
         // Why: watcher may detect a helper while a simulator tab is already mounted; push stream info so the pane updates without re-attach.
         window.setTimeout(() => {
           window.dispatchEvent(
-            new CustomEvent('orca:emulator-auto-attach', {
+            new CustomEvent('oak:emulator-auto-attach', {
               detail: { worktreeId, info }
             })
           )

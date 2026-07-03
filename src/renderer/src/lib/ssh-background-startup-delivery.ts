@@ -57,7 +57,7 @@ export function createSshBackgroundStartupDelivery(
     }
     if (!startupShellReady) {
       if (fallbackTimer === null) {
-        // Why: hidden SSH sessions can use shells that cannot emit Orca's
+        // Why: hidden SSH sessions can use shells that cannot emit Oak's
         // marker. Prefer readiness, but never drop the startup command forever.
         fallbackTimer = setTimeout(() => {
           fallbackTimer = null

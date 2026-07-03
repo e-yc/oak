@@ -43,9 +43,9 @@ export type WorktreeCardDetailsHoverProps = WorktreeCardMetaBadgesProps & {
   closeDelay?: number
   onEditIssue?: (event: React.MouseEvent) => void
   onEditComment?: (event: React.MouseEvent) => void
-  onOpenGitHubIssueInOrca?: (event: React.MouseEvent) => void
-  onOpenLinearIssueInOrca?: (event: React.MouseEvent) => void
-  onOpenReviewInOrca?: (event: React.MouseEvent) => void
+  onOpenGitHubIssueInOak?: (event: React.MouseEvent) => void
+  onOpenLinearIssueInOak?: (event: React.MouseEvent) => void
+  onOpenReviewInOak?: (event: React.MouseEvent) => void
   onUnlinkReview?: () => void
   onOpenAutomation?: (event: React.MouseEvent) => void
   onOpenAutomationRun?: (event: React.MouseEvent) => void

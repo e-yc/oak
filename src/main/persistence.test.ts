@@ -154,7 +154,7 @@ async function withPlatform<T>(platform: NodeJS.Platform, fn: () => Promise<T>):
 }
 
 function dataFile(): string {
-  return join(testState.dir, 'orca-data.json')
+  return join(testState.dir, 'oak-data.json')
 }
 
 function writeDataFile(data: unknown): void {
@@ -324,7 +324,7 @@ function makeBalancedLegacyPaneLayout(start: number, end: number): TerminalPaneL
 
 describe('Store', () => {
   beforeEach(() => {
-    testState.dir = mkdtempSync(join(tmpdir(), 'orca-test-'))
+    testState.dir = mkdtempSync(join(tmpdir(), 'oak-test-'))
     trackMock.mockReset()
     getCohortAtEmitMock.mockReset()
     getCohortAtEmitMock.mockReturnValue({ nth_repo_added: 2 })
@@ -347,16 +347,16 @@ describe('Store', () => {
       repos: [
         makeRepo({
           id: 'local-repo',
-          path: '/Users/alice/orca',
-          displayName: 'Orca',
-          upstream: { owner: 'StablyAI', repo: 'Orca' }
+          path: '/Users/alice/oak',
+          displayName: 'Oak',
+          upstream: { owner: 'E-YC', repo: 'Oak' }
         }),
         makeRepo({
           id: 'remote-repo',
-          path: '/home/alice/orca',
-          displayName: 'orca',
+          path: '/home/alice/oak',
+          displayName: 'oak',
           connectionId: 'gpu-vm',
-          upstream: { owner: 'stablyai', repo: 'orca' }
+          upstream: { owner: 'e-yc', repo: 'oak' }
         })
       ]
     })
@@ -365,22 +365,22 @@ describe('Store', () => {
 
     expect(store.getProjects()).toEqual([
       expect.objectContaining({
-        id: 'github:stablyai/orca',
+        id: 'github:e-yc/oak',
         sourceRepoIds: ['local-repo', 'remote-repo']
       })
     ])
     expect(store.getProjectHostSetups()).toEqual([
       expect.objectContaining({
         id: 'local-repo',
-        projectId: 'github:stablyai/orca',
+        projectId: 'github:e-yc/oak',
         hostId: 'local',
-        path: '/Users/alice/orca'
+        path: '/Users/alice/oak'
       }),
       expect.objectContaining({
         id: 'remote-repo',
-        projectId: 'github:stablyai/orca',
+        projectId: 'github:e-yc/oak',
         hostId: 'ssh:gpu-vm',
-        path: '/home/alice/orca'
+        path: '/home/alice/oak'
       })
     ])
 
@@ -1503,7 +1503,7 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'orca' },
+        upstream: { owner: 'e-yc', repo: 'oak' },
         connectionId: 'builder'
       })
     )
@@ -1521,7 +1521,7 @@ describe('Store', () => {
 
     expect(automation.runContext).toMatchObject({
       kind: 'workspace-run',
-      projectId: 'github:stablyai/orca',
+      projectId: 'github:e-yc/oak',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
@@ -1530,11 +1530,11 @@ describe('Store', () => {
     expect(automation.sourceContext).toMatchObject({
       kind: 'task-source',
       provider: 'github',
-      projectId: 'github:stablyai/orca',
+      projectId: 'github:e-yc/oak',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'orca' }
+      providerIdentity: { provider: 'github', owner: 'e-yc', repo: 'oak' }
     })
   })
 
@@ -1543,7 +1543,7 @@ describe('Store', () => {
     store.addRepo(
       makeRepo({
         executionHostId: toRuntimeExecutionHostId('gpu-server'),
-        upstream: { owner: 'stablyai', repo: 'orca' }
+        upstream: { owner: 'stablyai', repo: 'oak' }
       })
     )
 
@@ -1566,7 +1566,7 @@ describe('Store', () => {
 
   it('snapshots automation contexts onto runs', async () => {
     const store = await createStore()
-    store.addRepo(makeRepo({ upstream: { owner: 'stablyai', repo: 'orca' } }))
+    store.addRepo(makeRepo({ upstream: { owner: 'stablyai', repo: 'oak' } }))
     const automation = store.createAutomation({
       name: 'Nightly',
       prompt: 'Run checks',
@@ -1594,7 +1594,7 @@ describe('Store', () => {
     const store = await createStore()
     store.addRepo(
       makeRepo({
-        upstream: { owner: 'stablyai', repo: 'orca' },
+        upstream: { owner: 'e-yc', repo: 'oak' },
         connectionId: 'builder'
       })
     )
@@ -1629,7 +1629,7 @@ describe('Store', () => {
 
     expect(migratedAutomation?.runContext).toMatchObject({
       kind: 'workspace-run',
-      projectId: 'github:stablyai/orca',
+      projectId: 'github:e-yc/oak',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
@@ -1638,11 +1638,11 @@ describe('Store', () => {
     expect(migratedAutomation?.sourceContext).toMatchObject({
       kind: 'task-source',
       provider: 'github',
-      projectId: 'github:stablyai/orca',
+      projectId: 'github:e-yc/oak',
       hostId: toSshExecutionHostId('builder'),
       projectHostSetupId: 'r1',
       repoId: 'r1',
-      providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'orca' }
+      providerIdentity: { provider: 'github', owner: 'e-yc', repo: 'oak' }
     })
     expect(migratedRun?.runContext).toEqual(migratedAutomation?.runContext)
     expect(migratedRun?.sourceContext).toEqual(migratedAutomation?.sourceContext)
@@ -2139,7 +2139,7 @@ describe('Store', () => {
       customAgentCommand: 'claude'
     })
     store.flush()
-    const persisted = JSON.parse(readFileSync(join(testState.dir, 'orca-data.json'), 'utf-8'))
+    const persisted = JSON.parse(readFileSync(join(testState.dir, 'oak-data.json'), 'utf-8'))
     expect(persisted.settings.sourceControlAi.actions.commitMessage).toEqual({
       agentId: 'claude',
       commandInputTemplate: '{basePrompt}\n\nRollback commit prompt'
@@ -2298,7 +2298,7 @@ describe('Store', () => {
     })
 
     const store = await createStore()
-    expect(store.getSettings().terminalShortcutPolicy).toBe('orca-first')
+    expect(store.getSettings().terminalShortcutPolicy).toBe('oak-first')
   })
 
   it('normalizes malformed source control group order on load', async () => {
@@ -3044,12 +3044,12 @@ describe('Store', () => {
     store.updateRepo('r1', {
       displayName: 'renamed',
       worktreeBasePath: '../new-worktrees',
-      upstream: { owner: 'stablyai', repo: 'orca' }
+      upstream: { owner: 'e-yc', repo: 'oak' }
     })
 
     expect(store.getProjects()).toEqual([
       expect.objectContaining({
-        id: 'github:stablyai/orca',
+        id: 'github:e-yc/oak',
         displayName: 'renamed',
         sourceRepoIds: ['r1']
       })
@@ -3057,7 +3057,7 @@ describe('Store', () => {
     expect(store.getProjectHostSetups()).toEqual([
       expect.objectContaining({
         id: 'r1',
-        projectId: 'github:stablyai/orca',
+        projectId: 'github:e-yc/oak',
         displayName: 'renamed',
         worktreeBasePath: '../new-worktrees'
       })
@@ -3367,9 +3367,9 @@ describe('Store', () => {
     store.addRepo(makeRepo())
 
     const updated = store.updateRepo('r1', {
-      upstream: { owner: ' stablyai ', repo: ' orca ' }
+      upstream: { owner: ' stablyai ', repo: ' oak ' }
     })
-    expect(updated!.upstream).toEqual({ owner: 'stablyai', repo: 'orca' })
+    expect(updated!.upstream).toEqual({ owner: 'stablyai', repo: 'oak' })
 
     store.updateRepo('r1', { upstream: null })
     store.flush()
@@ -4095,7 +4095,7 @@ describe('Store', () => {
 
   it('normalizes disabled TUI agents on load and update', async () => {
     writeFileSync(
-      join(testState.dir, 'orca-data.json'),
+      join(testState.dir, 'oak-data.json'),
       JSON.stringify({
         settings: {
           disabledTuiAgents: ['codex', 'not-real', 'codex', 'claude']
@@ -4121,7 +4121,7 @@ describe('Store', () => {
 
   it('migrates yolo default args onto untouched agent launch settings', async () => {
     writeFileSync(
-      join(testState.dir, 'orca-data.json'),
+      join(testState.dir, 'oak-data.json'),
       JSON.stringify({
         settings: {
           agentCmdOverrides: {}
@@ -4143,7 +4143,7 @@ describe('Store', () => {
 
   it('does not add yolo defaults for legacy agents with command overrides', async () => {
     writeFileSync(
-      join(testState.dir, 'orca-data.json'),
+      join(testState.dir, 'oak-data.json'),
       JSON.stringify({
         settings: {
           agentCmdOverrides: {
@@ -4162,7 +4162,7 @@ describe('Store', () => {
 
   it('removes unsupported TUI skip-permissions args from migrated profiles', async () => {
     writeFileSync(
-      join(testState.dir, 'orca-data.json'),
+      join(testState.dir, 'oak-data.json'),
       JSON.stringify({
         settings: {
           agentYoloDefaultsMigrated: true,
@@ -4190,7 +4190,7 @@ describe('Store', () => {
 
   it('normalizes app icon on load and update', async () => {
     writeFileSync(
-      join(testState.dir, 'orca-data.json'),
+      join(testState.dir, 'oak-data.json'),
       JSON.stringify({
         settings: {
           appIcon: 'not-real'
@@ -4344,7 +4344,7 @@ describe('Store', () => {
     expect(store.getSettings().terminalShortcutPolicy).toBe('terminal-first')
 
     store.updateSettings({ terminalShortcutPolicy: 'terminal-maybe' as never })
-    expect(store.getSettings().terminalShortcutPolicy).toBe('orca-first')
+    expect(store.getSettings().terminalShortcutPolicy).toBe('oak-first')
   })
 
   it('reloads sourceControlViewMode from global settings without touching workspace state', async () => {
@@ -4696,7 +4696,7 @@ describe('Store', () => {
     const store = await createStore()
     store.setGitHubCache({ pr: { 'o/r#7': { fetchedAt: 7 } as never }, issue: {} })
     store.flush()
-    expect(existsSync(join(testState.dir, 'orca-github-cache.json'))).toBe(true)
+    expect(existsSync(join(testState.dir, 'oak-github-cache.json'))).toBe(true)
 
     const restarted = await createStore()
     expect(restarted.getGitHubCache().pr['o/r#7']).toEqual({ fetchedAt: 7 })
@@ -5600,7 +5600,7 @@ describe('Store', () => {
 
   it('missing terminalMacOptionAsAlt in persisted file defaults to "auto" and flags migrated', async () => {
     // Existing file predates the setting entirely. Treat like upgrade from
-    // pre-Option-as-Alt Orca: land on 'auto' and mark migrated so we don't
+    // pre-Option-as-Alt Oak: land on 'auto' and mark migrated so we don't
     // re-examine.
     writeDataFile({
       schemaVersion: 1,
@@ -8720,7 +8720,7 @@ describe('Store', () => {
   // inference because the `telemetry` field is new in this release: keying
   // on its presence would misclassify every pre-telemetry install as fresh,
   // silently flipping existing users to default-on and violating the social
-  // contract they installed Orca under.
+  // contract they installed Oak under.
 
   it('classifies a truly fresh install as new-user cohort (file absent → optedIn=true)', async () => {
     // No data file written — truly fresh install of the telemetry release.
@@ -8760,7 +8760,7 @@ describe('Store', () => {
   it('still classifies as existing-user cohort when the data file is corrupt', async () => {
     // Load-bearing: `fileExistedOnLoad` stays true even when the parse
     // throws, so the corrupt-file catch path must also apply the migration.
-    // Otherwise a user whose `orca-data.json` got corrupted would be
+    // Otherwise a user whose `oak-data.json` got corrupted would be
     // silently opted in as if they were a fresh install.
     mkdirSync(testState.dir, { recursive: true })
     writeFileSync(dataFile(), '{{{corrupt json', 'utf-8')
@@ -8807,7 +8807,7 @@ describe('Store.migrateWorktreeIdentity', () => {
   const NEW_WORKSPACE_KEY = worktreeWorkspaceKey(NEW)
 
   beforeEach(() => {
-    testState.dir = mkdtempSync(join(tmpdir(), 'orca-test-'))
+    testState.dir = mkdtempSync(join(tmpdir(), 'oak-test-'))
   })
 
   afterEach(() => {
@@ -8967,7 +8967,7 @@ describe('Store.migrateWorktreeIdentity', () => {
 
 describe('Store host-partitioned workspace sessions', () => {
   beforeEach(() => {
-    testState.dir = mkdtempSync(join(tmpdir(), 'orca-test-'))
+    testState.dir = mkdtempSync(join(tmpdir(), 'oak-test-'))
   })
 
   afterEach(() => {
@@ -9117,7 +9117,7 @@ describe('Store host-partitioned workspace sessions', () => {
 
 describe('Store native-chat tab viewMode persistence', () => {
   beforeEach(() => {
-    testState.dir = mkdtempSync(join(tmpdir(), 'orca-test-'))
+    testState.dir = mkdtempSync(join(tmpdir(), 'oak-test-'))
   })
 
   afterEach(() => {

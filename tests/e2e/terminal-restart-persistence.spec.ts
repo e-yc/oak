@@ -27,7 +27,7 @@
 
 import { readFileSync, existsSync } from 'node:fs'
 import type { ElectronApplication, Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { TEST_REPO_PATH_FILE } from './global-setup'
 import {
   discoverActivePtyId,
@@ -46,7 +46,7 @@ import {
   getWorktreeTabs,
   ensureTerminalVisible
 } from './helpers/store'
-import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/orca-restart'
+import { attachRepoAndOpenTerminal, createRestartSession } from './helpers/oak-restart'
 import { PTY_SESSION_ID_SEPARATOR } from '../../src/shared/pty-session-id-format'
 
 // Why: each test in this file does a full quit→relaunch cycle, which spawns
@@ -266,8 +266,8 @@ test.describe('Terminal restart persistence', () => {
       const { worktreeId, ptyId } = await bootstrapFirstLaunch(firstLaunch.page, repoPath)
       expect(ptyId).toContain(PTY_SESSION_ID_SEPARATOR)
 
-      const prompt = `ORCA_RESTART_PROMPT_${Date.now()}_GT `
-      const marker = `ORCA_CURSOR_RESTART_${Date.now()}`
+      const prompt = `OAK_RESTART_PROMPT_${Date.now()}_GT `
+      const marker = `OAK_CURSOR_RESTART_${Date.now()}`
       await execInTerminal(firstLaunch.page, ptyId, `export PS1='${prompt}'; PROMPT='${prompt}'`)
       await waitForTerminalActiveLine(firstLaunch.page, prompt.trim())
       await execInTerminal(firstLaunch.page, ptyId, `echo ${marker}`)

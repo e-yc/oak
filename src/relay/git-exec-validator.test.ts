@@ -209,18 +209,18 @@ describe('validateGitExecArgs', () => {
 
   describe('git clone', () => {
     it('allows only the project setup clone shape', () => {
-      expectAllowed(['clone', '--', 'https://github.com/stablyai/orca.git', 'orca'])
-      expectAllowed(['clone', '--progress', '--', 'git@github.com:stablyai/orca.git', 'orca'])
+      expectAllowed(['clone', '--', 'https://github.com/e-yc/oak.git', 'oak'])
+      expectAllowed(['clone', '--progress', '--', 'git@github.com:e-yc/oak.git', 'oak'])
     })
 
     it.each([
-      [['clone', 'https://github.com/stablyai/orca.git']],
-      [['clone', 'https://github.com/stablyai/orca.git', 'orca']],
-      [['clone', '--depth=1', '--', 'https://github.com/stablyai/orca.git', 'orca']],
-      [['clone', '--', 'https://github.com/stablyai/orca.git', '.']],
-      [['clone', '--', 'https://github.com/stablyai/orca.git', '..']],
-      [['clone', '--', 'https://github.com/stablyai/orca.git', 'nested/orca']],
-      [['clone', '--', 'https://github.com/stablyai/orca.git', 'nested\\orca']]
+      [['clone', 'https://github.com/e-yc/oak.git']],
+      [['clone', 'https://github.com/e-yc/oak.git', 'oak']],
+      [['clone', '--depth=1', '--', 'https://github.com/e-yc/oak.git', 'oak']],
+      [['clone', '--', 'https://github.com/e-yc/oak.git', '.']],
+      [['clone', '--', 'https://github.com/e-yc/oak.git', '..']],
+      [['clone', '--', 'https://github.com/e-yc/oak.git', 'nested/oak']],
+      [['clone', '--', 'https://github.com/e-yc/oak.git', 'nested\\oak']]
     ])('rejects unsafe clone args %j', (args) => {
       expectBlocked(args, 'git clone')
     })

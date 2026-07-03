@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { mapGhosttyToOrca } from './mapper'
+import { mapGhosttyToOak } from './mapper'
 
-describe('mapGhosttyToOrca — split-divider-color', () => {
+describe('mapGhosttyToOak — split-divider-color', () => {
   it('maps valid hex to both dark and light divider colors', () => {
-    const result = mapGhosttyToOrca({ 'split-divider-color': '#ff5500' })
+    const result = mapGhosttyToOak({ 'split-divider-color': '#ff5500' })
     expect(result.diff).toEqual({
       terminalDividerColorDark: '#ff5500',
       terminalDividerColorLight: '#ff5500'
@@ -12,7 +12,7 @@ describe('mapGhosttyToOrca — split-divider-color', () => {
   })
 
   it('maps hex without hash to both divider colors', () => {
-    const result = mapGhosttyToOrca({ 'split-divider-color': 'ff5500' })
+    const result = mapGhosttyToOak({ 'split-divider-color': 'ff5500' })
     expect(result.diff).toEqual({
       terminalDividerColorDark: '#ff5500',
       terminalDividerColorLight: '#ff5500'
@@ -21,67 +21,67 @@ describe('mapGhosttyToOrca — split-divider-color', () => {
   })
 
   it('rejects invalid split-divider-color', () => {
-    const result = mapGhosttyToOrca({ 'split-divider-color': 'blue' })
+    const result = mapGhosttyToOak({ 'split-divider-color': 'blue' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['split-divider-color'])
   })
 })
 
-describe('mapGhosttyToOrca — unfocused-split-opacity', () => {
+describe('mapGhosttyToOak — unfocused-split-opacity', () => {
   it('maps valid float to terminalInactivePaneOpacity', () => {
-    const result = mapGhosttyToOrca({ 'unfocused-split-opacity': '0.5' })
+    const result = mapGhosttyToOak({ 'unfocused-split-opacity': '0.5' })
     expect(result.diff).toEqual({ terminalInactivePaneOpacity: 0.5 })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('rejects out-of-range unfocused-split-opacity', () => {
-    const result = mapGhosttyToOrca({ 'unfocused-split-opacity': '1.2' })
+    const result = mapGhosttyToOak({ 'unfocused-split-opacity': '1.2' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['unfocused-split-opacity'])
   })
 
   it('rejects negative unfocused-split-opacity', () => {
-    const result = mapGhosttyToOrca({ 'unfocused-split-opacity': '-0.1' })
+    const result = mapGhosttyToOak({ 'unfocused-split-opacity': '-0.1' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['unfocused-split-opacity'])
   })
 })
 
-describe('mapGhosttyToOrca — scrollback-limit', () => {
+describe('mapGhosttyToOak — scrollback-limit', () => {
   // Why: Ghostty's scrollback-limit is a byte budget (where 0 means unlimited),
   // while xterm's scrollback is a row count (where 0 means disabled). The
   // units and sentinel values don't line up, so we treat the key as
   // unsupported rather than silently mis-applying it by orders of magnitude.
   it('marks scrollback-limit as unsupported', () => {
-    const result = mapGhosttyToOrca({ 'scrollback-limit': '50000' })
+    const result = mapGhosttyToOak({ 'scrollback-limit': '50000' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['scrollback-limit'])
   })
 })
 
-describe('mapGhosttyToOrca — window-padding', () => {
+describe('mapGhosttyToOak — window-padding', () => {
   it('maps window-padding-x to terminalPaddingX', () => {
-    const result = mapGhosttyToOrca({ 'window-padding-x': '8' })
+    const result = mapGhosttyToOak({ 'window-padding-x': '8' })
     expect(result.diff).toEqual({ terminalPaddingX: 8 })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('maps window-padding-y to terminalPaddingY', () => {
-    const result = mapGhosttyToOrca({ 'window-padding-y': '4' })
+    const result = mapGhosttyToOak({ 'window-padding-y': '4' })
     expect(result.diff).toEqual({ terminalPaddingY: 4 })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('rejects invalid window-padding-x', () => {
-    const result = mapGhosttyToOrca({ 'window-padding-x': 'wide' })
+    const result = mapGhosttyToOak({ 'window-padding-x': 'wide' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['window-padding-x'])
   })
 })
 
-describe('mapGhosttyToOrca — cursor-text', () => {
+describe('mapGhosttyToOak — cursor-text', () => {
   it('maps valid hex to terminalColorOverrides.cursorAccent', () => {
-    const result = mapGhosttyToOrca({ 'cursor-text': '#ffffff' })
+    const result = mapGhosttyToOak({ 'cursor-text': '#ffffff' })
     expect(result.diff).toEqual({
       terminalColorOverrides: { cursorAccent: '#ffffff' }
     })
@@ -89,15 +89,15 @@ describe('mapGhosttyToOrca — cursor-text', () => {
   })
 
   it('rejects invalid cursor-text', () => {
-    const result = mapGhosttyToOrca({ 'cursor-text': 'white' })
+    const result = mapGhosttyToOak({ 'cursor-text': 'white' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['cursor-text'])
   })
 })
 
-describe('mapGhosttyToOrca — bold-color', () => {
+describe('mapGhosttyToOak — bold-color', () => {
   it('maps valid hex to terminalColorOverrides.bold', () => {
-    const result = mapGhosttyToOrca({ 'bold-color': '#ff0000' })
+    const result = mapGhosttyToOak({ 'bold-color': '#ff0000' })
     expect(result.diff).toEqual({
       terminalColorOverrides: { bold: '#ff0000' }
     })
@@ -105,89 +105,89 @@ describe('mapGhosttyToOrca — bold-color', () => {
   })
 
   it('rejects invalid bold-color', () => {
-    const result = mapGhosttyToOrca({ 'bold-color': 'red' })
+    const result = mapGhosttyToOak({ 'bold-color': 'red' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['bold-color'])
   })
 })
 
-describe('mapGhosttyToOrca — mouse-hide-while-typing', () => {
+describe('mapGhosttyToOak — mouse-hide-while-typing', () => {
   it('maps true to terminalMouseHideWhileTyping', () => {
-    const result = mapGhosttyToOrca({ 'mouse-hide-while-typing': 'true' })
+    const result = mapGhosttyToOak({ 'mouse-hide-while-typing': 'true' })
     expect(result.diff).toEqual({ terminalMouseHideWhileTyping: true })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('maps false to terminalMouseHideWhileTyping', () => {
-    const result = mapGhosttyToOrca({ 'mouse-hide-while-typing': 'false' })
+    const result = mapGhosttyToOak({ 'mouse-hide-while-typing': 'false' })
     expect(result.diff).toEqual({ terminalMouseHideWhileTyping: false })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('rejects invalid mouse-hide-while-typing', () => {
-    const result = mapGhosttyToOrca({ 'mouse-hide-while-typing': 'yes' })
+    const result = mapGhosttyToOak({ 'mouse-hide-while-typing': 'yes' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['mouse-hide-while-typing'])
   })
 })
 
-describe('mapGhosttyToOrca — selection-word-chars', () => {
+describe('mapGhosttyToOak — selection-word-chars', () => {
   it('treats selection-word-chars as unsupported due to semantic inversion', () => {
-    const result = mapGhosttyToOrca({ 'selection-word-chars': ':/?#@' })
+    const result = mapGhosttyToOak({ 'selection-word-chars': ':/?#@' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['selection-word-chars'])
   })
 })
 
-describe('mapGhosttyToOrca — cursor-opacity', () => {
+describe('mapGhosttyToOak — cursor-opacity', () => {
   it('maps valid float to terminalCursorOpacity', () => {
-    const result = mapGhosttyToOrca({ 'cursor-opacity': '0.75' })
+    const result = mapGhosttyToOak({ 'cursor-opacity': '0.75' })
     expect(result.diff).toEqual({ terminalCursorOpacity: 0.75 })
     expect(result.unsupportedKeys).toEqual([])
   })
 
   it('rejects out-of-range cursor-opacity', () => {
-    const result = mapGhosttyToOrca({ 'cursor-opacity': '1.5' })
+    const result = mapGhosttyToOak({ 'cursor-opacity': '1.5' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['cursor-opacity'])
   })
 
   it('rejects negative cursor-opacity', () => {
-    const result = mapGhosttyToOrca({ 'cursor-opacity': '-0.1' })
+    const result = mapGhosttyToOak({ 'cursor-opacity': '-0.1' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['cursor-opacity'])
   })
 })
 
-describe('mapGhosttyToOrca — empty values', () => {
+describe('mapGhosttyToOak — empty values', () => {
   it('rejects empty background-opacity', () => {
-    const result = mapGhosttyToOrca({ 'background-opacity': '' })
+    const result = mapGhosttyToOak({ 'background-opacity': '' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['background-opacity'])
   })
 
   it('rejects empty cursor-opacity', () => {
-    const result = mapGhosttyToOrca({ 'cursor-opacity': '' })
+    const result = mapGhosttyToOak({ 'cursor-opacity': '' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['cursor-opacity'])
   })
 
   it('rejects empty unfocused-split-opacity', () => {
-    const result = mapGhosttyToOrca({ 'unfocused-split-opacity': '' })
+    const result = mapGhosttyToOak({ 'unfocused-split-opacity': '' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['unfocused-split-opacity'])
   })
 })
 
-describe('mapGhosttyToOrca — negative padding', () => {
+describe('mapGhosttyToOak — negative padding', () => {
   it('rejects negative window-padding-x', () => {
-    const result = mapGhosttyToOrca({ 'window-padding-x': '-4' })
+    const result = mapGhosttyToOak({ 'window-padding-x': '-4' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['window-padding-x'])
   })
 
   it('rejects negative window-padding-y', () => {
-    const result = mapGhosttyToOrca({ 'window-padding-y': '-2' })
+    const result = mapGhosttyToOak({ 'window-padding-y': '-2' })
     expect(result.diff).toEqual({})
     expect(result.unsupportedKeys).toEqual(['window-padding-y'])
   })

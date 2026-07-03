@@ -18,7 +18,7 @@ const baseSession: AiVaultSession = {
   agent: 'codex',
   sessionId: 'session-1',
   title: 'Find the pane',
-  cwd: '/repo/orca/src',
+  cwd: '/repo/oak/src',
   branch: null,
   model: null,
   filePath: '/home/ada/.codex/session-1.jsonl',
@@ -34,10 +34,10 @@ const baseSession: AiVaultSession = {
 
 function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
   const worktree: Worktree = {
-    id: 'repo-1::/repo/orca',
+    id: 'repo-1::/repo/oak',
     repoId: 'repo-1',
-    displayName: 'orca',
-    path: '/repo/orca',
+    displayName: 'oak',
+    path: '/repo/oak',
     head: 'abc123',
     branch: 'main',
     isBare: false,
@@ -67,8 +67,8 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'current',
-      label: 'orca',
-      path: '/repo/orca'
+      label: 'oak',
+      path: '/repo/oak'
     })
   })
 
@@ -86,9 +86,9 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
 
   it('uses prior worktree paths to identify renamed active worktrees', () => {
     const worktree = makeWorktree({
-      id: 'repo-1::/repo/orca-renamed',
-      path: '/repo/orca-renamed',
-      priorWorktreeIds: ['repo-1::/repo/orca']
+      id: 'repo-1::/repo/oak-renamed',
+      path: '/repo/oak-renamed',
+      priorWorktreeIds: ['repo-1::/repo/oak']
     })
 
     expect(
@@ -99,8 +99,8 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'active',
-      label: 'orca',
-      path: '/repo/orca'
+      label: 'oak',
+      path: '/repo/oak'
     })
   })
 
@@ -113,26 +113,26 @@ describe('resolveAiVaultSessionWorktreeInfo', () => {
       })
     ).toMatchObject({
       status: 'unavailable',
-      label: 'orca/src',
-      path: '/repo/orca/src'
+      label: 'oak/src',
+      path: '/repo/oak/src'
     })
   })
 
   it('matches WSL UNC worktree paths to Linux transcript cwd values', () => {
     const worktree = makeWorktree({
-      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\orca'
+      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\oak'
     })
 
     expect(
       resolveAiVaultSessionWorktreeInfo({
-        session: { ...baseSession, cwd: '/home/ada/orca/src' },
+        session: { ...baseSession, cwd: '/home/ada/oak/src' },
         worktrees: [worktree],
         activeWorktreeId: null
       })
     ).toMatchObject({
       status: 'active',
-      label: 'orca',
-      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\orca'
+      label: 'oak',
+      path: '\\\\wsl.localhost\\Ubuntu\\home\\ada\\oak'
     })
   })
 })
@@ -164,12 +164,10 @@ describe('extractWorktreePathFromSessionTitle', () => {
   it('reads worktree paths embedded in session titles', () => {
     expect(
       extractWorktreePathFromSessionTitle(
-        'Inspect PR #6229 - Worktree: /Users/ada/projects/orca/fix-tabs'
+        'Inspect PR #6229 - Worktree: /Users/ada/projects/oak/fix-tabs'
       )
-    ).toBe('/Users/ada/projects/orca/fix-tabs')
-    expect(extractWorktreePathFromSessionTitle('Worktree: /tmp/orca-worker')).toBe(
-      '/tmp/orca-worker'
-    )
+    ).toBe('/Users/ada/projects/oak/fix-tabs')
+    expect(extractWorktreePathFromSessionTitle('Worktree: /tmp/oak-worker')).toBe('/tmp/oak-worker')
   })
 })
 
@@ -181,12 +179,12 @@ describe('resolveAiVaultSessionWorktreeDisplay', () => {
           ...baseSession,
           cwd: null,
           branch: null,
-          title: 'Fix tabs - Worktree: /Users/ada/projects/orca/fix-tabs'
+          title: 'Fix tabs - Worktree: /Users/ada/projects/oak/fix-tabs'
         },
         worktrees: [makeWorktree()],
         activeWorktreeId: null
       })?.path
-    ).toBe('/Users/ada/projects/orca/fix-tabs')
+    ).toBe('/Users/ada/projects/oak/fix-tabs')
 
     expect(
       resolveAiVaultSessionWorktreeDisplay({
@@ -200,8 +198,8 @@ describe('resolveAiVaultSessionWorktreeDisplay', () => {
 
 describe('aiVaultWorktreeCompactPath', () => {
   it('keeps the last two path segments for dense detail rows', () => {
-    expect(aiVaultWorktreeCompactPath('/Users/ada/projects/orca/improve-agent-session')).toBe(
-      'orca/improve-agent-session'
+    expect(aiVaultWorktreeCompactPath('/Users/ada/projects/oak/improve-agent-session')).toBe(
+      'oak/improve-agent-session'
     )
   })
 })
@@ -233,8 +231,8 @@ function makeWorktreeInfo(
 ): AiVaultSessionWorktreeInfo {
   return {
     status,
-    label: 'orca',
-    path: '/repo/orca',
-    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/orca' })
+    label: 'oak',
+    path: '/repo/oak',
+    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/oak' })
   }
 }

@@ -4,7 +4,7 @@ import type { GlobalSettings, GhosttyImportPreview } from '../../shared/types'
 import type { Store } from '../persistence'
 import { findGhosttyConfigPaths } from './discovery'
 import { parseGhosttyConfig } from './parser'
-import { mapGhosttyToOrca } from './mapper'
+import { mapGhosttyToOak } from './mapper'
 
 // Why: defensive upper bound on the Ghostty config size we're willing to read
 // into memory on the main process. Real configs are a few KB; anything past
@@ -12,7 +12,7 @@ import { mapGhosttyToOrca } from './mapper'
 // would rather surface an error than OOM the main process.
 const MAX_CONFIG_BYTES = 1_000_000
 
-// Why: mapGhosttyToOrca creates new object instances for nested values like
+// Why: mapGhosttyToOak creates new object instances for nested values like
 // terminalColorOverrides. A reference comparison (!==) would always report
 // them as changed even when the contents are identical. The stringifier sorts
 // keys at every object depth so persisted settings whose storage preserves a
@@ -93,7 +93,7 @@ export async function previewGhosttyImport(store: Store): Promise<GhosttyImportP
     mergeParsedConfig(parsed, parseGhosttyConfig(content))
   }
 
-  const { diff: rawDiff, unsupportedKeys } = mapGhosttyToOrca(parsed, platform() === 'darwin')
+  const { diff: rawDiff, unsupportedKeys } = mapGhosttyToOak(parsed, platform() === 'darwin')
 
   const currentSettings = store.getSettings()
   const actualDiff: Partial<typeof rawDiff> = {}

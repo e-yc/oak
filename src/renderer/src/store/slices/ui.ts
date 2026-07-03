@@ -12,7 +12,7 @@ import type {
   GitHubWorkItem,
   JiraIssue,
   LinearIssue,
-  PersistedTrustedOrcaHooks,
+  PersistedTrustedOakHooks,
   PersistedUIState,
   StatusBarItem,
   TaskProvider,
@@ -85,7 +85,7 @@ import {
 } from '../../../../shared/workspace-statuses'
 import { clampMarkdownTocPanelWidth } from '../../../../shared/markdown-toc-panel-width'
 import { normalizeKagiSessionLink } from '../../../../shared/browser-url'
-import type { OrcaHookScriptKind } from '../../lib/orca-hook-trust'
+import type { OakHookScriptKind } from '../../lib/oak-hook-trust'
 import type { SettingsNavTarget } from '@/lib/settings-navigation-types'
 import {
   filterSetupScriptPromptDismissalsToValidRepos,
@@ -348,11 +348,11 @@ function collectAcknowledgedAgentNotificationId({
   }
 }
 
-function filterTrustedOrcaHooksToValidRepos(
-  trust: PersistedTrustedOrcaHooks,
+function filterTrustedOakHooksToValidRepos(
+  trust: PersistedTrustedOakHooks,
   validRepoIds: Set<string>
-): PersistedTrustedOrcaHooks {
-  const next: PersistedTrustedOrcaHooks = {}
+): PersistedTrustedOakHooks {
+  const next: PersistedTrustedOakHooks = {}
   for (const [repoId, entry] of Object.entries(trust)) {
     if (validRepoIds.has(repoId)) {
       next[repoId] = entry
@@ -719,7 +719,7 @@ export type UISlice = {
     | 'feature-wall'
     | 'feature-tips'
     | 'new-workspace-composer'
-    | 'confirm-orca-yaml-hooks'
+    | 'confirm-oak-yaml-hooks'
   modalData: Record<string, unknown>
   openModal: (modal: UISlice['activeModal'], data?: Record<string, unknown>) => void
   closeModal: () => void
@@ -757,14 +757,10 @@ export type UISlice = {
   completeContextualTour: (id?: ContextualTourId) => void
   cancelContextualTour: (id?: ContextualTourId) => void
   markContextualToursSeen: (ids: ContextualTourId[]) => void
-  trustedOrcaHooks: PersistedTrustedOrcaHooks
-  markOrcaHookScriptConfirmed: (
-    repoId: string,
-    kind: OrcaHookScriptKind,
-    contentHash: string
-  ) => void
-  markOrcaHookRepoAlwaysTrusted: (repoId: string) => void
-  clearOrcaHookTrustForRepo: (repoId: string) => void
+  trustedOakHooks: PersistedTrustedOakHooks
+  markOakHookScriptConfirmed: (repoId: string, kind: OakHookScriptKind, contentHash: string) => void
+  markOakHookRepoAlwaysTrusted: (repoId: string) => void
+  clearOakHookTrustForRepo: (repoId: string) => void
   setupScriptPromptDismissedRepoIds: string[]
   dismissSetupScriptPrompt: (repoId: string) => void
   setupGuideSidebarDismissed: boolean
@@ -1751,10 +1747,10 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
       }
       return { contextualToursSeenIds: next }
     }),
-  trustedOrcaHooks: {},
-  markOrcaHookScriptConfirmed: (repoId, kind, contentHash) =>
+  trustedOakHooks: {},
+  markOakHookScriptConfirmed: (repoId, kind, contentHash) =>
     set((s) => {
-      const existing = s.trustedOrcaHooks[repoId]
+      const existing = s.trustedOakHooks[repoId]
       const currentEntry = existing?.[kind]
       if (currentEntry?.contentHash === contentHash) {
         return s
@@ -1763,35 +1759,35 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
         ...existing,
         [kind]: { contentHash, approvedAt: Date.now() }
       }
-      const next = { ...s.trustedOrcaHooks, [repoId]: nextRepo }
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      const next = { ...s.trustedOakHooks, [repoId]: nextRepo }
+      window.api.ui.set({ trustedOakHooks: next }).catch(console.error)
+      return { trustedOakHooks: next }
     }),
-  markOrcaHookRepoAlwaysTrusted: (repoId) =>
+  markOakHookRepoAlwaysTrusted: (repoId) =>
     set((s) => {
-      const existing = s.trustedOrcaHooks[repoId]
+      const existing = s.trustedOakHooks[repoId]
       if (existing?.all) {
         return s
       }
       const next = {
-        ...s.trustedOrcaHooks,
+        ...s.trustedOakHooks,
         [repoId]: {
           ...existing,
           all: { approvedAt: Date.now() }
         }
       }
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      window.api.ui.set({ trustedOakHooks: next }).catch(console.error)
+      return { trustedOakHooks: next }
     }),
-  clearOrcaHookTrustForRepo: (repoId) =>
+  clearOakHookTrustForRepo: (repoId) =>
     set((s) => {
-      if (!(repoId in s.trustedOrcaHooks)) {
+      if (!(repoId in s.trustedOakHooks)) {
         return s
       }
-      const next = { ...s.trustedOrcaHooks }
+      const next = { ...s.trustedOakHooks }
       delete next[repoId]
-      window.api.ui.set({ trustedOrcaHooks: next }).catch(console.error)
-      return { trustedOrcaHooks: next }
+      window.api.ui.set({ trustedOakHooks: next }).catch(console.error)
+      return { trustedOakHooks: next }
     }),
   setupScriptPromptDismissedRepoIds: [],
   dismissSetupScriptPrompt: (repoId) =>
@@ -2324,10 +2320,7 @@ export const createUISlice: StateCreator<AppState, [], [], UISlice> = (set, get)
           typeof ui.contextualToursAutoEligible === 'boolean'
             ? ui.contextualToursAutoEligible
             : null,
-        trustedOrcaHooks: filterTrustedOrcaHooksToValidRepos(
-          ui.trustedOrcaHooks ?? {},
-          validRepoIds
-        ),
+        trustedOakHooks: filterTrustedOakHooksToValidRepos(ui.trustedOakHooks ?? {}, validRepoIds),
         setupScriptPromptDismissedRepoIds: filterSetupScriptPromptDismissalsToValidRepos(
           ui.setupScriptPromptDismissedRepoIds,
           validRepoIds

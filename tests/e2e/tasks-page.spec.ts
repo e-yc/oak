@@ -5,7 +5,7 @@
  * source controls and close affordance are present.
  */
 
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { waitForSessionReady, waitForActiveWorktree, getStoreState } from './helpers/store'
 
 type RenderedTaskSource = {
@@ -50,19 +50,19 @@ async function getRenderedTaskSources(
 }
 
 test.describe('Tasks page', () => {
-  test.beforeEach(async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
+  test.beforeEach(async ({ oakPage }) => {
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
   })
 
-  test('opening the tasks view renders the tasks UI', async ({ orcaPage }) => {
-    await openTasksPage(orcaPage)
+  test('opening the tasks view renders the tasks UI', async ({ oakPage }) => {
+    await openTasksPage(oakPage)
 
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe('tasks')
 
-    await expect(orcaPage.getByRole('button', { name: 'Close tasks' })).toBeVisible({
+    await expect(oakPage.getByRole('button', { name: 'Close tasks' })).toBeVisible({
       timeout: 10_000
     })
 
@@ -72,7 +72,7 @@ test.describe('Tasks page', () => {
     await expect
       .poll(
         async () => {
-          renderedSources = await getRenderedTaskSources(orcaPage)
+          renderedSources = await getRenderedTaskSources(oakPage)
           return renderedSources.length
         },
         {
@@ -85,7 +85,7 @@ test.describe('Tasks page', () => {
     await expect
       .poll(
         async () => {
-          renderedSources = await getRenderedTaskSources(orcaPage)
+          renderedSources = await getRenderedTaskSources(oakPage)
           return renderedSources.some((source) => source.active)
         },
         {
@@ -95,27 +95,27 @@ test.describe('Tasks page', () => {
       )
       .toBe(true)
     if (renderedSources.some((source) => source.source === 'github' && source.active)) {
-      await expect(orcaPage.getByRole('button', { name: 'Issues', exact: true })).toBeVisible()
-      await expect(orcaPage.getByRole('button', { name: 'PRs', exact: true })).toBeVisible()
-      await expect(orcaPage.getByRole('button', { name: 'Projects', exact: true })).toBeVisible()
-      await expect(orcaPage.getByPlaceholder(/Search GitHub (issues|PRs)/i)).toBeVisible()
+      await expect(oakPage.getByRole('button', { name: 'Issues', exact: true })).toBeVisible()
+      await expect(oakPage.getByRole('button', { name: 'PRs', exact: true })).toBeVisible()
+      await expect(oakPage.getByRole('button', { name: 'Projects', exact: true })).toBeVisible()
+      await expect(oakPage.getByPlaceholder(/Search GitHub (issues|PRs)/i)).toBeVisible()
     }
   })
 
-  test('closing the tasks page returns to the previous view', async ({ orcaPage }) => {
-    const previousView = await getStoreState<string>(orcaPage, 'activeView')
+  test('closing the tasks page returns to the previous view', async ({ oakPage }) => {
+    const previousView = await getStoreState<string>(oakPage, 'activeView')
 
-    await openTasksPage(orcaPage)
+    await openTasksPage(oakPage)
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe('tasks')
     // Sanity: the tasks UI actually painted before we close it.
-    await expect(orcaPage.getByRole('button', { name: 'Close tasks' })).toBeVisible()
+    await expect(oakPage.getByRole('button', { name: 'Close tasks' })).toBeVisible()
 
-    await orcaPage.getByRole('button', { name: 'Close tasks' }).click()
+    await oakPage.getByRole('button', { name: 'Close tasks' }).click()
 
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe(previousView)
     // Why: the load-bearing check is that the previous view's DOM actually
     // re-rendered — a store-only `activeView` assertion would pass even if the
@@ -124,9 +124,9 @@ test.describe('Tasks page', () => {
     // previous view was terminal (by far the common case in E2E setup), that
     // element must be visible. Tasks-close also hides the "Close tasks"
     // button regardless of previous view, so we assert that too.
-    await expect(orcaPage.getByRole('button', { name: 'Close tasks' })).toHaveCount(0)
+    await expect(oakPage.getByRole('button', { name: 'Close tasks' })).toHaveCount(0)
     if (previousView === 'terminal') {
-      await expect(orcaPage.locator('.xterm').first()).toBeVisible({ timeout: 5_000 })
+      await expect(oakPage.locator('.xterm').first()).toBeVisible({ timeout: 5_000 })
     }
   })
 })

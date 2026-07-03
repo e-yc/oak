@@ -3,7 +3,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'nod
 import os from 'node:os'
 import path from 'node:path'
 import type { Page } from '@stablyai/playwright-test'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { waitForSessionReady } from './helpers/store'
 
 type CombinedDiffScrollRepo = {
@@ -48,7 +48,7 @@ function buildModifiedFile(fileIndex: number): string {
 }
 
 function createCombinedDiffScrollRepo(): CombinedDiffScrollRepo {
-  const repoPath = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'orca-combined-diff-scroll-')))
+  const repoPath = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'oak-combined-diff-scroll-')))
   runGit(repoPath, ['init'])
   runGit(repoPath, ['config', 'user.email', 'e2e@test.local'])
   runGit(repoPath, ['config', 'user.name', 'E2E Test'])
@@ -356,43 +356,43 @@ test.describe('Combined diff scroll restore', () => {
   test.describe.configure({ mode: 'serial' })
   test.use({ seedTestRepo: false })
 
-  test('keeps the visible section anchored after switching tabs', async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
+  test('keeps the visible section anchored after switching tabs', async ({ oakPage }) => {
+    await waitForSessionReady(oakPage)
     const fixture = createCombinedDiffScrollRepo()
 
     try {
-      const worktreeId = await addAndActivateRepo(orcaPage, fixture.repoPath)
-      const diffTabId = await openCombinedDiff(orcaPage, worktreeId, fixture.repoPath)
-      await expect(orcaPage.locator('.combined-diff-scroll-container')).toBeVisible()
-      await expect(orcaPage.getByText(`${FILE_COUNT} changed files`)).toBeVisible()
+      const worktreeId = await addAndActivateRepo(oakPage, fixture.repoPath)
+      const diffTabId = await openCombinedDiff(oakPage, worktreeId, fixture.repoPath)
+      await expect(oakPage.locator('.combined-diff-scroll-container')).toBeVisible()
+      await expect(oakPage.getByText(`${FILE_COUNT} changed files`)).toBeVisible()
 
-      await scrollCombinedDiffDeep(orcaPage)
-      await waitForStableViewportAnchor(orcaPage)
-      const activeScrollSamples = await wheelCombinedDiffDown(orcaPage)
+      await scrollCombinedDiffDeep(oakPage)
+      await waitForStableViewportAnchor(oakPage)
+      const activeScrollSamples = await wheelCombinedDiffDown(oakPage)
       expect(activeScrollSamples.length).toBeGreaterThan(2)
       expect(getLargestBackwardScrollJump(activeScrollSamples)).toBeLessThan(120)
 
-      const beforeSwitch = await waitForStableViewportAnchor(orcaPage)
+      const beforeSwitch = await waitForStableViewportAnchor(oakPage)
       expect(beforeSwitch.index).toBeGreaterThan(0)
 
-      await orcaPage.evaluate((wId) => {
+      await oakPage.evaluate((wId) => {
         const store = window.__store
         if (!store) {
           throw new Error('window.__store is not available')
         }
         store.getState().createTab(wId)
       }, worktreeId)
-      await expect(orcaPage.locator('.combined-diff-scroll-container')).toHaveCount(0)
+      await expect(oakPage.locator('.combined-diff-scroll-container')).toHaveCount(0)
 
-      await orcaPage.locator(`[data-tab-id="${diffTabId}"]`).click({ force: true })
-      await expect(orcaPage.locator('.combined-diff-scroll-container')).toBeVisible()
-      const afterSwitch = await waitForStableViewportAnchor(orcaPage)
+      await oakPage.locator(`[data-tab-id="${diffTabId}"]`).click({ force: true })
+      await expect(oakPage.locator('.combined-diff-scroll-container')).toBeVisible()
+      const afterSwitch = await waitForStableViewportAnchor(oakPage)
 
       expect(afterSwitch.key).toBe(beforeSwitch.key)
       expect(Math.abs(afterSwitch.top - beforeSwitch.top)).toBeLessThan(80)
 
-      await clickVisibleDiffLine(orcaPage)
-      const afterLineClick = await waitForStableViewportAnchor(orcaPage)
+      await clickVisibleDiffLine(oakPage)
+      const afterLineClick = await waitForStableViewportAnchor(oakPage)
 
       expect(afterLineClick.key).toBe(afterSwitch.key)
       expect(Math.abs(afterLineClick.top - afterSwitch.top)).toBeLessThan(80)

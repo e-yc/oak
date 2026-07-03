@@ -14,7 +14,7 @@ import {
   app
 } from 'electron'
 export { getBashShellReadyRcfileContent } from '../providers/local-pty-shell-ready'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { OakRuntimeService } from '../runtime/oak-runtime'
 import type { Store } from '../persistence'
 import type { GlobalSettings, TuiAgent } from '../../shared/types'
 import type { SleepingAgentLaunchConfig } from '../../shared/agent-session-resume'
@@ -84,7 +84,7 @@ import {
 } from '../agent-hooks/migration-unsupported-pty-state'
 import { parseWslPath } from '../wsl'
 import { mergePersistedWindowsPath } from '../pty/windows-environment-path'
-import { addOrcaWslInteropEnv } from '../pty/wsl-orca-env'
+import { addOakWslInteropEnv } from '../pty/wsl-oak-env'
 import type { CodexAccountSelectionTarget } from '../codex-accounts/runtime-selection'
 import { isHostCodexHomeForWsl, isWslCodexHomeForHost } from '../pty/codex-home-wsl-env'
 import { buildConfiguredProxyEnv, type NetworkProxySettings } from '../../shared/network-proxy'
@@ -147,14 +147,14 @@ const ptyPaneKey = new Map<string, string>()
 const paneKeyPtyId = new Map<string, string>()
 
 const AGENT_HOOK_RUNTIME_ENV_KEYS = [
-  'ORCA_AGENT_HOOK_PORT',
-  'ORCA_AGENT_HOOK_TOKEN',
-  'ORCA_AGENT_HOOK_ENV',
-  'ORCA_AGENT_HOOK_VERSION',
-  'ORCA_AGENT_HOOK_ENDPOINT',
+  'OAK_AGENT_HOOK_PORT',
+  'OAK_AGENT_HOOK_TOKEN',
+  'OAK_AGENT_HOOK_ENV',
+  'OAK_AGENT_HOOK_VERSION',
+  'OAK_AGENT_HOOK_ENDPOINT',
   // Why: PR 2778 briefly exported this scoped Claude settings path. Keep
   // deleting stale inherited values so older PTYs cannot leak the reverted path.
-  'ORCA_CLAUDE_AGENT_STATUS_SETTINGS'
+  'OAK_CLAUDE_AGENT_STATUS_SETTINGS'
 ] as const
 
 export function getPtyIdForPaneKey(paneKey: string): string | undefined {
@@ -364,18 +364,18 @@ function stripRemotePaneEnvWhenHooksDisabled(
   }
   if (
     !env ||
-    (!('ORCA_PANE_KEY' in env) &&
-      !('ORCA_TAB_ID' in env) &&
-      !('ORCA_WORKTREE_ID' in env) &&
-      !('ORCA_AGENT_LAUNCH_TOKEN' in env))
+    (!('OAK_PANE_KEY' in env) &&
+      !('OAK_TAB_ID' in env) &&
+      !('OAK_WORKTREE_ID' in env) &&
+      !('OAK_AGENT_LAUNCH_TOKEN' in env))
   ) {
     return env
   }
   const stripped = { ...env }
-  delete stripped.ORCA_PANE_KEY
-  delete stripped.ORCA_TAB_ID
-  delete stripped.ORCA_WORKTREE_ID
-  delete stripped.ORCA_AGENT_LAUNCH_TOKEN
+  delete stripped.OAK_PANE_KEY
+  delete stripped.OAK_TAB_ID
+  delete stripped.OAK_WORKTREE_ID
+  delete stripped.OAK_AGENT_LAUNCH_TOKEN
   return stripped
 }
 
@@ -515,7 +515,7 @@ function promoteAgentTeamsShimPath(
   env: Record<string, string> | undefined,
   requestedPath: string | undefined
 ): void {
-  if (!env?.ORCA_AGENT_TEAMS_TEAM_ID) {
+  if (!env?.OAK_AGENT_TEAMS_TEAM_ID) {
     return
   }
   const shimPath = firstPathEntry(requestedPath)
@@ -527,7 +527,7 @@ function promoteAgentTeamsShimPath(
   const remaining = currentPath
     .split(delimiter)
     .filter((entry) => entry.length > 0 && entry !== shimPath)
-  // Why: host env injection can prepend Orca's attribution/dev shims. Claude
+  // Why: host env injection can prepend Oak's attribution/dev shims. Claude
   // Agent Teams must still resolve our fake tmux before any real tmux.
   env[currentPathKey] = [shimPath, ...remaining].join(delimiter)
 }
@@ -551,7 +551,7 @@ function shouldSkipCodexHomeEnvForWindowsShell(
   return isWslShellName(shellPath) || (typeof cwd === 'string' && parseWslPath(cwd) !== null)
 }
 
-const CODEX_HOME_ENV_KEYS = ['CODEX_HOME', 'ORCA_CODEX_HOME'] as const
+const CODEX_HOME_ENV_KEYS = ['CODEX_HOME', 'OAK_CODEX_HOME'] as const
 type GetSelectedCodexHomePath = (target?: CodexAccountSelectionTarget) => string | null
 type PrepareClaudeAuth = (
   target?: ClaudeAccountSelectionTarget
@@ -596,9 +596,9 @@ function resolvePiAgentSourceDir(
   baseEnv: Record<string, string>,
   kind: PiAgentKind
 ): string | undefined {
-  const sourceKey = kind === 'omp' ? 'ORCA_OMP_SOURCE_AGENT_DIR' : 'ORCA_PI_SOURCE_AGENT_DIR'
-  const overlayKey = kind === 'omp' ? 'ORCA_OMP_CODING_AGENT_DIR' : 'ORCA_PI_CODING_AGENT_DIR'
-  const otherOverlayKey = kind === 'omp' ? 'ORCA_PI_CODING_AGENT_DIR' : 'ORCA_OMP_CODING_AGENT_DIR'
+  const sourceKey = kind === 'omp' ? 'OAK_OMP_SOURCE_AGENT_DIR' : 'OAK_PI_SOURCE_AGENT_DIR'
+  const overlayKey = kind === 'omp' ? 'OAK_OMP_CODING_AGENT_DIR' : 'OAK_PI_CODING_AGENT_DIR'
+  const otherOverlayKey = kind === 'omp' ? 'OAK_PI_CODING_AGENT_DIR' : 'OAK_OMP_CODING_AGENT_DIR'
 
   const sourceDir = readEnvWithProcessFallback(baseEnv, sourceKey)
   if (sourceDir) {
@@ -608,7 +608,7 @@ function resolvePiAgentSourceDir(
   const publicDir = readEnvWithProcessFallback(baseEnv, 'PI_CODING_AGENT_DIR')
   const ownOverlayDir = readEnvWithProcessFallback(baseEnv, overlayKey)
   const otherOverlayDir = readEnvWithProcessFallback(baseEnv, otherOverlayKey)
-  // Why: if PI_CODING_AGENT_DIR is just a restored Orca overlay from either
+  // Why: if PI_CODING_AGENT_DIR is just a restored Oak overlay from either
   // kind and the matching source shadow is absent, remirroring it would leak
   // another agent's overlay tree into this launch. Fall through to defaults.
   if (publicDir && publicDir !== ownOverlayDir && publicDir !== otherOverlayDir) {
@@ -626,19 +626,19 @@ function resolveScopedPiAgentSourceDir(
   baseEnv: Record<string, string>,
   kind: PiAgentKind
 ): string | undefined {
-  const sourceKey = kind === 'omp' ? 'ORCA_OMP_SOURCE_AGENT_DIR' : 'ORCA_PI_SOURCE_AGENT_DIR'
+  const sourceKey = kind === 'omp' ? 'OAK_OMP_SOURCE_AGENT_DIR' : 'OAK_PI_SOURCE_AGENT_DIR'
   return readEnvWithProcessFallback(baseEnv, sourceKey)
 }
 
 function clearPiAgentShadowEnv(baseEnv: Record<string, string>, kind: PiAgentKind): void {
   if (kind === 'omp') {
-    delete baseEnv.ORCA_OMP_CODING_AGENT_DIR
-    delete baseEnv.ORCA_OMP_SOURCE_AGENT_DIR
-    delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+    delete baseEnv.OAK_OMP_CODING_AGENT_DIR
+    delete baseEnv.OAK_OMP_SOURCE_AGENT_DIR
+    delete baseEnv.OAK_OMP_STATUS_EXTENSION
     return
   }
-  delete baseEnv.ORCA_PI_CODING_AGENT_DIR
-  delete baseEnv.ORCA_PI_SOURCE_AGENT_DIR
+  delete baseEnv.OAK_PI_CODING_AGENT_DIR
+  delete baseEnv.OAK_PI_SOURCE_AGENT_DIR
 }
 
 function exposePiManagedExtensionEnv(
@@ -647,24 +647,24 @@ function exposePiManagedExtensionEnv(
   managedEnv: Record<string, string>
 ): void {
   if (kind === 'omp') {
-    delete baseEnv.ORCA_OMP_CODING_AGENT_DIR
-    if (managedEnv.ORCA_OMP_SOURCE_AGENT_DIR) {
-      baseEnv.ORCA_OMP_SOURCE_AGENT_DIR = managedEnv.ORCA_OMP_SOURCE_AGENT_DIR
+    delete baseEnv.OAK_OMP_CODING_AGENT_DIR
+    if (managedEnv.OAK_OMP_SOURCE_AGENT_DIR) {
+      baseEnv.OAK_OMP_SOURCE_AGENT_DIR = managedEnv.OAK_OMP_SOURCE_AGENT_DIR
     } else {
-      delete baseEnv.ORCA_OMP_SOURCE_AGENT_DIR
+      delete baseEnv.OAK_OMP_SOURCE_AGENT_DIR
     }
-    if (managedEnv.ORCA_OMP_STATUS_EXTENSION) {
-      baseEnv.ORCA_OMP_STATUS_EXTENSION = managedEnv.ORCA_OMP_STATUS_EXTENSION
+    if (managedEnv.OAK_OMP_STATUS_EXTENSION) {
+      baseEnv.OAK_OMP_STATUS_EXTENSION = managedEnv.OAK_OMP_STATUS_EXTENSION
     } else {
-      delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+      delete baseEnv.OAK_OMP_STATUS_EXTENSION
     }
     return
   }
-  delete baseEnv.ORCA_PI_CODING_AGENT_DIR
-  if (managedEnv.ORCA_PI_SOURCE_AGENT_DIR) {
-    baseEnv.ORCA_PI_SOURCE_AGENT_DIR = managedEnv.ORCA_PI_SOURCE_AGENT_DIR
+  delete baseEnv.OAK_PI_CODING_AGENT_DIR
+  if (managedEnv.OAK_PI_SOURCE_AGENT_DIR) {
+    baseEnv.OAK_PI_SOURCE_AGENT_DIR = managedEnv.OAK_PI_SOURCE_AGENT_DIR
   } else {
-    delete baseEnv.ORCA_PI_SOURCE_AGENT_DIR
+    delete baseEnv.OAK_PI_SOURCE_AGENT_DIR
   }
 }
 
@@ -688,9 +688,9 @@ function getInheritedAgentHookEnvKeysToDelete(
   return AGENT_HOOK_RUNTIME_ENV_KEYS.filter((key) => env[key] === undefined)
 }
 
-// Why: when agent status is disabled, a nested Orca terminal can still pass
+// Why: when agent status is disabled, a nested Oak terminal can still pass
 // through prior OpenCode or legacy Pi/OMP overlay env. Restore the user's
-// original source dir when Orca recorded one, otherwise strip only values
+// original source dir when Oak recorded one, otherwise strip only values
 // known to be ours.
 function restoreOrStripOverlayEnv(
   baseEnv: Record<string, string>,
@@ -719,13 +719,13 @@ function isMimoLaunchCommand(launchCommand: string | undefined): boolean {
 }
 
 function resolveMimocodeSourceHome(baseEnv: Record<string, string>): string | undefined {
-  const sourceHome = baseEnv.ORCA_MIMOCODE_SOURCE_HOME ?? process.env.ORCA_MIMOCODE_SOURCE_HOME
+  const sourceHome = baseEnv.OAK_MIMOCODE_SOURCE_HOME ?? process.env.OAK_MIMOCODE_SOURCE_HOME
   if (sourceHome) {
     return sourceHome
   }
   const configHome = baseEnv.MIMOCODE_HOME ?? process.env.MIMOCODE_HOME
-  const orcaHome = baseEnv.ORCA_MIMOCODE_HOME ?? process.env.ORCA_MIMOCODE_HOME
-  if (configHome && orcaHome && configHome === orcaHome) {
+  const oakHome = baseEnv.OAK_MIMOCODE_HOME ?? process.env.OAK_MIMOCODE_HOME
+  if (configHome && oakHome && configHome === oakHome) {
     return undefined
   }
   return configHome
@@ -733,18 +733,18 @@ function resolveMimocodeSourceHome(baseEnv: Record<string, string>): string | un
 
 function resolveOpenCodeSourceConfigDir(baseEnv: Record<string, string>): string | undefined {
   const sourceDir =
-    baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR ?? process.env.ORCA_OPENCODE_SOURCE_CONFIG_DIR
+    baseEnv.OAK_OPENCODE_SOURCE_CONFIG_DIR ?? process.env.OAK_OPENCODE_SOURCE_CONFIG_DIR
   if (sourceDir) {
     return sourceDir
   }
 
   const configDir = baseEnv.OPENCODE_CONFIG_DIR ?? process.env.OPENCODE_CONFIG_DIR
-  const orcaConfigDir = baseEnv.ORCA_OPENCODE_CONFIG_DIR ?? process.env.ORCA_OPENCODE_CONFIG_DIR
-  // Why: nested Orca terminals inherit OPENCODE_CONFIG_DIR from the parent
-  // PTY. If there is no recorded source dir, that value is Orca-owned, not a
-  // user config. Treating it as user config makes child Orcas mirror Orca's
+  const oakConfigDir = baseEnv.OAK_OPENCODE_CONFIG_DIR ?? process.env.OAK_OPENCODE_CONFIG_DIR
+  // Why: nested Oak terminals inherit OPENCODE_CONFIG_DIR from the parent
+  // PTY. If there is no recorded source dir, that value is Oak-owned, not a
+  // user config. Treating it as user config makes child Oaks mirror Oak's
   // hook dir and can create large OpenCode runtime trees per terminal.
-  if (configDir && orcaConfigDir && configDir === orcaConfigDir) {
+  if (configDir && oakConfigDir && configDir === oakConfigDir) {
     return undefined
   }
 
@@ -761,7 +761,7 @@ function resolveOpenCodeSourceConfigDir(baseEnv: Record<string, string>): string
 /**
  * Mutates `baseEnv` in place with all host-local PTY env vars and returns it.
  *
- * This is the single source of truth for the env shape an Orca PTY needs
+ * This is the single source of truth for the env shape an Oak PTY needs
  * BEFORE the provider-specific wrapper (LocalPtyProvider's TERM/LANG defaults,
  * DaemonPtyAdapter's subprocess env). Callers are responsible for the SSH
  * guard — if `args.connectionId` is set, do NOT call this function, because
@@ -800,54 +800,54 @@ export function buildPtyHostEnv(
 
   if (opts.agentStatusHooksEnabled) {
     // Why: OPENCODE_CONFIG_DIR is a singular path, not a colon-list, so a user
-    // value cannot coexist with an Orca-only injection. Hand the user's value
+    // value cannot coexist with an Oak-only injection. Hand the user's value
     // (when present) to the hook service and let it materialize a source-scoped
-    // mirror overlay that lets the user's plugins and Orca's status plugin
+    // mirror overlay that lets the user's plugins and Oak's status plugin
     // load together. See docs/opencode-config-dir-collision.md.
     Object.assign(baseEnv, openCodeHookService.buildPtyEnv(id, preexistingOpenCodeConfigDir))
     if (baseEnv.OPENCODE_CONFIG_DIR) {
       // Why: ~/.zshrc can re-export the user's default after spawn; shell-ready
       // wrappers restore this PTY-scoped value after user startup files run.
-      baseEnv.ORCA_OPENCODE_CONFIG_DIR = baseEnv.OPENCODE_CONFIG_DIR
+      baseEnv.OAK_OPENCODE_CONFIG_DIR = baseEnv.OPENCODE_CONFIG_DIR
       if (preexistingOpenCodeConfigDir) {
-        // Why: terminals launched from another Orca terminal inherit the overlay
+        // Why: terminals launched from another Oak terminal inherit the overlay
         // as OPENCODE_CONFIG_DIR; keep the original source so overlays do not
         // mirror overlays and drop the user's real config.
-        baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR = preexistingOpenCodeConfigDir
+        baseEnv.OAK_OPENCODE_SOURCE_CONFIG_DIR = preexistingOpenCodeConfigDir
       } else {
-        delete baseEnv.ORCA_OPENCODE_SOURCE_CONFIG_DIR
+        delete baseEnv.OAK_OPENCODE_SOURCE_CONFIG_DIR
       }
     }
     if (isMimoLaunchCommand(launchCommandHint)) {
       const preexistingMimocodeHome = resolveMimocodeSourceHome(baseEnv)
       Object.assign(baseEnv, mimoCodeHookService.buildPtyEnv(id, preexistingMimocodeHome))
       if (baseEnv.MIMOCODE_HOME) {
-        baseEnv.ORCA_MIMOCODE_HOME = baseEnv.MIMOCODE_HOME
+        baseEnv.OAK_MIMOCODE_HOME = baseEnv.MIMOCODE_HOME
         if (preexistingMimocodeHome) {
-          baseEnv.ORCA_MIMOCODE_SOURCE_HOME = preexistingMimocodeHome
+          baseEnv.OAK_MIMOCODE_SOURCE_HOME = preexistingMimocodeHome
         } else {
-          delete baseEnv.ORCA_MIMOCODE_SOURCE_HOME
+          delete baseEnv.OAK_MIMOCODE_SOURCE_HOME
         }
       }
     }
   } else {
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'OPENCODE_CONFIG_DIR',
-      overlay: 'ORCA_OPENCODE_CONFIG_DIR',
-      source: 'ORCA_OPENCODE_SOURCE_CONFIG_DIR'
+      overlay: 'OAK_OPENCODE_CONFIG_DIR',
+      source: 'OAK_OPENCODE_SOURCE_CONFIG_DIR'
     })
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'MIMOCODE_HOME',
-      overlay: 'ORCA_MIMOCODE_HOME',
-      source: 'ORCA_MIMOCODE_SOURCE_HOME'
+      overlay: 'OAK_MIMOCODE_HOME',
+      source: 'OAK_MIMOCODE_SOURCE_HOME'
     })
   }
 
-  // Why: Claude/Codex native hooks run inside the shell process, so Orca
+  // Why: Claude/Codex native hooks run inside the shell process, so Oak
   // must inject the loopback receiver coordinates before the agent starts.
   // Without these env vars the global hook config cannot map callbacks back
-  // to the correct Orca pane.
-  // Why: nested Orca terminals can inherit another process's hook endpoint or
+  // to the correct Oak pane.
+  // Why: nested Oak terminals can inherit another process's hook endpoint or
   // token. Strip all hook runtime coordinates before injecting this PTY's fresh
   // server values so callbacks route to the owning app/runtime.
   for (const key of AGENT_HOOK_RUNTIME_ENV_KEYS) {
@@ -858,7 +858,7 @@ export function buildPtyHostEnv(
   }
 
   // Why: PI_CODING_AGENT_DIR owns Pi's / OMP's full config/session root. Keep
-  // that home as the user's normal source of truth and install only Orca-owned,
+  // that home as the user's normal source of truth and install only Oak-owned,
   // env-guarded extension files into the selected agent's extension dir.
   if (opts.agentStatusHooksEnabled) {
     clearPiAgentShadowEnv(baseEnv, 'pi')
@@ -879,40 +879,40 @@ export function buildPtyHostEnv(
     // so a nested PTY does not inherit a stale overlay from either agent.
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'PI_CODING_AGENT_DIR',
-      overlay: 'ORCA_PI_CODING_AGENT_DIR',
-      source: 'ORCA_PI_SOURCE_AGENT_DIR'
+      overlay: 'OAK_PI_CODING_AGENT_DIR',
+      source: 'OAK_PI_SOURCE_AGENT_DIR'
     })
     restoreOrStripOverlayEnv(baseEnv, {
       primary: 'PI_CODING_AGENT_DIR',
-      overlay: 'ORCA_OMP_CODING_AGENT_DIR',
-      source: 'ORCA_OMP_SOURCE_AGENT_DIR'
+      overlay: 'OAK_OMP_CODING_AGENT_DIR',
+      source: 'OAK_OMP_SOURCE_AGENT_DIR'
     })
-    delete baseEnv.ORCA_OMP_STATUS_EXTENSION
+    delete baseEnv.OAK_OMP_STATUS_EXTENSION
   }
 
-  // Why: Codex account switching now materializes auth into an Orca-scoped
-  // runtime home, and Codex launched inside Orca terminals must use that same
+  // Why: Codex account switching now materializes auth into an Oak-scoped
+  // runtime home, and Codex launched inside Oak terminals must use that same
   // prepared home as quota fetches and other entry points. Keep the override
-  // PTY-scoped so dev/prod Orcas do not share hooks through ~/.codex.
+  // PTY-scoped so dev/prod Oaks do not share hooks through ~/.codex.
   if (opts.skipCodexHomeEnv) {
     delete baseEnv.CODEX_HOME
-    delete baseEnv.ORCA_CODEX_HOME
+    delete baseEnv.OAK_CODEX_HOME
   } else if (opts.selectedCodexHomePath) {
     baseEnv.CODEX_HOME = opts.selectedCodexHomePath
     // Why: user startup files may re-export CODEX_HOME; shell-ready wrappers
     // restore this runtime home before Codex can be launched from the prompt.
-    baseEnv.ORCA_CODEX_HOME = opts.selectedCodexHomePath
+    baseEnv.OAK_CODEX_HOME = opts.selectedCodexHomePath
   }
 
-  // Why: in dev mode the `orca` CLI defaults to the production userData
-  // path, which routes status updates to the packaged Orca instead of this
-  // dev instance. Injecting ORCA_USER_DATA_PATH ensures CLI calls from
+  // Why: in dev mode the `oak` CLI defaults to the production userData
+  // path, which routes status updates to the packaged Oak instead of this
+  // dev instance. Injecting OAK_USER_DATA_PATH ensures CLI calls from
   // agents running inside dev terminals reach the correct runtime. We also
-  // prepend the dev CLI launcher directory to PATH so `orca` resolves to
-  // the dev build (which supports ORCA_USER_DATA_PATH) instead of the
-  // production binary at /usr/local/bin/orca.
+  // prepend the dev CLI launcher directory to PATH so `oak` resolves to
+  // the dev build (which supports OAK_USER_DATA_PATH) instead of the
+  // production binary at /usr/local/bin/oak.
   if (!opts.isPackaged) {
-    baseEnv.ORCA_USER_DATA_PATH ??= opts.userDataPath
+    baseEnv.OAK_USER_DATA_PATH ??= opts.userDataPath
     const devCliBin = join(opts.userDataPath, 'cli', 'bin')
     const inheritedPath = readInheritedPath(baseEnv)
     // Why: avoid a trailing delimiter when PATH is empty — some shells
@@ -923,15 +923,15 @@ export function buildPtyHostEnv(
   }
 
   // Why: GitHub attribution should only affect commands launched from
-  // Orca's own PTYs. Injecting lightweight PATH shims at spawn-time keeps
-  // the behavior local to Orca instead of rewriting user git config or
+  // Oak's own PTYs. Injecting lightweight PATH shims at spawn-time keeps
+  // the behavior local to Oak instead of rewriting user git config or
   // touching external shells.
   if (!opts.githubAttributionEnabled) {
-    delete baseEnv.ORCA_ENABLE_GIT_ATTRIBUTION
-    delete baseEnv.ORCA_GIT_COMMIT_TRAILER
-    delete baseEnv.ORCA_GH_PR_FOOTER
-    delete baseEnv.ORCA_GH_ISSUE_FOOTER
-    delete baseEnv.ORCA_ATTRIBUTION_SHIM_DIR
+    delete baseEnv.OAK_ENABLE_GIT_ATTRIBUTION
+    delete baseEnv.OAK_GIT_COMMIT_TRAILER
+    delete baseEnv.OAK_GH_PR_FOOTER
+    delete baseEnv.OAK_GH_ISSUE_FOOTER
+    delete baseEnv.OAK_ATTRIBUTION_SHIM_DIR
   }
   applyTerminalAttributionEnv(baseEnv, {
     enabled: opts.githubAttributionEnabled,
@@ -1240,7 +1240,7 @@ export function unbindLocalProviderListeners(): void {
 
 export function registerPtyHandlers(
   mainWindow: BrowserWindow,
-  runtime?: OrcaRuntimeService,
+  runtime?: OakRuntimeService,
   getSelectedCodexHomePath?: GetSelectedCodexHomePath,
   getSettings?: () => GlobalSettings,
   prepareClaudeAuth?: PrepareClaudeAuth,
@@ -1320,19 +1320,19 @@ export function registerPtyHandlers(
         })
         // Why: agents need their own terminal handle at process start so they
         // can self-identify in orchestration messages without an extra RPC.
-        const requestedHandle = baseEnv.ORCA_TERMINAL_HANDLE
+        const requestedHandle = baseEnv.OAK_TERMINAL_HANDLE
         const preAllocatedHandle =
           requestedHandle && trustedTerminalHandleEnv.has(requestedHandle)
             ? requestedHandle
             : runtime?.preAllocateHandleForPty(id)
         if (requestedHandle && requestedHandle !== preAllocatedHandle) {
-          delete env.ORCA_TERMINAL_HANDLE
+          delete env.OAK_TERMINAL_HANDLE
         }
         if (preAllocatedHandle) {
-          env.ORCA_TERMINAL_HANDLE = preAllocatedHandle
+          env.OAK_TERMINAL_HANDLE = preAllocatedHandle
         }
         if (ctx?.isWsl === true) {
-          addOrcaWslInteropEnv(env)
+          addOakWslInteropEnv(env)
         }
         return env
       },
@@ -2058,9 +2058,9 @@ export function registerPtyHandlers(
       let env: Record<string, string> | undefined = claudeAuth
         ? { ...sshScopedEnv, ...claudeAuth.envPatch }
         : sshScopedEnv
-      const requestedAgentTeamsPath = env?.ORCA_AGENT_TEAMS_TEAM_ID ? env.PATH : undefined
+      const requestedAgentTeamsPath = env?.OAK_AGENT_TEAMS_TEAM_ID ? env.PATH : undefined
       if (args.preAllocatedHandle) {
-        env = { ...env, ORCA_TERMINAL_HANDLE: args.preAllocatedHandle }
+        env = { ...env, OAK_TERMINAL_HANDLE: args.preAllocatedHandle }
       }
       const selectedCodexHomePath = isDaemonHostSpawn
         ? getCompatibleSelectedCodexHomePath(
@@ -2260,7 +2260,7 @@ export function registerPtyHandlers(
         // Why: runtime-owned CLI PTYs bypass the renderer `pty:spawn` handler,
         // so record their spawn-time paneKey here too. Synthetic hook titles and
         // paneKey-scoped cache cleanup both depend on this reverse lookup.
-        const paneKey = rememberPaneKeyForPty(result.id, env?.ORCA_PANE_KEY)
+        const paneKey = rememberPaneKeyForPty(result.id, env?.OAK_PANE_KEY)
         if (!args.connectionId) {
           registerPty({
             ptyId: result.id,
@@ -2544,7 +2544,7 @@ export function registerPtyHandlers(
         tabId?: string
         leafId?: string
         // Why: telemetry-plan.md§Agent launch semantics. The renderer
-        // threads what Orca was *asked* to launch through this field; main
+        // threads what Oak was *asked* to launch through this field; main
         // fires `agent_started` only after `provider.spawn` resolves. Loose
         // typing on the IPC boundary because the main-side schema
         // validator is the single enforcement point — `track()` will drop
@@ -2645,12 +2645,12 @@ export function registerPtyHandlers(
           : null
       // Why: the renderer sets pane env for SSH too. Only forward it to the
       // remote when the relay hook path is enabled; otherwise a newer relay
-      // could emit statuses this Orca build is not prepared to route.
+      // could emit statuses this Oak build is not prepared to route.
       const sshSourceEnv = stripRemotePaneEnvWhenHooksDisabled(args.connectionId, args.env)
       const baseEnvWithAuth = claudeAuth
         ? { ...sshSourceEnv, ...claudeAuth.envPatch }
         : sshSourceEnv
-      const spawnPaneKey = baseEnvWithAuth?.ORCA_PANE_KEY
+      const spawnPaneKey = baseEnvWithAuth?.OAK_PANE_KEY
       const parsedSpawnPaneKey = parseValidPaneKey(spawnPaneKey)
       const verifiedPaneKey =
         parsedSpawnPaneKey &&
@@ -2719,32 +2719,32 @@ export function registerPtyHandlers(
           }
         }
       }
-      const requestedAgentTeamsPath = baseEnv?.ORCA_AGENT_TEAMS_TEAM_ID ? baseEnv.PATH : undefined
+      const requestedAgentTeamsPath = baseEnv?.OAK_AGENT_TEAMS_TEAM_ID ? baseEnv.PATH : undefined
       const agentTeamsEnvToDelete = shouldRefreshAgentTeamsEnv
-        ? ['TERM_PROGRAM', 'ORCA_ATTRIBUTION_SHIM_DIR']
+        ? ['TERM_PROGRAM', 'OAK_ATTRIBUTION_SHIM_DIR']
         : undefined
       if (baseEnv && stablePaneKey) {
-        baseEnv.ORCA_PANE_KEY = stablePaneKey
+        baseEnv.OAK_PANE_KEY = stablePaneKey
         if (typeof args.tabId === 'string') {
-          baseEnv.ORCA_TAB_ID = args.tabId
+          baseEnv.OAK_TAB_ID = args.tabId
         } else if (!args.connectionId) {
-          delete baseEnv.ORCA_TAB_ID
+          delete baseEnv.OAK_TAB_ID
         }
         if (typeof args.worktreeId === 'string') {
-          baseEnv.ORCA_WORKTREE_ID = args.worktreeId
+          baseEnv.OAK_WORKTREE_ID = args.worktreeId
         } else if (!args.connectionId) {
-          delete baseEnv.ORCA_WORKTREE_ID
+          delete baseEnv.OAK_WORKTREE_ID
         }
       } else if (baseEnv) {
-        // Why: ORCA_PANE_KEY crosses into shells and hook registries. Only the
+        // Why: OAK_PANE_KEY crosses into shells and hook registries. Only the
         // key proven to match this spawn's tab+leaf may leave the IPC boundary.
-        delete baseEnv.ORCA_PANE_KEY
-        delete baseEnv.ORCA_TAB_ID
-        delete baseEnv.ORCA_WORKTREE_ID
-        delete baseEnv.ORCA_AGENT_LAUNCH_TOKEN
+        delete baseEnv.OAK_PANE_KEY
+        delete baseEnv.OAK_TAB_ID
+        delete baseEnv.OAK_WORKTREE_ID
+        delete baseEnv.OAK_AGENT_LAUNCH_TOKEN
       }
       const validatedPaneKey = stablePaneKey
-      // Why: SSH can strip ORCA_PANE_KEY when remote hooks are disabled; the
+      // Why: SSH can strip OAK_PANE_KEY when remote hooks are disabled; the
       // IPC tab/leaf metadata still names the pane and matches runtime fallback.
       const reservationPaneKey = metadataPaneKey ?? validatedPaneKey
       const validatedLeafId = verifiedLeafId ?? metadataLeafId
@@ -2814,7 +2814,7 @@ export function registerPtyHandlers(
       }
       spawnTiming.mark('host_env')
       const spawnEnv = preAllocatedHandle
-        ? { ...env, ORCA_TERMINAL_HANDLE: preAllocatedHandle }
+        ? { ...env, OAK_TERMINAL_HANDLE: preAllocatedHandle }
         : env
       const envToDelete = claudeAuth?.stripAuthEnv
         ? [...CLAUDE_AUTH_ENV_VARS, 'ANTHROPIC_CUSTOM_HEADERS']
@@ -2991,7 +2991,7 @@ export function registerPtyHandlers(
         }
         const relayResultId = getRelayPtyId(args.connectionId, result.id)
         if (store && args.connectionId) {
-          // Why: remote PTYs live in the SSH relay grace window after Orca
+          // Why: remote PTYs live in the SSH relay grace window after Oak
           // detaches. Persist their IDs immediately so reconnect can reattach
           // instead of treating the tab as a fresh shell.
           store.upsertSshRemotePtyLease({
@@ -3105,7 +3105,7 @@ export function registerPtyHandlers(
         if (isClaudeLaunch) {
           markClaudePtySpawned(result.id)
         }
-        // Why: renderer sets ORCA_PANE_KEY in `args.env` for every pane-owned
+        // Why: renderer sets OAK_PANE_KEY in `args.env` for every pane-owned
         // spawn (see pty-connection.ts). Recording the mapping here lets
         // clearProviderPtyState clear the agent-hooks server's per-paneKey
         // caches when the PTY exits.
@@ -3687,13 +3687,13 @@ export function registerPtyHandlers(
 }
 
 export function registerHeadlessPtyRuntime(
-  runtime: OrcaRuntimeService,
+  runtime: OakRuntimeService,
   getSelectedCodexHomePath?: GetSelectedCodexHomePath,
   getSettings?: () => GlobalSettings,
   prepareClaudeAuth?: PrepareClaudeAuth,
   store?: Store
 ): void {
-  // Why: headless `orca serve` has no renderer window, but the runtime still
+  // Why: headless `oak serve` has no renderer window, but the runtime still
   // needs the same PTY controller and provider listeners as desktop so remote
   // clients can create, stream, inspect, and stop terminals.
   const headlessWindow = {

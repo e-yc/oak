@@ -38,7 +38,7 @@ export function AgentPipExperimentalSetting({
           <p className="text-xs text-muted-foreground">
             {translate(
               'auto.components.settings.ExperimentalPane.agentPip.description',
-              'Adds a status-bar toggle for a small always-on-top window that lists your agent sessions across workspaces — like a video pop-out. Click a row to reply to that agent without switching back to Orca.'
+              'Adds a status-bar toggle for a small always-on-top window that lists your agent sessions across workspaces — like a video pop-out. Click a row to reply to that agent without switching back to Oak.'
             )}
           </p>
         </div>

@@ -1,7 +1,7 @@
 import type { Terminal } from '@xterm/xterm'
 
 const XTERM_MOUSE_REPORTING_CLASS = 'enable-mouse-events'
-const REPLAYED_WHEEL_EVENT_PROPERTY = '__orcaReplayedTerminalWheelEvent'
+const REPLAYED_WHEEL_EVENT_PROPERTY = '__oakReplayedTerminalWheelEvent'
 const DOM_DELTA_PIXEL = 0
 const DOM_DELTA_LINE = 1
 const DISCRETE_PIXEL_WHEEL_DELTA_MIN = 50

@@ -350,13 +350,13 @@ describe('NewWorkspaceComposerCard folder task source mode', () => {
           kind: 'ready',
           id: 'setup-local',
           label: 'Local Mac',
-          path: '/Users/alice/orca'
+          path: '/Users/alice/oak'
         },
         {
           kind: 'ready',
           id: 'setup-builder',
           label: 'Builder',
-          path: '/workspace/orca'
+          path: '/workspace/oak'
         }
       ] as never,
       selectedProjectHostSetupId: 'setup-local',
@@ -365,8 +365,8 @@ describe('NewWorkspaceComposerCard folder task source mode', () => {
         {
           id: 'vercel',
           name: 'Vercel Sandbox',
-          create: './scripts/orca-vm/vercel.start.sh',
-          destroy: './scripts/orca-vm/vercel.cleanup.sh',
+          create: './scripts/oak-vm/vercel.start.sh',
+          destroy: './scripts/oak-vm/vercel.cleanup.sh',
           destroyDisabled: false
         }
       ] as never,
@@ -407,13 +407,13 @@ describe('NewWorkspaceComposerCard folder task source mode', () => {
           kind: 'ready',
           id: 'setup-local',
           label: 'Local Mac',
-          path: '/Users/alice/orca'
+          path: '/Users/alice/oak'
         },
         {
           kind: 'ready',
           id: 'setup-builder',
           label: 'Builder',
-          path: '/workspace/orca'
+          path: '/workspace/oak'
         }
       ] as never,
       selectedProjectHostSetupId: 'setup-local',
@@ -422,7 +422,7 @@ describe('NewWorkspaceComposerCard folder task source mode', () => {
         {
           id: 'vercel',
           name: 'Vercel Sandbox',
-          create: './scripts/orca-vm/vercel.start.sh',
+          create: './scripts/oak-vm/vercel.start.sh',
           destroyDisabled: true
         }
       ] as never,

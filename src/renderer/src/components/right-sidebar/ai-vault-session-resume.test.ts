@@ -12,10 +12,10 @@ import {
 
 function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
   return {
-    id: 'repo-1::/repo/orca',
+    id: 'repo-1::/repo/oak',
     repoId: 'repo-1',
-    displayName: 'orca',
-    path: '/repo/orca',
+    displayName: 'oak',
+    path: '/repo/oak',
     head: 'abc123',
     branch: 'main',
     isBare: false,
@@ -36,8 +36,8 @@ function makeWorktree(overrides: Partial<Worktree> = {}): Worktree {
 function makeRepo(overrides: Partial<Repo> = {}): Repo {
   return {
     id: 'repo-1',
-    path: '/repo/orca',
-    displayName: 'orca',
+    path: '/repo/oak',
+    displayName: 'oak',
     badgeColor: '#000000',
     addedAt: 1,
     ...overrides
@@ -100,9 +100,9 @@ function makeWorktreeInfo(
 ): AiVaultSessionWorktreeInfo {
   return {
     status,
-    label: 'orca',
-    path: '/repo/orca',
-    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/orca' })
+    label: 'oak',
+    path: '/repo/oak',
+    ...(status === 'unavailable' ? {} : { worktreeId: 'repo-1::/repo/oak' })
   }
 }
 
@@ -120,7 +120,7 @@ describe('resolveAiVaultSessionResumeState', () => {
       })
     ).toEqual({
       blocked: false,
-      worktreeId: 'repo-1::/repo/orca',
+      worktreeId: 'repo-1::/repo/oak',
       usesSessionWorktree: true
     })
   })
@@ -129,13 +129,13 @@ describe('resolveAiVaultSessionResumeState', () => {
     expect(
       resolveAiVaultSessionResumeState({
         worktreeInfo: makeWorktreeInfo('archived'),
-        activeWorktreeId: 'repo-1::/repo/orca',
+        activeWorktreeId: 'repo-1::/repo/oak',
         worktrees: [makeWorktree()],
         repos: [{ id: 'repo-1' } as Repo]
       })
     ).toEqual({
       blocked: false,
-      worktreeId: 'repo-1::/repo/orca',
+      worktreeId: 'repo-1::/repo/oak',
       usesSessionWorktree: false
     })
   })
@@ -165,7 +165,7 @@ describe('resolveAiVaultSessionResumeState', () => {
       })
     ).toEqual({
       blocked: false,
-      worktreeId: 'repo-1::/repo/orca',
+      worktreeId: 'repo-1::/repo/oak',
       usesSessionWorktree: true
     })
   })
@@ -180,7 +180,7 @@ describe('resolveAiVaultSessionResumeState', () => {
       })
     ).toEqual({
       blocked: false,
-      worktreeId: 'repo-1::/repo/orca',
+      worktreeId: 'repo-1::/repo/oak',
       usesSessionWorktree: true
     })
   })
@@ -224,20 +224,20 @@ describe('resolveAiVaultSessionResumeState', () => {
     expect(
       resolveAiVaultSessionResumeState({
         worktreeInfo: makeWorktreeInfo('active'),
-        activeWorktreeId: 'repo-2::/remote/orca',
+        activeWorktreeId: 'repo-2::/remote/oak',
         worktrees: [
           makeWorktree(),
           makeWorktree({
-            id: 'repo-2::/remote/orca',
+            id: 'repo-2::/remote/oak',
             repoId: 'repo-2',
-            path: '/remote/orca'
+            path: '/remote/oak'
           })
         ],
         repos: [{ id: 'repo-1' } as Repo, { id: 'repo-2', connectionId: 'ssh-1' } as Repo]
       })
     ).toEqual({
       blocked: false,
-      worktreeId: 'repo-1::/repo/orca',
+      worktreeId: 'repo-1::/repo/oak',
       usesSessionWorktree: true
     })
   })
@@ -318,7 +318,7 @@ describe('resolveAiVaultSessionResumeActions', () => {
         repos: [{ id: 'repo-1' } as Repo]
       })
     ).toEqual({
-      worktree: { worktreeId: 'repo-1::/repo/orca', disabled: false },
+      worktree: { worktreeId: 'repo-1::/repo/oak', disabled: false },
       newTab: { worktreeId: 'repo-1::/repo/other', disabled: false }
     })
   })
@@ -327,20 +327,20 @@ describe('resolveAiVaultSessionResumeActions', () => {
     expect(
       resolveAiVaultSessionResumeActions({
         worktreeInfo: makeWorktreeInfo('active'),
-        activeWorktreeId: 'repo-2::/remote/orca',
+        activeWorktreeId: 'repo-2::/remote/oak',
         worktrees: [
           makeWorktree(),
           makeWorktree({
-            id: 'repo-2::/remote/orca',
+            id: 'repo-2::/remote/oak',
             repoId: 'repo-2',
-            path: '/remote/orca'
+            path: '/remote/oak'
           })
         ],
         repos: [{ id: 'repo-1' } as Repo, { id: 'repo-2', connectionId: 'ssh-1' } as Repo]
       })
     ).toEqual({
-      worktree: { worktreeId: 'repo-1::/repo/orca', disabled: false },
-      newTab: { worktreeId: 'repo-2::/remote/orca', disabled: false }
+      worktree: { worktreeId: 'repo-1::/repo/oak', disabled: false },
+      newTab: { worktreeId: 'repo-2::/remote/oak', disabled: false }
     })
   })
 
@@ -368,7 +368,7 @@ describe('resolveAiVaultSessionResumeActions', () => {
         ]
       })
     ).toEqual({
-      worktree: { worktreeId: 'repo-1::/repo/orca', disabled: true },
+      worktree: { worktreeId: 'repo-1::/repo/oak', disabled: true },
       newTab: { worktreeId: 'repo-2::/repo/other', disabled: false }
     })
   })
@@ -377,12 +377,12 @@ describe('resolveAiVaultSessionResumeActions', () => {
     expect(
       resolveAiVaultSessionResumeActions({
         worktreeInfo: makeWorktreeInfo('current'),
-        activeWorktreeId: 'repo-1::/repo/orca',
+        activeWorktreeId: 'repo-1::/repo/oak',
         worktrees: [makeWorktree()],
         repos: [{ id: 'repo-1' } as Repo]
       })
     ).toEqual({
-      worktree: { worktreeId: 'repo-1::/repo/orca', disabled: false },
+      worktree: { worktreeId: 'repo-1::/repo/oak', disabled: false },
       newTab: { worktreeId: null, disabled: true }
     })
   })

@@ -42,13 +42,13 @@ import {
   type CodexHookTrustState,
   type CodexTrustEntry
 } from './config-toml-trust'
-import { getOrcaManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
+import { getOakManagedCodexHomePath, getSystemCodexHomePath } from './codex-home-paths'
 import { syncSystemConfigIntoManagedCodexHome } from './codex-config-mirror'
 
 // Why: PreToolUse/PostToolUse give the dashboard a live readout of the
 // in-flight tool (name + input preview) between UserPromptSubmit and Stop.
 // PermissionRequest is the human-input boundary: the managed script exits
-// without a decision so Codex still shows its normal approval UI, while Orca
+// without a decision so Codex still shows its normal approval UI, while Oak
 // can flip the pane to the red waiting state.
 const CODEX_EVENTS = [
   'SessionStart',
@@ -60,17 +60,17 @@ const CODEX_EVENTS = [
 ] as const
 
 function getConfigPath(): string {
-  return join(getOrcaManagedCodexHomePath(), 'hooks.json')
+  return join(getOakManagedCodexHomePath(), 'hooks.json')
 }
 
 function writeCodexHooksJson(configPath: string, hooks: Record<string, HookDefinition[]>): void {
   // Why: Codex rejects unknown top-level hooks.json fields, so plugin manager
-  // bookkeeping such as `_managed` must not survive Orca's rewrite.
+  // bookkeeping such as `_managed` must not survive Oak's rewrite.
   writeHooksJson(configPath, { hooks })
 }
 
 function getCodexConfigTomlPath(): string {
-  return join(getOrcaManagedCodexHomePath(), 'config.toml')
+  return join(getOakManagedCodexHomePath(), 'config.toml')
 }
 
 // Why: Codex's hash key uses the snake_case event label (see
@@ -103,9 +103,9 @@ const CODEX_PLUGIN_ONLY_HOOK_PLACEHOLDERS = [
   '${PLUGIN_DATA}'
 ] as const
 
-const LEGACY_ORCA_PROFILE_NAME = 'orca-agent-status'
-const LEGACY_ORCA_PROFILE_BLOCK_START = '# BEGIN ORCA AGENT STATUS HOOKS'
-const LEGACY_ORCA_PROFILE_BLOCK_END = '# END ORCA AGENT STATUS HOOKS'
+const LEGACY_OAK_PROFILE_NAME = 'oak-agent-status'
+const LEGACY_OAK_PROFILE_BLOCK_START = '# BEGIN OAK AGENT STATUS HOOKS'
+const LEGACY_OAK_PROFILE_BLOCK_END = '# END OAK AGENT STATUS HOOKS'
 
 type MirroredRuntimeUserHookTrustEntry = {
   entry: CodexTrustEntry
@@ -135,7 +135,7 @@ function getSystemCodexConfigTomlPath(): string {
 }
 
 function getLegacyCodexProfileTomlPath(): string {
-  return join(getSystemCodexHomePath(), `${LEGACY_ORCA_PROFILE_NAME}.config.toml`)
+  return join(getSystemCodexHomePath(), `${LEGACY_OAK_PROFILE_NAME}.config.toml`)
 }
 
 function collectManagedTrustEntries(
@@ -257,7 +257,7 @@ function commandUsesCodexPluginOnlyPlaceholder(command: string | undefined): boo
 }
 
 function removeCodexPluginEnvironmentCommands(definitions: HookDefinition[]): HookDefinition[] {
-  // Why: Orca mirrors system hooks into a plain runtime hooks.json. Plugin
+  // Why: Oak mirrors system hooks into a plain runtime hooks.json. Plugin
   // placeholders only work for Codex plugin hook sources, so copying those
   // commands here strips the environment they require and turns them into 127s.
   return removeManagedCommands(definitions, commandUsesCodexPluginOnlyPlaceholder)
@@ -299,9 +299,9 @@ function getRuntimeHooksWithSystemUserHooks(
       continue
     }
 
-    // Why: runtime hooks are derived from the user's system hooks plus Orca's
+    // Why: runtime hooks are derived from the user's system hooks plus Oak's
     // managed hooks. Reusing old runtime user-hook copies would keep deleted or
-    // edited ~/.codex/hooks.json entries alive for new Orca-launched sessions.
+    // edited ~/.codex/hooks.json entries alive for new Oak-launched sessions.
     nextHooks[eventName] = dedupeHookDefinitions(systemUserDefinitions)
   }
 
@@ -327,7 +327,7 @@ function getTrustedSystemUserHookSignatures(
     trustEntries = readHookTrustEntries(getSystemCodexConfigTomlPath())
   } catch (error) {
     // Why: a hand-broken system config.toml should only disable user-hook
-    // trust mirroring; Orca's managed runtime hooks can still be installed.
+    // trust mirroring; Oak's managed runtime hooks can still be installed.
     console.warn('[codex-hook-service] failed to read system hook trust entries', error)
     return signatures
   }
@@ -478,7 +478,7 @@ function buildHookTrustHeaderKeyPattern(key: string): string {
     const quoted = [`"${escapeRegex(escapeTomlString(variant))}"`]
     if (!variant.includes("'")) {
       // Why: tolerate raw-backslash literal keys left by Codex/manual approval
-      // while Orca repairs mirrored runtime trust across both Windows variants.
+      // while Oak repairs mirrored runtime trust across both Windows variants.
       quoted.push(`'${escapeRegex(variant)}'`)
     }
     return quoted
@@ -562,23 +562,23 @@ function cleanupLegacySystemManagedHooks(): void {
     }
   }
 
-  // Why: Codex hooks moved to Orca's managed CODEX_HOME; old entries in
-  // ~/.codex would keep external Codex sessions reporting into Orca.
+  // Why: Codex hooks moved to Oak's managed CODEX_HOME; old entries in
+  // ~/.codex would keep external Codex sessions reporting into Oak.
   if (removedManagedHook) {
-    // Why: this is the user's system hooks file, not Orca's runtime copy.
-    // Remove only stale Orca hook entries and preserve other managers' metadata.
+    // Why: this is the user's system hooks file, not Oak's runtime copy.
+    // Remove only stale Oak hook entries and preserve other managers' metadata.
     writeHooksJson(legacyConfigPath, { ...config, hooks: nextHooks })
   }
   removeMatchingTrustEntries(getSystemCodexConfigTomlPath(), trustEntries)
 }
 
 function stripLegacyManagedProfileBlock(content: string): string {
-  const start = content.indexOf(LEGACY_ORCA_PROFILE_BLOCK_START)
+  const start = content.indexOf(LEGACY_OAK_PROFILE_BLOCK_START)
   if (start === -1) {
     return content
   }
-  const endMarker = content.indexOf(LEGACY_ORCA_PROFILE_BLOCK_END, start)
-  const end = endMarker === -1 ? content.length : endMarker + LEGACY_ORCA_PROFILE_BLOCK_END.length
+  const endMarker = content.indexOf(LEGACY_OAK_PROFILE_BLOCK_END, start)
+  const end = endMarker === -1 ? content.length : endMarker + LEGACY_OAK_PROFILE_BLOCK_END.length
   const before = content.slice(0, start).replace(/[ \t]*(?:\r?\n)*$/, '')
   const after = content.slice(end).replace(/^(?:\r?\n)+/, '')
   if (!before) {
@@ -601,8 +601,8 @@ function cleanupLegacyCodexProfileHooks(): void {
   if (next === existing) {
     return
   }
-  // Why: #2778 wrote Orca hooks into a Codex profile file. Runtime CODEX_HOME
-  // supersedes that representation, so remove only Orca's marked block.
+  // Why: #2778 wrote Oak hooks into a Codex profile file. Runtime CODEX_HOME
+  // supersedes that representation, so remove only Oak's marked block.
   if (next.trim().length === 0) {
     unlinkSync(profilePath)
   } else {
@@ -629,7 +629,7 @@ function removeRuntimeManagedHookTrustEntries(configPath: string): void {
       CODEX_EVENTS.map((event) => CODEX_EVENT_LABEL[event])
     )
     // Why: only drop entries WE wrote. The same config.toml can contain
-    // user-approved trust entries for non-Orca commands, so match by hash
+    // user-approved trust entries for non-Oak commands, so match by hash
     // equivalence to our managed command — a sourcePath-only filter would
     // wipe the user's manually-approved entries.
     const ourKeys: string[] = []
@@ -680,13 +680,13 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
       '@echo off',
       'setlocal',
       // Why: see claude/hook-service.ts for rationale. The endpoint file holds
-      // the live port/token for this Orca install; sourcing it here lets a
+      // the live port/token for this Oak install; sourcing it here lets a
       // surviving PTY reach the current server even though its env points at
-      // the prior Orca's coordinates.
-      'if defined ORCA_AGENT_HOOK_ENDPOINT if exist "%ORCA_AGENT_HOOK_ENDPOINT%" call "%ORCA_AGENT_HOOK_ENDPOINT%" 2>nul',
-      'if "%ORCA_AGENT_HOOK_PORT%"=="" exit /b 0',
-      'if "%ORCA_AGENT_HOOK_TOKEN%"=="" exit /b 0',
-      'if "%ORCA_PANE_KEY%"=="" exit /b 0',
+      // the prior Oak's coordinates.
+      'if defined OAK_AGENT_HOOK_ENDPOINT if exist "%OAK_AGENT_HOOK_ENDPOINT%" call "%OAK_AGENT_HOOK_ENDPOINT%" 2>nul',
+      'if "%OAK_AGENT_HOOK_PORT%"=="" exit /b 0',
+      'if "%OAK_AGENT_HOOK_TOKEN%"=="" exit /b 0',
+      'if "%OAK_PANE_KEY%"=="" exit /b 0',
       buildWindowsAgentHookCurlPostCommand('codex'),
       'exit /b 0',
       ''
@@ -696,12 +696,12 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
   return [
     '#!/bin/sh',
     // Why: see claude/hook-service.ts for rationale. Sourcing refreshes
-    // PORT/TOKEN/ENV/VERSION from the current Orca so a surviving PTY keeps
+    // PORT/TOKEN/ENV/VERSION from the current Oak so a surviving PTY keeps
     // reporting after a restart.
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$OAK_AGENT_HOOK_ENDPOINT" ] && [ -r "$OAK_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$OAK_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$OAK_AGENT_HOOK_PORT" ] || [ -z "$OAK_AGENT_HOOK_TOKEN" ] || [ -z "$OAK_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     'payload=$(cat)',
@@ -712,16 +712,16 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
     // shell is not safe once a path contains quotes or newlines. Post the raw
     // hook payload plus metadata as form fields and let the receiver parse it.
     // Timeout caps best-effort hook posts if the local listener stalls.
-    'curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/codex" \\',
+    'curl -sS -X POST "http://127.0.0.1:${OAK_AGENT_HOOK_PORT}/hook/codex" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
+    '  -H "X-Oak-Agent-Hook-Token: ${OAK_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${OAK_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${OAK_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${OAK_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${OAK_WORKTREE_ID}" \\',
+    '  --data-urlencode "env=${OAK_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${OAK_AGENT_HOOK_VERSION}" \\',
     '  --data-urlencode "payload=${payload}" >/dev/null 2>&1 || true',
     'exit 0',
     ''
@@ -935,7 +935,7 @@ export class CodexHookService {
       syncSystemConfigIntoManagedCodexHome()
       // Why: system user hook approvals are mirrored into runtime CODEX_HOME.
       // If the user later revokes approval in ~/.codex/config.toml, preserving
-      // all old runtime [hooks.state.*] blocks would keep Orca Codex trusted.
+      // all old runtime [hooks.state.*] blocks would keep Oak Codex trusted.
       // Upsert first so duplicate repair can preserve a disabled managed copy
       // before stale cleanup removes old managed hook keys.
       upsertHookTrustEntries(tomlPath, trustEntries)
@@ -962,7 +962,7 @@ export class CodexHookService {
   async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
     const remoteConfigPath = `${remoteHome.replace(/\/$/, '')}/.codex/hooks.json`
     const remoteTomlPath = `${remoteHome.replace(/\/$/, '')}/.codex/config.toml`
-    const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.orca/agent-hooks/codex-hook.sh`
+    const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.oak/agent-hooks/codex-hook.sh`
     try {
       const config = await readHooksJsonRemote(sftp, remoteConfigPath)
       if (!config) {
@@ -1013,11 +1013,11 @@ export class CodexHookService {
       config.hooks = nextHooks
       // Why: script/settings first, trust TOML last. A partial trust write
       // leaves Codex asking for approval rather than executing a missing script.
-      // Why: SSH remotes use POSIX `.sh` hook paths even when Orca itself is
+      // Why: SSH remotes use POSIX `.sh` hook paths even when Oak itself is
       // running on Windows; never derive remote script syntax from local OS.
       await writeManagedScriptRemote(sftp, remoteScriptPath, getManagedScript('posix'))
       // Why: SSH installs edit the user's remote ~/.codex/hooks.json directly.
-      // Preserve non-Orca top-level metadata while replacing the hooks tree.
+      // Preserve non-Oak top-level metadata while replacing the hooks tree.
       await writeHooksJsonRemote(sftp, remoteConfigPath, { ...config, hooks: nextHooks })
       try {
         const existingToml = (await readTextFileRemote(sftp, remoteTomlPath)) ?? ''
@@ -1080,8 +1080,8 @@ export class CodexHookService {
       const tomlPath = getCodexConfigTomlPath()
       const trustEntries = hookPlan.trustEntries.map(({ entry }) => entry)
       syncSystemConfigIntoManagedCodexHome()
-      // Why: this path is used when Orca status hooks are disabled. The
-      // runtime CODEX_HOME should keep user hooks, but not Orca-managed trust.
+      // Why: this path is used when Oak status hooks are disabled. The
+      // runtime CODEX_HOME should keep user hooks, but not Oak-managed trust.
       // Write current mirrored user trust first so stale cleanup compares
       // against current hashes while deleting old managed hook keys.
       upsertHookTrustEntries(tomlPath, trustEntries)

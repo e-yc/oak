@@ -2,7 +2,7 @@ import type { Page, TestInfo } from '@stablyai/playwright-test'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import {
   ensureTerminalVisible,
   getActiveWorktreeId,
@@ -143,37 +143,37 @@ function readPositiveIntList(name: string): number[] {
 }
 
 const SAME_WORKSPACE_PANES = readPositiveInt(
-  'ORCA_E2E_OPENCODE_SAME_WORKSPACE_PANES',
+  'OAK_E2E_OPENCODE_SAME_WORKSPACE_PANES',
   DEFAULT_SAME_WORKSPACE_PANES
 )
 const CROSS_WORKSPACE_PANES_PER_WORKTREE = readPositiveInt(
-  'ORCA_E2E_OPENCODE_CROSS_WORKSPACE_PANES',
+  'OAK_E2E_OPENCODE_CROSS_WORKSPACE_PANES',
   DEFAULT_CROSS_WORKSPACE_PANES_PER_WORKTREE
 )
 const PRESSURE_BACKGROUND_PANES = readPositiveInt(
-  'ORCA_E2E_OPENCODE_PRESSURE_BACKGROUND_PANES',
+  'OAK_E2E_OPENCODE_PRESSURE_BACKGROUND_PANES',
   DEFAULT_PRESSURE_BACKGROUND_PANES
 )
 const PRESSURE_OUTPUT_CHARS = readPositiveInt(
-  'ORCA_E2E_OPENCODE_PRESSURE_OUTPUT_CHARS',
+  'OAK_E2E_OPENCODE_PRESSURE_OUTPUT_CHARS',
   DEFAULT_PRESSURE_OUTPUT_CHARS
 )
 const HIDDEN_PRESSURE_PANES = readPositiveInt(
-  'ORCA_E2E_OPENCODE_HIDDEN_PRESSURE_PANES',
+  'OAK_E2E_OPENCODE_HIDDEN_PRESSURE_PANES',
   DEFAULT_HIDDEN_PRESSURE_PANES
 )
-const FRAME_COUNT = readPositiveInt('ORCA_E2E_OPENCODE_FRAME_COUNT', DEFAULT_FRAME_COUNT)
+const FRAME_COUNT = readPositiveInt('OAK_E2E_OPENCODE_FRAME_COUNT', DEFAULT_FRAME_COUNT)
 const FRAME_INTERVAL_MS = readPositiveInt(
-  'ORCA_E2E_OPENCODE_FRAME_INTERVAL_MS',
+  'OAK_E2E_OPENCODE_FRAME_INTERVAL_MS',
   DEFAULT_FRAME_INTERVAL_MS
 )
-const SCALE_SAME_WORKSPACE_PANES = readPositiveIntList('ORCA_E2E_OPENCODE_SCALE_PANES')
+const SCALE_SAME_WORKSPACE_PANES = readPositiveIntList('OAK_E2E_OPENCODE_SCALE_PANES')
 const SCALE_CROSS_WORKSPACE_PANES = readPositiveIntList(
-  'ORCA_E2E_OPENCODE_SCALE_CROSS_WORKSPACE_PANES'
+  'OAK_E2E_OPENCODE_SCALE_CROSS_WORKSPACE_PANES'
 )
-const SCALE_PRESSURE_PANES = readPositiveIntList('ORCA_E2E_OPENCODE_SCALE_PRESSURE_PANES')
+const SCALE_PRESSURE_PANES = readPositiveIntList('OAK_E2E_OPENCODE_SCALE_PRESSURE_PANES')
 const SCALE_HIDDEN_PRESSURE_PANES = readPositiveIntList(
-  'ORCA_E2E_OPENCODE_SCALE_HIDDEN_PRESSURE_PANES'
+  'OAK_E2E_OPENCODE_SCALE_HIDDEN_PRESSURE_PANES'
 )
 
 function interactivePromptScript(runId: string): string {
@@ -472,51 +472,51 @@ function annotateTypingMeasurement(
 }
 
 async function measureCrossWorkspaceTypingDuringHiddenLoad({
-  orcaPage,
+  oakPage,
   testRepoPath,
   hiddenPaneCount,
   annotationType,
   testInfo
 }: {
-  orcaPage: Page
+  oakPage: Page
   testRepoPath: string
   hiddenPaneCount: number
   annotationType: string
   testInfo: TestInfo
 }): Promise<void> {
-  await waitForSessionReady(orcaPage)
-  const firstWorktreeId = await waitForActiveWorktree(orcaPage)
-  const allWorktreeIds = await getAllWorktreeIds(orcaPage)
+  await waitForSessionReady(oakPage)
+  const firstWorktreeId = await waitForActiveWorktree(oakPage)
+  const allWorktreeIds = await getAllWorktreeIds(oakPage)
   const secondWorktreeId = allWorktreeIds.find((id) => id !== firstWorktreeId)
   test.skip(!secondWorktreeId, 'OpenCode cross-workspace load needs the seeded secondary worktree')
   if (!secondWorktreeId) {
     return
   }
 
-  await switchToWorktree(orcaPage, secondWorktreeId)
-  const hiddenPanes = await ensureActiveWorktreePaneLoad(orcaPage, hiddenPaneCount)
+  await switchToWorktree(oakPage, secondWorktreeId)
+  const hiddenPanes = await ensureActiveWorktreePaneLoad(oakPage, hiddenPaneCount)
 
-  await switchToWorktree(orcaPage, firstWorktreeId)
-  await expect.poll(() => getActiveWorktreeId(orcaPage), { timeout: 10_000 }).toBe(firstWorktreeId)
-  await ensureTerminalVisible(orcaPage)
-  await waitForActiveTerminalManager(orcaPage, 30_000)
-  const typingPtyId = await waitForActivePanePtyId(orcaPage)
+  await switchToWorktree(oakPage, firstWorktreeId)
+  await expect.poll(() => getActiveWorktreeId(oakPage), { timeout: 10_000 }).toBe(firstWorktreeId)
+  await ensureTerminalVisible(oakPage)
+  await waitForActiveTerminalManager(oakPage, 30_000)
+  const typingPtyId = await waitForActivePanePtyId(oakPage)
 
   const runId = randomUUID()
-  const scriptPath = path.join(testRepoPath, `.orca-opencode-cross-${hiddenPaneCount}-${runId}.mjs`)
+  const scriptPath = path.join(testRepoPath, `.oak-opencode-cross-${hiddenPaneCount}-${runId}.mjs`)
   writeInteractivePromptScript(scriptPath, runId)
-  await resetTerminalPtyOutputDebug(orcaPage)
+  await resetTerminalPtyOutputDebug(oakPage)
   const load = await startSyntheticOpenCodeInjection({
     frameCount: FRAME_COUNT,
     intervalMs: FRAME_INTERVAL_MS,
-    page: orcaPage,
+    page: oakPage,
     paneKeys: hiddenPanes.map((pane) => pane.paneKey)
   })
   try {
-    const measurement = await measureTypingDuringLoad(orcaPage, scriptPath, typingPtyId, runId)
-    const debug = await readTerminalPtyOutputDebug(orcaPage)
-    const scheduler = await readTerminalOutputSchedulerDebug(orcaPage)
-    const mainPressure = await readMainPtyPressureDebug(orcaPage)
+    const measurement = await measureTypingDuringLoad(oakPage, scriptPath, typingPtyId, runId)
+    const debug = await readTerminalPtyOutputDebug(oakPage)
+    const scheduler = await readTerminalOutputSchedulerDebug(oakPage)
+    const mainPressure = await readMainPtyPressureDebug(oakPage)
     annotateTypingMeasurement(
       testInfo,
       annotationType,
@@ -533,7 +533,7 @@ async function measureCrossWorkspaceTypingDuringHiddenLoad({
     expect(measurement.maxTimerDriftMs).toBeLessThan(MAX_TIMER_DRIFT_MS)
   } finally {
     await load.stop()
-    await sendToTerminal(orcaPage, typingPtyId, '\x03').catch(() => undefined)
+    await sendToTerminal(oakPage, typingPtyId, '\x03').catch(() => undefined)
     rmSync(scriptPath, { force: true })
   }
 }
@@ -541,20 +541,20 @@ async function measureCrossWorkspaceTypingDuringHiddenLoad({
 async function runConfiguredMainPressureScenario({
   annotationSuffix,
   backgroundPaneCount,
-  orcaPage,
+  oakPage,
   testInfo,
   testRepoPath
 }: {
   annotationSuffix: string
   backgroundPaneCount: number
-  orcaPage: Page
+  oakPage: Page
   testInfo: TestInfo
   testRepoPath: string
 }): Promise<void> {
   await runMainPressureScenario({
     annotationSuffix,
     backgroundPaneCount,
-    orcaPage,
+    oakPage,
     pressureOutputChars: PRESSURE_OUTPUT_CHARS,
     testInfo,
     testRepoPath,
@@ -586,24 +586,24 @@ test.describe('Artificial OpenCode terminal load', () => {
   test.describe.configure({ mode: 'serial' })
 
   test('measures baseline typing responsiveness with one active terminal', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    const typingPtyId = await waitForActivePanePtyId(orcaPage)
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    const typingPtyId = await waitForActivePanePtyId(oakPage)
 
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-opencode-baseline-typing-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.oak-opencode-baseline-typing-${runId}.mjs`)
     writeInteractivePromptScript(scriptPath, runId)
-    await resetTerminalPtyOutputDebug(orcaPage)
+    await resetTerminalPtyOutputDebug(oakPage)
     try {
-      const measurement = await measureTypingDuringLoad(orcaPage, scriptPath, typingPtyId, runId)
-      const debug = await readTerminalPtyOutputDebug(orcaPage)
-      const scheduler = await readTerminalOutputSchedulerDebug(orcaPage)
-      const mainPressure = await readMainPtyPressureDebug(orcaPage)
+      const measurement = await measureTypingDuringLoad(oakPage, scriptPath, typingPtyId, runId)
+      const debug = await readTerminalPtyOutputDebug(oakPage)
+      const scheduler = await readTerminalOutputSchedulerDebug(oakPage)
+      const mainPressure = await readMainPtyPressureDebug(oakPage)
       annotateTypingMeasurement(
         testInfo,
         'opencode-baseline-typing',
@@ -617,34 +617,34 @@ test.describe('Artificial OpenCode terminal load', () => {
       expect(measurement.worstLatencyMs).toBeLessThan(MAX_WORST_KEY_LATENCY_MS)
       expect(measurement.maxTimerDriftMs).toBeLessThan(MAX_TIMER_DRIFT_MS)
     } finally {
-      await sendToTerminal(orcaPage, typingPtyId, '\x03').catch(() => undefined)
+      await sendToTerminal(oakPage, typingPtyId, '\x03').catch(() => undefined)
       rmSync(scriptPath, { force: true })
     }
   })
 
   test('keeps typing responsive while same-workspace panes redraw simultaneously', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    const panes = await ensureActiveWorktreePaneLoad(orcaPage, SAME_WORKSPACE_PANES)
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
+    const panes = await ensureActiveWorktreePaneLoad(oakPage, SAME_WORKSPACE_PANES)
     const [typingPane, ...loadPanes] = panes
-    await focusPane(orcaPage, typingPane.paneKey)
+    await focusPane(oakPage, typingPane.paneKey)
 
     const runId = randomUUID()
-    const scriptPath = path.join(testRepoPath, `.orca-opencode-typing-${runId}.mjs`)
+    const scriptPath = path.join(testRepoPath, `.oak-opencode-typing-${runId}.mjs`)
     writeInteractivePromptScript(scriptPath, runId)
-    await resetTerminalPtyOutputDebug(orcaPage)
+    await resetTerminalPtyOutputDebug(oakPage)
     const load = await startSyntheticOpenCodeInjection({
       frameCount: FRAME_COUNT,
       intervalMs: FRAME_INTERVAL_MS,
-      page: orcaPage,
+      page: oakPage,
       paneKeys: loadPanes.map((pane) => pane.paneKey)
     })
     try {
       const measurement = await measureTypingDuringLoad(
-        orcaPage,
+        oakPage,
         scriptPath,
         typingPane.ptyId,
         runId
@@ -654,26 +654,26 @@ test.describe('Artificial OpenCode terminal load', () => {
         'opencode-same-workspace-typing',
         panes.length,
         measurement,
-        await readTerminalPtyOutputDebug(orcaPage),
-        await readTerminalOutputSchedulerDebug(orcaPage),
-        await readMainPtyPressureDebug(orcaPage)
+        await readTerminalPtyOutputDebug(oakPage),
+        await readTerminalOutputSchedulerDebug(oakPage),
+        await readMainPtyPressureDebug(oakPage)
       )
       expect(measurement.medianLatencyMs).toBeLessThan(MAX_MEDIAN_KEY_LATENCY_MS)
       expect(measurement.worstLatencyMs).toBeLessThan(MAX_WORST_KEY_LATENCY_MS)
       expect(measurement.maxTimerDriftMs).toBeLessThan(MAX_TIMER_DRIFT_MS)
     } finally {
       await load.stop()
-      await sendToTerminal(orcaPage, typingPane.ptyId, '\x03').catch(() => undefined)
+      await sendToTerminal(oakPage, typingPane.ptyId, '\x03').catch(() => undefined)
       rmSync(scriptPath, { force: true })
     }
   })
 
   test('keeps active typing responsive while background PTYs are ACK-backpressured', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo) => {
     await runConfiguredMainPressureScenario({
-      orcaPage,
+      oakPage,
       testRepoPath,
       backgroundPaneCount: PRESSURE_BACKGROUND_PANES,
       annotationSuffix: '',
@@ -683,11 +683,11 @@ test.describe('Artificial OpenCode terminal load', () => {
 
   for (const paneCount of SCALE_PRESSURE_PANES) {
     test(`keeps active interactions responsive at ${paneCount} ACK-backpressured OpenCode PTYs`, async ({
-      orcaPage,
+      oakPage,
       testRepoPath
     }, testInfo) => {
       await runConfiguredMainPressureScenario({
-        orcaPage,
+        oakPage,
         testRepoPath,
         backgroundPaneCount: paneCount,
         annotationSuffix: `-${paneCount}`,
@@ -698,28 +698,28 @@ test.describe('Artificial OpenCode terminal load', () => {
 
   for (const paneCount of SCALE_SAME_WORKSPACE_PANES) {
     test(`keeps typing responsive at ${paneCount} same-workspace OpenCode panes`, async ({
-      orcaPage,
+      oakPage,
       testRepoPath
     }, testInfo) => {
-      await waitForSessionReady(orcaPage)
-      await waitForActiveWorktree(orcaPage)
-      const panes = await ensureActiveWorktreePaneLoad(orcaPage, paneCount)
+      await waitForSessionReady(oakPage)
+      await waitForActiveWorktree(oakPage)
+      const panes = await ensureActiveWorktreePaneLoad(oakPage, paneCount)
       const [typingPane, ...loadPanes] = panes
-      await focusPane(orcaPage, typingPane.paneKey)
+      await focusPane(oakPage, typingPane.paneKey)
 
       const runId = randomUUID()
-      const scriptPath = path.join(testRepoPath, `.orca-opencode-scale-${paneCount}-${runId}.mjs`)
+      const scriptPath = path.join(testRepoPath, `.oak-opencode-scale-${paneCount}-${runId}.mjs`)
       writeInteractivePromptScript(scriptPath, runId)
-      await resetTerminalPtyOutputDebug(orcaPage)
+      await resetTerminalPtyOutputDebug(oakPage)
       const load = await startSyntheticOpenCodeInjection({
         frameCount: FRAME_COUNT,
         intervalMs: FRAME_INTERVAL_MS,
-        page: orcaPage,
+        page: oakPage,
         paneKeys: loadPanes.map((pane) => pane.paneKey)
       })
       try {
         const measurement = await measureTypingDuringLoad(
-          orcaPage,
+          oakPage,
           scriptPath,
           typingPane.ptyId,
           runId
@@ -729,27 +729,27 @@ test.describe('Artificial OpenCode terminal load', () => {
           `opencode-scale-same-workspace-${paneCount}`,
           panes.length,
           measurement,
-          await readTerminalPtyOutputDebug(orcaPage),
-          await readTerminalOutputSchedulerDebug(orcaPage),
-          await readMainPtyPressureDebug(orcaPage)
+          await readTerminalPtyOutputDebug(oakPage),
+          await readTerminalOutputSchedulerDebug(oakPage),
+          await readMainPtyPressureDebug(oakPage)
         )
         expect(measurement.medianLatencyMs).toBeLessThan(MAX_MEDIAN_KEY_LATENCY_MS)
         expect(measurement.worstLatencyMs).toBeLessThan(MAX_WORST_KEY_LATENCY_MS)
         expect(measurement.maxTimerDriftMs).toBeLessThan(MAX_TIMER_DRIFT_MS)
       } finally {
         await load.stop()
-        await sendToTerminal(orcaPage, typingPane.ptyId, '\x03').catch(() => undefined)
+        await sendToTerminal(oakPage, typingPane.ptyId, '\x03').catch(() => undefined)
         rmSync(scriptPath, { force: true })
       }
     })
   }
 
   test('keeps typing responsive while another workspace streams OpenCode-style output', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo) => {
     await measureCrossWorkspaceTypingDuringHiddenLoad({
-      orcaPage,
+      oakPage,
       testRepoPath,
       hiddenPaneCount: CROSS_WORKSPACE_PANES_PER_WORKTREE,
       annotationType: 'opencode-cross-workspace-typing',
@@ -757,14 +757,14 @@ test.describe('Artificial OpenCode terminal load', () => {
     })
   })
   async function runConfiguredHiddenRealPtyPressureScenario(
-    orcaPage: Page,
+    oakPage: Page,
     testRepoPath: string,
     testInfo: TestInfo,
     hiddenPaneCount: number,
     annotationSuffix?: string
   ): Promise<void> {
     await runHiddenRealPtyPressureScenario({
-      orcaPage,
+      oakPage,
       testRepoPath,
       annotationSuffix,
       hiddenPaneCount,
@@ -788,11 +788,11 @@ test.describe('Artificial OpenCode terminal load', () => {
     })
   }
   test('keeps typing responsive while hidden real PTYs are ACK-backpressured', async ({
-    orcaPage,
+    oakPage,
     testRepoPath
   }, testInfo) => {
     await runConfiguredHiddenRealPtyPressureScenario(
-      orcaPage,
+      oakPage,
       testRepoPath,
       testInfo,
       HIDDEN_PRESSURE_PANES
@@ -800,11 +800,11 @@ test.describe('Artificial OpenCode terminal load', () => {
   })
   for (const paneCount of SCALE_HIDDEN_PRESSURE_PANES) {
     test(`keeps hidden restore responsive with ${paneCount} ACK-backpressured real PTYs`, async ({
-      orcaPage,
+      oakPage,
       testRepoPath
     }, testInfo) => {
       await runConfiguredHiddenRealPtyPressureScenario(
-        orcaPage,
+        oakPage,
         testRepoPath,
         testInfo,
         paneCount,
@@ -815,11 +815,11 @@ test.describe('Artificial OpenCode terminal load', () => {
 
   for (const paneCount of SCALE_CROSS_WORKSPACE_PANES) {
     test(`keeps typing responsive with ${paneCount} hidden cross-workspace OpenCode panes`, async ({
-      orcaPage,
+      oakPage,
       testRepoPath
     }, testInfo) => {
       await measureCrossWorkspaceTypingDuringHiddenLoad({
-        orcaPage,
+        oakPage,
         testRepoPath,
         hiddenPaneCount: paneCount,
         annotationType: `opencode-scale-cross-workspace-${paneCount}`,

@@ -1,5 +1,5 @@
 {
-  "name": "orca-mobile",
+  "name": "oak-mobile",
   "version": "0.0.1",
   "private": true,
   "main": "expo-router/entry",
@@ -16,7 +16,7 @@
     "start:emulator": "node scripts/start-emulator.mjs"
   },
   "dependencies": {
-    "@orca/expo-two-way-audio": "file:./packages/expo-two-way-audio",
+    "@oak/expo-two-way-audio": "file:./packages/expo-two-way-audio",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "buffer": "^6.0.3",
     "expo": "^55.0.23",

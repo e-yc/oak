@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ORCA_BROWSER_BLANK_URL } from '../../../../shared/constants'
+import { OAK_BROWSER_BLANK_URL } from '../../../../shared/constants'
 import { redactKagiSessionToken } from '../../../../shared/browser-url'
 import type { BrowserTab as BrowserTabState } from '../../../../shared/types'
 import { CLOSE_ALL_CONTEXT_MENUS_EVENT } from './SortableTab'
@@ -28,7 +28,7 @@ import { TAB_CONTAINER_WIDTH_CLASSES, TAB_LABEL_WIDTH_CLASSES } from './tab-widt
 import { TabWorkspaceLayoutMenuSection } from './TabWorkspaceLayoutMenuSection'
 
 function formatBrowserTabUrlLabel(url: string): string {
-  if (url === ORCA_BROWSER_BLANK_URL || url === 'about:blank') {
+  if (url === OAK_BROWSER_BLANK_URL || url === 'about:blank') {
     return 'New Tab'
   }
   try {
@@ -43,7 +43,7 @@ export function getBrowserTabLabel(tab: BrowserTabState): string {
   if (
     !tab.title ||
     tab.title === tab.url ||
-    tab.title === ORCA_BROWSER_BLANK_URL ||
+    tab.title === OAK_BROWSER_BLANK_URL ||
     tab.title === 'about:blank'
   ) {
     return formatBrowserTabUrlLabel(tab.url)
@@ -52,7 +52,7 @@ export function getBrowserTabLabel(tab: BrowserTabState): string {
 }
 
 function isBlankBrowserTab(tab: BrowserTabState): boolean {
-  return tab.url === ORCA_BROWSER_BLANK_URL || tab.url === 'about:blank'
+  return tab.url === OAK_BROWSER_BLANK_URL || tab.url === 'about:blank'
 }
 
 type FailedFavicon = {

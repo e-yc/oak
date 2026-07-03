@@ -1,6 +1,6 @@
 import type { ElectronApplication, Page } from '@stablyai/playwright-test'
 import { PNG } from 'pngjs'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { ensureTerminalVisible, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 import {
   splitActiveTerminalPane,
@@ -283,22 +283,22 @@ async function dispatchDocumentVisibilityCycle(page: Page): Promise<void> {
 test.describe('terminal document visibility WebGL recovery @headful', () => {
   test('clears the WebGL atlas and keeps terminal text painted after document visibility resumes', async ({
     electronApp,
-    orcaPage
+    oakPage
   }, testInfo) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
-    await ensureTerminalVisible(orcaPage)
-    await waitForActiveTerminalManager(orcaPage, 30_000)
-    await splitActiveTerminalPane(orcaPage, 'vertical')
-    await waitForPaneCount(orcaPage, 2)
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
+    await ensureTerminalVisible(oakPage)
+    await waitForActiveTerminalManager(oakPage, 30_000)
+    await splitActiveTerminalPane(oakPage, 'vertical')
+    await waitForPaneCount(oakPage, 2)
 
-    const webglActive = await forceWebgl(orcaPage)
+    const webglActive = await forceWebgl(oakPage)
     test.skip(!webglActive, 'WebGL was not active in this headful environment')
 
-    await writeStableTerminalContent(orcaPage)
-    expect(await patchAtlasCounter(orcaPage)).toBe(true)
-    expect(await countPatchedWebglAddons(orcaPage)).toBeGreaterThanOrEqual(2)
-    const baseline = await terminalScreenshots(orcaPage)
+    await writeStableTerminalContent(oakPage)
+    expect(await patchAtlasCounter(oakPage)).toBe(true)
+    expect(await countPatchedWebglAddons(oakPage)).toBeGreaterThanOrEqual(2)
+    const baseline = await terminalScreenshots(oakPage)
     expect(baseline.length).toBeGreaterThanOrEqual(2)
     const baselineInkPixels = baseline.map(countTerminalInkPixels)
     for (const inkPixels of baselineInkPixels) {
@@ -309,35 +309,35 @@ test.describe('terminal document visibility WebGL recovery @headful', () => {
       // Why: this is the app-level background/foreground path where the
       // TerminalPane stays mounted and visible, so React pane visibility does
       // not run its normal resume recovery.
-      await resetAtlasResetCount(orcaPage)
+      await resetAtlasResetCount(oakPage)
       const browserWindowVisibilityWorked = await tryBrowserWindowVisibilityCycle(
         electronApp,
-        orcaPage
+        oakPage
       )
       console.log(
         `[visibility-webgl] browserWindowVisibilityWorked=${browserWindowVisibilityWorked}`
       )
       if (browserWindowVisibilityWorked) {
         await expect
-          .poll(() => readAtlasResetCount(orcaPage), {
+          .poll(() => readAtlasResetCount(oakPage), {
             timeout: 2_000,
             message: 'BrowserWindow visibility resume did not clear the WebGL atlas'
           })
           .toBeGreaterThan(0)
       } else {
-        await resetAtlasResetCount(orcaPage)
-        await dispatchDocumentVisibilityCycle(orcaPage)
+        await resetAtlasResetCount(oakPage)
+        await dispatchDocumentVisibilityCycle(oakPage)
         await expect
-          .poll(() => readAtlasResetCount(orcaPage), {
+          .poll(() => readAtlasResetCount(oakPage), {
             timeout: 2_000,
             message: 'document visibility resume did not clear the WebGL atlas'
           })
           .toBeGreaterThan(0)
       }
 
-      await waitForTerminalPaint(orcaPage)
+      await waitForTerminalPaint(oakPage)
 
-      const afterResume = await terminalScreenshots(orcaPage)
+      const afterResume = await terminalScreenshots(oakPage)
       for (const [index, baselineShot] of baseline.entries()) {
         await testInfo.attach(`visibility-webgl-baseline-${index}`, {
           body: baselineShot,

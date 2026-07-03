@@ -25,7 +25,7 @@ import {
   getPortOpenBrowserTooltipLabel,
   openWorkspacePortInBrowser,
   refreshWorkspacePortScanAfterStop,
-  resolvePortOpenInOrcaBrowser,
+  resolvePortOpenInOakBrowser,
   scanWorkspacePortsForTarget,
   workspacePortRuntimeTargetKey
 } from '@/lib/workspace-port-actions'
@@ -290,7 +290,7 @@ function LocalWorkspacePortsPanel({ isVisible }: { isVisible: boolean }): React.
         runtimeTarget,
         createBrowserTab,
         setRemoteBrowserPageHandle,
-        openInOrcaBrowser: resolvePortOpenInOrcaBrowser({
+        openInOakBrowser: resolvePortOpenInOakBrowser({
           settings,
           event,
           isMac: navigator.userAgent.includes('Mac')
@@ -866,7 +866,7 @@ function SshPortsPanel(): React.JSX.Element {
     (entry: PortForwardEntry, event?: React.MouseEvent<HTMLButtonElement>) => {
       const url = browserUrlForPortForwardEntry(entry)
       if (
-        !resolvePortOpenInOrcaBrowser({
+        !resolvePortOpenInOakBrowser({
           settings,
           event,
           isMac: navigator.userAgent.includes('Mac')

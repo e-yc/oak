@@ -48,21 +48,21 @@ function getManagedScript(
       'setlocal',
       ...(options.skipWhenDevinImportsClaude
         ? [
-            // Why: Devin imports .claude hooks by default. Skip Orca's managed
+            // Why: Devin imports .claude hooks by default. Skip Oak's managed
             // Claude hook there so status posts stay attributed to Devin.
             'if not "%DEVIN_PROJECT_DIR%"=="" exit /b 0'
           ]
         : []),
-      // Why: the endpoint file holds the *live* port/token for this Orca
-      // install. A PTY that survived an Orca restart has stale PORT/TOKEN
+      // Why: the endpoint file holds the *live* port/token for this Oak
+      // install. A PTY that survived an Oak restart has stale PORT/TOKEN
       // baked into its env from the old instance — loading `endpoint.cmd`
       // (`set KEY=VALUE` lines) via `call` refreshes them so the hook
       // reaches the current server. Falls through to PTY env if the file
-      // is missing (first run / pre-endpoint-file / running outside Orca).
-      'if defined ORCA_AGENT_HOOK_ENDPOINT if exist "%ORCA_AGENT_HOOK_ENDPOINT%" call "%ORCA_AGENT_HOOK_ENDPOINT%" 2>nul',
-      'if "%ORCA_AGENT_HOOK_PORT%"=="" exit /b 0',
-      'if "%ORCA_AGENT_HOOK_TOKEN%"=="" exit /b 0',
-      'if "%ORCA_PANE_KEY%"=="" exit /b 0',
+      // is missing (first run / pre-endpoint-file / running outside Oak).
+      'if defined OAK_AGENT_HOOK_ENDPOINT if exist "%OAK_AGENT_HOOK_ENDPOINT%" call "%OAK_AGENT_HOOK_ENDPOINT%" 2>nul',
+      'if "%OAK_AGENT_HOOK_PORT%"=="" exit /b 0',
+      'if "%OAK_AGENT_HOOK_TOKEN%"=="" exit /b 0',
+      'if "%OAK_PANE_KEY%"=="" exit /b 0',
       // Why: post via curl.exe, not a second PowerShell. Claude's launcher is
       // already an encoded PowerShell command (Git Bash needs it to survive
       // spaces); a PowerShell post on top of that meant two interpreter
@@ -78,18 +78,18 @@ function getManagedScript(
     '#!/bin/sh',
     ...(options.skipWhenDevinImportsClaude
       ? [
-          // Why: Devin imports .claude hooks by default. Skip Orca's managed
+          // Why: Devin imports .claude hooks by default. Skip Oak's managed
           // Claude hook there so status posts stay attributed to Devin.
           'if [ -n "$DEVIN_PROJECT_DIR" ]; then',
           '  exit 0',
           'fi'
         ]
       : []),
-    // Why: the endpoint file holds the *live* port/token for this Orca
-    // install. PTYs that survive an Orca restart have stale PORT/TOKEN
+    // Why: the endpoint file holds the *live* port/token for this Oak
+    // install. PTYs that survive an Oak restart have stale PORT/TOKEN
     // baked into their env from the old instance — sourcing the file here
     // lets us reach the new server. Falls back to PTY env if the file is
-    // missing (first-run / pre-endpoint-file scripts / running outside Orca).
+    // missing (first-run / pre-endpoint-file scripts / running outside Oak).
     // Why: suppress stderr on the `.` builtin. A TOCTOU race (endpoint unlinked
     // between the `[ -r ]` test and the source) or a malformed line (e.g. CRLF
     // bled in from a cross-platform userData copy) would otherwise print a
@@ -99,10 +99,10 @@ function getManagedScript(
     // here is strictly better than leaking shell errors into the hook output.
     // `|| :` defends against an eventual `set -e` in an outer script context
     // (not present today) aborting the hook on a parse error.
-    'if [ -n "$ORCA_AGENT_HOOK_ENDPOINT" ] && [ -r "$ORCA_AGENT_HOOK_ENDPOINT" ]; then',
-    '  . "$ORCA_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
+    'if [ -n "$OAK_AGENT_HOOK_ENDPOINT" ] && [ -r "$OAK_AGENT_HOOK_ENDPOINT" ]; then',
+    '  . "$OAK_AGENT_HOOK_ENDPOINT" 2>/dev/null || :',
     'fi',
-    'if [ -z "$ORCA_AGENT_HOOK_PORT" ] || [ -z "$ORCA_AGENT_HOOK_TOKEN" ] || [ -z "$ORCA_PANE_KEY" ]; then',
+    'if [ -z "$OAK_AGENT_HOOK_PORT" ] || [ -z "$OAK_AGENT_HOOK_TOKEN" ] || [ -z "$OAK_PANE_KEY" ]; then',
     '  exit 0',
     'fi',
     'payload=$(cat)',
@@ -113,16 +113,16 @@ function getManagedScript(
     // shell is not safe once a path contains quotes or newlines. Post the raw
     // hook payload plus metadata as form fields and let the receiver parse it.
     // Timeout caps best-effort hook posts if the local listener stalls.
-    'curl -sS -X POST "http://127.0.0.1:${ORCA_AGENT_HOOK_PORT}/hook/claude" \\',
+    'curl -sS -X POST "http://127.0.0.1:${OAK_AGENT_HOOK_PORT}/hook/claude" \\',
     '  --connect-timeout 0.5 --max-time 1.5 \\',
     '  -H "Content-Type: application/x-www-form-urlencoded" \\',
-    '  -H "X-Orca-Agent-Hook-Token: ${ORCA_AGENT_HOOK_TOKEN}" \\',
-    '  --data-urlencode "paneKey=${ORCA_PANE_KEY}" \\',
-    '  --data-urlencode "tabId=${ORCA_TAB_ID}" \\',
-    '  --data-urlencode "launchToken=${ORCA_AGENT_LAUNCH_TOKEN}" \\',
-    '  --data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" \\',
-    '  --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}" \\',
-    '  --data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}" \\',
+    '  -H "X-Oak-Agent-Hook-Token: ${OAK_AGENT_HOOK_TOKEN}" \\',
+    '  --data-urlencode "paneKey=${OAK_PANE_KEY}" \\',
+    '  --data-urlencode "tabId=${OAK_TAB_ID}" \\',
+    '  --data-urlencode "launchToken=${OAK_AGENT_LAUNCH_TOKEN}" \\',
+    '  --data-urlencode "worktreeId=${OAK_WORKTREE_ID}" \\',
+    '  --data-urlencode "env=${OAK_AGENT_HOOK_ENV}" \\',
+    '  --data-urlencode "version=${OAK_AGENT_HOOK_VERSION}" \\',
     '  --data-urlencode "payload=${payload}" >/dev/null 2>&1 || true',
     'exit 0',
     ''
@@ -214,7 +214,7 @@ export class ClaudeHookService {
     return this.getStatus()
   }
 
-  // Why: install Orca's Claude hook settings on the remote box rather than the
+  // Why: install Oak's Claude hook settings on the remote box rather than the
   // local machine. Caller passes the user's SFTP handle plus the resolved
   // remote `$HOME`; POSIX-only by design (Windows-remote deferred).
   async installRemote(sftp: SFTPWrapper, remoteHome: string): Promise<AgentHookInstallStatus> {
@@ -224,7 +224,7 @@ export class ClaudeHookService {
     // `process.platform` here (that's the local box).
     const remoteConfigPath = getRemoteConfigPath(remoteHome, this.options.settings)
     const remoteScriptFileName = getPosixManagedScriptFileName(this.options.settings)
-    const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.orca/agent-hooks/${remoteScriptFileName}`
+    const remoteScriptPath = `${remoteHome.replace(/\/$/, '')}/.oak/agent-hooks/${remoteScriptFileName}`
     // Why: SFTP reads/writes fail far more often than local fs (network drops,
     // EACCES on remote dirs, disk full, channel closed). Wrap the entire
     // install flow in try/catch so a transient I/O failure surfaces as a
@@ -255,7 +255,7 @@ export class ClaudeHookService {
       // order means a partial-failure mid-install at worst leaves the user
       // with a working script no settings.json points at (a no-op), instead
       // of broken settings.json.
-      // Why: SSH remotes use POSIX `.sh` hook paths even when Orca itself is
+      // Why: SSH remotes use POSIX `.sh` hook paths even when Oak itself is
       // running on Windows; never derive remote script syntax from local OS.
       await writeManagedScriptRemote(
         sftp,

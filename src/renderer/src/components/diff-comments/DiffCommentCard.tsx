@@ -138,27 +138,27 @@ export function DiffCommentCard({
   }
 
   return (
-    <div className="orca-diff-comment-card">
-      <div className="orca-diff-comment-content-col">
+    <div className="oak-diff-comment-card">
+      <div className="oak-diff-comment-content-col">
         {/* Header Row */}
-        <div className="orca-diff-comment-header">
-          <div className="orca-diff-comment-meta-group">{metaText}</div>
+        <div className="oak-diff-comment-header">
+          <div className="oak-diff-comment-meta-group">{metaText}</div>
 
           {/* Action buttons pill (only shown if not editing) */}
           {!editing && (
             <div
-              className="orca-diff-comment-actions-pill"
+              className="oak-diff-comment-actions-pill"
               onMouseDown={(ev) => ev.stopPropagation()}
             >
               {headerActions}
               {headerActions && (url || onSubmitEdit || onDelete) && (
-                <span className="orca-diff-comment-pill-divider" />
+                <span className="oak-diff-comment-pill-divider" />
               )}
               {url && (
                 <>
                   <button
                     type="button"
-                    className="orca-diff-comment-pill-btn"
+                    className="oak-diff-comment-pill-btn"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.508ee678a5',
                       'Open in browser'
@@ -175,16 +175,14 @@ export function DiffCommentCard({
                   >
                     {translate('auto.components.diff.comments.DiffCommentCard.6978871a3d', 'Open')}
                   </button>
-                  {(onSubmitEdit || onDelete) && (
-                    <span className="orca-diff-comment-pill-divider" />
-                  )}
+                  {(onSubmitEdit || onDelete) && <span className="oak-diff-comment-pill-divider" />}
                 </>
               )}
               {onSubmitEdit && (
                 <>
                   <button
                     type="button"
-                    className="orca-diff-comment-pill-btn"
+                    className="oak-diff-comment-pill-btn"
                     title={translate(
                       'auto.components.diff.comments.DiffCommentCard.cad3384faa',
                       'Edit note'
@@ -201,13 +199,13 @@ export function DiffCommentCard({
                   >
                     <Pencil className="size-3" />
                   </button>
-                  {onDelete && <span className="orca-diff-comment-pill-divider" />}
+                  {onDelete && <span className="oak-diff-comment-pill-divider" />}
                 </>
               )}
               {onDelete && (
                 <button
                   type="button"
-                  className="orca-diff-comment-pill-btn orca-diff-comment-pill-btn-danger"
+                  className="oak-diff-comment-pill-btn oak-diff-comment-pill-btn-danger"
                   title={translate(
                     'auto.components.diff.comments.DiffCommentCard.cce596969e',
                     'Delete note'
@@ -231,8 +229,8 @@ export function DiffCommentCard({
 
         {/* Quote Block */}
         {quote ? (
-          <div className="orca-diff-comment-quote">
-            <div className="orca-diff-comment-quote-text">{quote}</div>
+          <div className="oak-diff-comment-quote">
+            <div className="oak-diff-comment-quote-text">{quote}</div>
           </div>
         ) : null}
 
@@ -241,7 +239,7 @@ export function DiffCommentCard({
           <div className="flex flex-col gap-2 mt-1">
             <textarea
               ref={textareaRef}
-              className="orca-diff-comment-popover-textarea"
+              className="oak-diff-comment-popover-textarea"
               value={draft}
               onChange={(e) => {
                 setDraft(e.target.value)
@@ -266,7 +264,7 @@ export function DiffCommentCard({
               }}
               rows={3}
             />
-            <div className="orca-diff-comment-popover-footer">
+            <div className="oak-diff-comment-popover-footer">
               <Button variant="ghost" size="sm" onClick={handleCancel} disabled={submitting}>
                 {translate('auto.components.diff.comments.DiffCommentCard.0203bed775', 'Cancel')}
               </Button>
@@ -289,7 +287,7 @@ export function DiffCommentCard({
             </div>
           </div>
         ) : (
-          <div className="orca-diff-comment-body">{body}</div>
+          <div className="oak-diff-comment-body">{body}</div>
         )}
       </div>
     </div>

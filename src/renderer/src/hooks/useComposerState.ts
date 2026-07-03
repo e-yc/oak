@@ -41,7 +41,7 @@ import type {
   GitPushTarget,
   GitLabWorkItem,
   LinearIssue,
-  OrcaHooks,
+  OakHooks,
   RepoHookSettings,
   SetupAgentStartupPolicy,
   SetupDecision,
@@ -245,7 +245,7 @@ export type ComposerCardProps = {
   projectHostSetupOptions: ProjectHostSetupOption[]
   selectedProjectHostSetupId: string | null
   onProjectHostSetupChange: (setupId: string) => void
-  ephemeralVmRecipes: NonNullable<OrcaHooks['environmentRecipes']>
+  ephemeralVmRecipes: NonNullable<OakHooks['environmentRecipes']>
   selectedEphemeralVmRecipeId: string | null
   onEphemeralVmRecipeChange: (recipeId: string | null) => void
   ephemeralVmRecipeError: string | null
@@ -482,7 +482,7 @@ export function getInitialAutoManagedWorkspaceName({
   initialLinkedWorkItem?: LinkedWorkItemSummary | null
 }): string {
   // Why: command-palette prefilled names are user input unless they exactly
-  // match the linked item seed Orca generated for a source selection.
+  // match the linked item seed Oak generated for a source selection.
   const candidateName = draftName ?? initialName
   const seedName = getLinkedWorkItemSeedName(draftLinkedWorkItem ?? initialLinkedWorkItem)
   return candidateName && seedName && candidateName === seedName ? candidateName : ''
@@ -711,7 +711,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
   const selectedRepo = eligibleRepos.find((repo) => repo.id === repoId)
   const selectedRepoIsGit = selectedRepo ? isGitRepoKind(selectedRepo) : false
   const [ephemeralVmRecipes, setEphemeralVmRecipes] = useState<
-    NonNullable<OrcaHooks['environmentRecipes']>
+    NonNullable<OakHooks['environmentRecipes']>
   >([])
   const [selectedEphemeralVmRecipeId, setSelectedEphemeralVmRecipeId] = useState<string | null>(
     null
@@ -737,8 +737,8 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         )
     return getAgentLaunchPlatformForRepo(selectedRepo, projectRuntime)
   }, [activeRepoId, projects, repos, selectedRepo, settings, worktreesByRepo])
-  // Why: SSH remotes deploy the CLI shim as plain `orca`, so the Linux-only
-  // `orca-ide` rename must not be applied to remote launch commands.
+  // Why: SSH remotes deploy the CLI shim as plain `oak`, so the Linux-only
+  // `oak-ide` rename must not be applied to remote launch commands.
   const selectedRepoIsRemote = selectedRepo ? repoIsRemote(selectedRepo) : false
   const selectedRepoProjectId =
     selectedWorkspaceTarget.status === 'ready' ? selectedWorkspaceTarget.target.projectId : null
@@ -1084,7 +1084,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     [detectedAgentList]
   )
 
-  const [yamlHooks, setYamlHooks] = useState<OrcaHooks | null>(null)
+  const [yamlHooks, setYamlHooks] = useState<OakHooks | null>(null)
   const [checkedHooksRepoId, setCheckedHooksRepoId] = useState<string | null>(null)
   const [issueCommandTemplate, setIssueCommandTemplate] = useState('')
   const [hasLoadedIssueCommand, setHasLoadedIssueCommand] = useState(false)
@@ -1315,7 +1315,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     return promise
   }, [])
   const commitHookCheckIfCurrent = useCallback(
-    (targetRepoId: string, hooks: OrcaHooks | null): boolean => {
+    (targetRepoId: string, hooks: OakHooks | null): boolean => {
       if (repoIdRef.current !== targetRepoId) {
         return false
       }
@@ -1916,7 +1916,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
     let cancelled = false
     setLinkDirectLoading(true)
     // Why: Superset lets users paste a full GitHub URL or type a raw issue/PR
-    // number and still get a concrete selectable result. Orca mirrors that by
+    // number and still get a concrete selectable result. Oak mirrors that by
     // resolving direct lookups against the selected repo instead of requiring a
     // text match in the recent-items list.
     const lookupRepoId = selectedRepo.id
@@ -2366,7 +2366,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
         }
         return { filePaths: [], folderPaths: [] }
       }
-      const destinationDir = joinPath(targetRepoPath, '.orca/drops')
+      const destinationDir = joinPath(targetRepoPath, '.oak/drops')
       const { results } = await importExternalPathsToRuntime(
         {
           settings: targetSettings,
@@ -2731,7 +2731,7 @@ export function useComposerState(options: UseComposerStateOptions): UseComposerS
       // linkedPR state stay in a single code path.
       applyLinkedWorkItem(item, { preserveBranchNameOverride: Boolean(nextBranchNameOverride) })
       // Why: starting a worktree from a PR is a strong hint for what the
-      // worktree's comment should surface (`orca worktree current`, sidebar).
+      // worktree's comment should surface (`oak worktree current`, sidebar).
       // Prefill the note if it's empty or still equal to a prior auto-fill, so
       // we don't overwrite anything the user has typed.
       if (item.type === 'pr') {

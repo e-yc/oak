@@ -386,7 +386,7 @@ async function assertProjectHostSetupRuntimeCapability(
   await assertRuntimeEnvironmentCapability(
     target.environmentId,
     PROJECT_HOST_SETUP_RUNTIME_CAPABILITY,
-    'The selected Orca server does not support project host setup yet. Update Orca on the server and try again.',
+    'The selected Oak server does not support project host setup yet. Update Oak on the server and try again.',
     15_000
   )
 }
@@ -401,7 +401,7 @@ async function assertProjectHostSetupMutationRuntimeCapabilities(
   await assertRuntimeEnvironmentCapability(
     target.environmentId,
     WORKSPACE_RUN_CONTEXT_RUNTIME_CAPABILITY,
-    'The selected Orca server does not support explicit workspace run hosts yet. Update Orca on the server and try again.',
+    'The selected Oak server does not support explicit workspace run hosts yet. Update Oak on the server and try again.',
     15_000
   )
 }
@@ -999,7 +999,7 @@ async function fetchRuntimeAddProjectPathStatus(args: {
     FOLDER_WORKSPACE_PATH_STATUS_RUNTIME_CAPABILITY,
     translate(
       'auto.store.slices.repos.2975400634',
-      'Update Orca server to open non-Git folders on this runtime.'
+      'Update Oak server to open non-Git folders on this runtime.'
     ),
     15_000
   )
@@ -1898,7 +1898,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       if (stillExists) {
         failedProjectRemovals.push({
           projectId,
-          reason: 'Project remained in Orca after removeProject completed.'
+          reason: 'Project remained in Oak after removeProject completed.'
         })
       } else {
         removedProjectIds.push(projectId)
@@ -2023,7 +2023,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
       const repoIdentity = getRepoHostIdentity(repo)
       const alreadyAdded = get().repos.some((r) => getRepoHostIdentity(r) === repoIdentity)
       if (alreadyAdded) {
-        get().clearOrcaHookTrustForRepo(repo.id)
+        get().clearOakHookTrustForRepo(repo.id)
       }
       set((s) => {
         if (s.repos.some((r) => getRepoHostIdentity(r) === repoIdentity)) {
@@ -2386,7 +2386,7 @@ export const createRepoSlice: StateCreator<AppState, [], [], RepoSlice> = (set, 
         ? window.api.repos.remove({ repoId: projectId })
         : callRuntimeRpc(target, 'repo.rm', { repo: projectId }, { timeoutMs: 15_000 }))
 
-      get().clearOrcaHookTrustForRepo(projectId)
+      get().clearOakHookTrustForRepo(projectId)
       const repoPath = get().repos.find((repo) =>
         repoMatchesHostIdentity(repo, projectId, ownerHostId)
       )?.path

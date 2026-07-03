@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process'
 import type { CommandHandler } from '../dispatch'
 import { formatCliStatus, formatStatus, printResult } from '../format'
-import { RuntimeClientError, serveOrcaApp } from '../runtime-client'
+import { RuntimeClientError, serveOakApp } from '../runtime-client'
 
 function envRecord(): Record<string, string> {
   return Object.fromEntries(
@@ -59,11 +59,11 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
         'Claude Agent Teams native panes are not supported on Windows.'
       )
     }
-    const paneKey = process.env.ORCA_PANE_KEY
+    const paneKey = process.env.OAK_PANE_KEY
     if (!paneKey) {
       throw new RuntimeClientError(
         'invalid_environment',
-        'orca claude-teams must be run inside an Orca terminal.'
+        'oak claude-teams must be run inside an Oak terminal.'
       )
     }
     const response = await client.call<{ launch: { env: Record<string, string> } }>(
@@ -82,7 +82,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
     )
   },
   open: async ({ client, json }) => {
-    const result = await client.openOrca()
+    const result = await client.openOak()
     printResult(result, json, formatCliStatus)
   },
   serve: async ({ flags, json }) => {
@@ -113,7 +113,7 @@ export const CORE_HANDLERS: Record<string, CommandHandler> = {
       )
     }
     const port = getOptionalServePort(flags)
-    const exitCode = await serveOrcaApp({
+    const exitCode = await serveOakApp({
       json,
       port,
       pairingAddress:

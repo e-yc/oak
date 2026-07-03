@@ -47,7 +47,7 @@ function detectLaunchAgentPaneStatus(
  * sees panes with a live status entry, so a freshly launched (still idle) agent
  * stays invisible until its first hook event — i.e. until the user talks to it.
  * We augment it with launch-agent tabs whose pane still has a live PTY:
- * TerminalTab.launchAgent records the harness Orca started and is the same
+ * TerminalTab.launchAgent records the harness Oak started and is the same
  * pre-hook signal the tab bar already trusts for its provider icon.
  *
  * The launch hint is gated on a recognized agent title (pane or tab) — the same
@@ -117,7 +117,7 @@ function deriveLaunchAgentTarget(
   const paneTitleResolution = resolveRuntimePaneTitleLeafResolution(layout, paneTitles, leafId)
   const launchStatus = detectLaunchAgentPaneStatus(paneTitleResolution, tab.title)
   if (!launchStatus) {
-    // Why: launchAgent is set the instant Orca spawns the tab, but the runtime
+    // Why: launchAgent is set the instant Oak spawns the tab, but the runtime
     // only accepts a send once the pane reads as an agent. Skipping until the
     // title is recognized keeps "listed ⇒ sendable" and avoids the boot-window
     // "not a recognized agent session" error.

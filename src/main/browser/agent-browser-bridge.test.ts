@@ -142,7 +142,7 @@ describe('AgentBrowserBridge', () => {
 
     const args = execFileMock.mock.calls[0][1] as string[]
     expect(args).toContain('--session')
-    expect(args[args.indexOf('--session') + 1]).toBe('orca-tab-tab-1')
+    expect(args[args.indexOf('--session') + 1]).toBe('oak-tab-tab-1')
   })
 
   // ── --cdp first-use only ──
@@ -244,7 +244,7 @@ describe('AgentBrowserBridge', () => {
     expect(snapshotCall![1]).toContain('--session')
     expect(
       (snapshotCall![1] as string[])[(snapshotCall![1] as string[]).indexOf('--session') + 1]
-    ).toBe('orca-tab-tab-b')
+    ).toBe('oak-tab-tab-b')
     expect(result).toEqual({ browserPageId: 'tab-b', snapshot: 'tree output' })
     expect(b.getActiveWebContentsId()).toBe(1)
   })
@@ -286,7 +286,7 @@ describe('AgentBrowserBridge', () => {
     // Why: this reproduces the teardown race where the tab close path has
     // already removed the bridge session before agent-browser reports that
     // its CDP proxy disappeared.
-    ;(bridge as unknown as { sessions: Map<string, unknown> }).sessions.delete('orca-tab-tab-1')
+    ;(bridge as unknown as { sessions: Map<string, unknown> }).sessions.delete('oak-tab-tab-1')
     releaseSnapshot!()
 
     await expect(snapshotPromise).rejects.toMatchObject({
@@ -814,7 +814,7 @@ describe('AgentBrowserBridge', () => {
           if (args.includes('screenshot')) {
             const sessionName = args[args.indexOf('--session') + 1]
             lifecycleEvents.push(`command-${sessionName}`)
-            if (sessionName === 'orca-tab-tab-1' && !releaseFirstScreenshot) {
+            if (sessionName === 'oak-tab-tab-1' && !releaseFirstScreenshot) {
               releaseFirstScreenshot = () => {
                 cb(null, JSON.stringify({ success: true, data: { path: '/tmp/tab-1.png' } }), '')
               }
@@ -839,7 +839,7 @@ describe('AgentBrowserBridge', () => {
       await vi.advanceTimersByTimeAsync(300)
 
       expect(lifecycleEvents).toContain('acquire-1')
-      expect(lifecycleEvents).toContain('command-orca-tab-tab-1')
+      expect(lifecycleEvents).toContain('command-oak-tab-tab-1')
       expect(lifecycleEvents).not.toContain('acquire-2')
 
       expect(releaseFirstScreenshot).not.toBeNull()
@@ -967,7 +967,7 @@ describe('AgentBrowserBridge', () => {
 
     const destroyPromise = (
       bridge as unknown as { destroySession: (name: string) => Promise<void> }
-    ).destroySession('orca-tab-tab-1')
+    ).destroySession('oak-tab-tab-1')
     const nextSnapshot = bridge.snapshot()
 
     await Promise.resolve()
@@ -1011,7 +1011,7 @@ describe('AgentBrowserBridge', () => {
           webContentsId: number
         ) => Promise<void>
       }
-    ).ensureSession('orca-tab-tab-1', 'tab-1', 100)
+    ).ensureSession('oak-tab-tab-1', 'tab-1', 100)
 
     await vi.waitFor(() => {
       expect(releaseStaleClose).not.toBeNull()
@@ -1020,7 +1020,7 @@ describe('AgentBrowserBridge', () => {
 
     const destroyPromise = (
       bridge as unknown as { destroySession: (name: string) => Promise<void> }
-    ).destroySession('orca-tab-tab-1')
+    ).destroySession('oak-tab-tab-1')
 
     releaseStaleClose!()
     await ensurePromise
@@ -1069,7 +1069,7 @@ describe('AgentBrowserBridge', () => {
 
     const destroyPromise = (
       bridge as unknown as { destroySession: (name: string) => Promise<void> }
-    ).destroySession('orca-tab-tab-1')
+    ).destroySession('oak-tab-tab-1')
 
     expect(activeChild.kill).toHaveBeenCalledTimes(1)
     await expect(runningSnapshot).rejects.toMatchObject({
@@ -1234,7 +1234,7 @@ describe('AgentBrowserBridge', () => {
       (call[1] as string[]).includes('close')
     )
     expect(closeCall).toBeTruthy()
-    expect(closeCall![1]).toEqual(['--session', 'orca-tab-tab-1', 'close'])
+    expect(closeCall![1]).toEqual(['--session', 'oak-tab-tab-1', 'close'])
   })
 
   it('repairs per-worktree active routing when the active tab closes', async () => {
@@ -1556,7 +1556,7 @@ describe('AgentBrowserBridge', () => {
           code: 'browser_target_ambiguous'
         })
         // Must not have dispatched the command to worktree B's session.
-        expect(sessionNamesUsed()).not.toContain('orca-tab-tab-b')
+        expect(sessionNamesUsed()).not.toContain('oak-tab-tab-b')
       }
     )
 
@@ -1570,7 +1570,7 @@ describe('AgentBrowserBridge', () => {
 
       await b.keyboardInsertText('x', undefined, undefined)
 
-      expect(sessionNamesUsed()).toContain('orca-tab-tab-a')
+      expect(sessionNamesUsed()).toContain('oak-tab-tab-a')
     })
 
     it('throws browser_no_tab for inserttext when no live tab exists', async () => {
@@ -1589,7 +1589,7 @@ describe('AgentBrowserBridge', () => {
 
       await b.snapshot(undefined, undefined)
 
-      expect(sessionNamesUsed()).toContain('orca-tab-tab-b')
+      expect(sessionNamesUsed()).toContain('oak-tab-tab-b')
     })
   })
 

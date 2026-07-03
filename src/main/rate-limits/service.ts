@@ -46,7 +46,7 @@ type GeminiCliOAuthEnabledResolver = () => boolean
 
 // Why: Claude's subscription usage endpoint has a tight request budget. Quota
 // state is informational, so prefer keeping a recent snapshot over polling it
-// into 429s during long focused Orca sessions.
+// into 429s during long focused Oak sessions.
 const DEFAULT_POLL_MS = 15 * 60 * 1000 // 15 minutes
 const MIN_POLL_MS = 30 * 1000 // 30 seconds — renderer input should never create a tight loop.
 const MAX_POLL_MS = 2_147_483_647 // Max safe setInterval delay before Node clamps back to 1ms.
@@ -600,7 +600,7 @@ export class RateLimitService {
     if (!this.mainWindow || this.mainWindow.isDestroyed()) {
       return false
     }
-    // Why: these quota fetches only power in-app UI. When Orca is hidden,
+    // Why: these quota fetches only power in-app UI. When Oak is hidden,
     // minimized, or unfocused, polling only burns CLI/API budget without any
     // visible benefit. We refresh again as soon as the window becomes active.
     if (!this.mainWindow.isVisible() || this.mainWindow.isMinimized()) {
@@ -812,9 +812,9 @@ export class RateLimitService {
     if (process.platform === 'win32') {
       return false
     }
-    // Why: system-default Claude is not an Orca-managed account. Background
+    // Why: system-default Claude is not an Oak-managed account. Background
     // quota refresh may read existing OAuth, but must not launch Claude and
-    // trigger auth/browser flows for users who never configured Claude in Orca.
+    // trigger auth/browser flows for users who never configured Claude in Oak.
     return !isSystemDefaultClaudeAuth(authPreparation)
   }
 

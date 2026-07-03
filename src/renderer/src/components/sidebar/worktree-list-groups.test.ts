@@ -33,8 +33,8 @@ const LOCAL_HOST_LABEL = getExecutionHostLabel('local')
 
 const repo: Repo = {
   id: 'repo-1',
-  path: '/tmp/orca',
-  displayName: 'orca',
+  path: '/tmp/oak',
+  displayName: 'oak',
   badgeColor: '#000000',
   addedAt: 0
 }
@@ -42,7 +42,7 @@ const repo: Repo = {
 const worktree: Worktree = {
   id: 'wt-1',
   repoId: repo.id,
-  path: '/tmp/orca-feature',
+  path: '/tmp/oak-feature',
   branch: 'refs/heads/feature/super-critical',
   head: 'abc123',
   isBare: false,
@@ -67,8 +67,8 @@ function readWorktreeListSource(): string {
 
 const remoteRepo: Repo = {
   id: 'repo-remote',
-  path: '/home/alice/orca',
-  displayName: 'orca',
+  path: '/home/alice/oak',
+  displayName: 'oak',
   badgeColor: '#111111',
   addedAt: 1,
   connectionId: 'gpu-vm'
@@ -78,13 +78,13 @@ const remoteWorktree: Worktree = {
   ...worktree,
   id: 'wt-remote',
   repoId: remoteRepo.id,
-  path: '/home/alice/orca-feature',
+  path: '/home/alice/oak-feature',
   displayName: 'remote feature'
 }
 
 const project: Project = {
-  id: 'github:stablyai/orca',
-  displayName: 'Orca',
+  id: 'github:e-yc/oak',
+  displayName: 'Oak',
   badgeColor: '#737373',
   sourceRepoIds: [repo.id, remoteRepo.id],
   createdAt: 1,
@@ -144,7 +144,7 @@ describe('getPRGroupKey', () => {
 
   it('prefers repo-scoped PR status over stale legacy path-scoped status', () => {
     const prCache = {
-      '/tmp/orca::feature/super-critical': {
+      '/tmp/oak::feature/super-critical': {
         data: { state: 'closed' }
       },
       'repo-1::feature/super-critical': {
@@ -157,7 +157,7 @@ describe('getPRGroupKey', () => {
 
   it('falls back to legacy path-scoped PR status when no repo-scoped entry exists', () => {
     const prCache = {
-      '/tmp/orca::feature/super-critical': {
+      '/tmp/oak::feature/super-critical': {
         data: { state: 'closed' }
       }
     }
@@ -357,7 +357,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/orca', label: 'Orca', count: 2 },
+      { type: 'header', key: 'project:github:e-yc/oak', label: 'Oak', count: 2 },
       { type: 'item', worktree: { id: worktree.id }, hostContextLabel: LOCAL_HOST_LABEL },
       { type: 'item', worktree: { id: remoteWorktree.id }, hostContextLabel: 'gpu-vm' }
     ])
@@ -620,22 +620,22 @@ describe('buildRows with pinned worktrees', () => {
 
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers.map((row) => row.key)).toEqual([
-      'project:github:stablyai/orca',
+      'project:github:e-yc/oak',
       'project:github:stablyai/analytics'
     ])
     expect(headers[0]).toMatchObject({
-      key: 'project:github:stablyai/orca',
+      key: 'project:github:e-yc/oak',
       repo: { id: repo.id, badgeColor: repo.badgeColor }
     })
   })
 
   it('keeps same-host checkouts of one project under the project header', () => {
-    const repoB: Repo = { ...repo, id: 'repo-2', path: '/tmp/orca-2', displayName: 'orca-2' }
+    const repoB: Repo = { ...repo, id: 'repo-2', path: '/tmp/oak-2', displayName: 'oak-2' }
     const worktreeB: Worktree = {
       ...worktree,
       id: 'wt-2',
       repoId: repoB.id,
-      path: '/tmp/orca-2-feature',
+      path: '/tmp/oak-2-feature',
       displayName: 'feature-b'
     }
     const localSetupB: ProjectHostSetup = {
@@ -678,8 +678,8 @@ describe('buildRows with pinned worktrees', () => {
     const headers = rows.filter((row) => row.type === 'header')
     expect(headers).toHaveLength(1)
     expect(headers[0]).toMatchObject({
-      key: 'project:github:stablyai/orca',
-      label: 'Orca',
+      key: 'project:github:e-yc/oak',
+      label: 'Oak',
       count: 2
     })
   })
@@ -688,14 +688,14 @@ describe('buildRows with pinned worktrees', () => {
     const localRepoB: Repo = {
       ...repo,
       id: 'repo-local-b',
-      path: '/tmp/orca-b',
-      displayName: 'orca-b'
+      path: '/tmp/oak-b',
+      displayName: 'oak-b'
     }
     const localWorktreeB: Worktree = {
       ...worktree,
       id: 'wt-local-b',
       repoId: localRepoB.id,
-      path: '/tmp/orca-b-feature',
+      path: '/tmp/oak-b-feature',
       displayName: 'feature-b'
     }
     const localSetupB: ProjectHostSetup = {
@@ -738,8 +738,8 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     const headers = rows.filter((row) => row.type === 'header')
-    expect(headers.map((row) => row.key)).toEqual(['project:github:stablyai/orca'])
-    expect(headers[0]).toMatchObject({ label: 'Orca', count: 3 })
+    expect(headers.map((row) => row.key)).toEqual(['project:github:e-yc/oak'])
+    expect(headers[0]).toMatchObject({ label: 'Oak', count: 3 })
   })
 
   it('groups Windows host and WSL setups on the same runtime host', () => {
@@ -747,28 +747,28 @@ describe('buildRows with pinned worktrees', () => {
     const windowsRepo: Repo = {
       ...repo,
       id: 'repo-windows',
-      path: String.raw`C:\Users\alice\git\orca`,
-      displayName: 'orca',
+      path: String.raw`C:\Users\alice\git\oak`,
+      displayName: 'oak',
       executionHostId: runtimeHostId
     }
     const wslRepo: Repo = {
       ...repo,
       id: 'repo-wsl',
-      path: String.raw`\\wsl.localhost\Ubuntu\home\alice\git\orca`,
-      displayName: 'orca',
+      path: String.raw`\\wsl.localhost\Ubuntu\home\alice\git\oak`,
+      displayName: 'oak',
       executionHostId: runtimeHostId
     }
     const windowsWorktree: Worktree = {
       ...worktree,
       id: 'wt-windows',
       repoId: windowsRepo.id,
-      path: String.raw`C:\Users\alice\git\orca\feature`
+      path: String.raw`C:\Users\alice\git\oak\feature`
     }
     const wslWorktree: Worktree = {
       ...worktree,
       id: 'wt-wsl',
       repoId: wslRepo.id,
-      path: String.raw`\\wsl.localhost\Ubuntu\home\alice\git\orca\feature`
+      path: String.raw`\\wsl.localhost\Ubuntu\home\alice\git\oak\feature`
     }
     const windowsSetup: ProjectHostSetup = {
       ...projectHostSetups[0]!,
@@ -816,8 +816,8 @@ describe('buildRows with pinned worktrees', () => {
 
     expect(rows.filter((row) => row.type === 'header')).toMatchObject([
       {
-        key: 'project:github:stablyai/orca',
-        label: 'Orca',
+        key: 'project:github:e-yc/oak',
+        label: 'Oak',
         count: 2
       }
     ])
@@ -827,7 +827,7 @@ describe('buildRows with pinned worktrees', () => {
     const runtimeRepo: Repo = {
       ...remoteRepo,
       id: 'repo-runtime',
-      path: '/Users/alice/runtime-orca',
+      path: '/Users/alice/runtime-oak',
       connectionId: null,
       executionHostId: 'runtime:03ef704c-b180-4b10-998d-e28fbd5de9a3'
     }
@@ -876,7 +876,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/orca', label: 'Orca', count: 2 },
+      { type: 'header', key: 'project:github:e-yc/oak', label: 'Oak', count: 2 },
       { type: 'item', worktree: { id: worktree.id }, hostContextLabel: LOCAL_HOST_LABEL },
       { type: 'item', worktree: { id: runtimeWorktree.id }, hostContextLabel: 'dev box' }
     ])
@@ -916,7 +916,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'project:github:stablyai/orca', label: 'Orca', count: 2 },
+      { type: 'header', key: 'project:github:e-yc/oak', label: 'Oak', count: 2 },
       { type: 'item', worktree: { id: worktree.id } },
       { type: 'item', worktree: { id: secondLocalWorktree.id } }
     ])
@@ -932,8 +932,8 @@ describe('buildRows with pinned worktrees', () => {
       'repo',
       [worktree, remoteWorktree],
       new Map([
-        [repo.id, { ...repo, displayName: 'orca' }],
-        [remoteRepo.id, { ...remoteRepo, displayName: 'orca' }]
+        [repo.id, { ...repo, displayName: 'oak' }],
+        [remoteRepo.id, { ...remoteRepo, displayName: 'oak' }]
       ]),
       null,
       new Set()
@@ -959,7 +959,7 @@ describe('buildRows with pinned worktrees', () => {
           projectHostSetups
         }
       )
-    ).toBe('project:github:stablyai/orca')
+    ).toBe('project:github:e-yc/oak')
   })
 
   it('emits an imported worktrees card at the top of repo-group rows', () => {
@@ -1070,7 +1070,7 @@ describe('buildRows with pinned worktrees', () => {
     )
 
     expect(rows).toMatchObject([
-      { type: 'header', key: 'repo:repo-1', label: 'orca' },
+      { type: 'header', key: 'repo:repo-1', label: 'oak' },
       {
         type: 'imported-worktrees-card',
         key: 'imported-worktrees-card:repo-group:repo-1',

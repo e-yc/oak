@@ -1,7 +1,7 @@
 import type { spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { statSync } from 'node:fs'
-import type { OrcaVmRecipe } from './types'
+import type { OakVmRecipe } from './types'
 import { parseEphemeralVmRecipeResult, type EphemeralVmRecipeResult } from './ephemeral-vm-recipes'
 import { runRecipeCommand } from './ephemeral-vm-recipe-process'
 import {
@@ -25,11 +25,11 @@ export type EphemeralVmRecipeContext = {
   repoUrl?: string
   branch?: string
   ref?: string
-  orcaVersion?: string
+  oakVersion?: string
 }
 
 export type EphemeralVmRecipeStartArgs = {
-  recipe: OrcaVmRecipe
+  recipe: OakVmRecipe
   repoPath: string
   context?: Partial<Omit<EphemeralVmRecipeContext, 'recipeId' | 'repoPath'>>
   env?: NodeJS.ProcessEnv
@@ -63,7 +63,7 @@ export type EphemeralVmRecipeStartResult =
   | EphemeralVmRecipeStartFailure
 
 export type EphemeralVmRecipeCleanupArgs = {
-  recipe: OrcaVmRecipe
+  recipe: OakVmRecipe
   repoPath: string
   context: EphemeralVmRecipeContext
   recipeResult: EphemeralVmRecipeResult
@@ -275,13 +275,13 @@ export async function runEphemeralVmRecipeResume(
 }
 
 function buildRecipeContext(
-  recipe: OrcaVmRecipe,
+  recipe: OakVmRecipe,
   repoPath: string,
   context: EphemeralVmRecipeStartArgs['context'] = {}
 ): EphemeralVmRecipeContext {
   return {
     ...context,
-    instanceId: context.instanceId ?? `orca-${randomUUID()}`,
+    instanceId: context.instanceId ?? `oak-${randomUUID()}`,
     recipeId: recipe.id,
     repoPath
   }

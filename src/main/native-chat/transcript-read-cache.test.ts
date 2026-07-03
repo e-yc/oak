@@ -29,7 +29,7 @@ function jsonLines(records: unknown[]): string {
 }
 
 async function seedSession(sessionId: string, turns: number): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'orca-native-chat-cache-'))
+  const root = await mkdtemp(join(tmpdir(), 'oak-native-chat-cache-'))
   tempRoots.push(root)
   const projectDir = join(root, '.claude', 'projects', '-repo')
   await mkdir(projectDir, { recursive: true })

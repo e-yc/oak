@@ -123,6 +123,6 @@ writeOutput('android_version_code', String(versionCode))
 writeOutput('tag', tag)
 writeOutput('publish_release', publishRelease ? 'true' : 'false')
 
-console.log(`Prepared Orca Mobile Android ${version} (${versionCode})`)
+console.log(`Prepared Oak Mobile Android ${version} (${versionCode})`)
 console.log(`Release tag: ${tag}`)
 console.log(`Publish GitHub Release: ${publishRelease ? 'yes' : 'no'}`)

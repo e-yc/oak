@@ -167,17 +167,17 @@ import type {
   NativeChatReadSessionResult
 } from './api-types'
 import {
-  ORCA_EDITOR_PREPARE_HOT_EXIT_EVENT,
+  OAK_EDITOR_PREPARE_HOT_EXIT_EVENT,
   type EditorPrepareHotExitDetail
 } from '../shared/editor-save-events'
 import {
-  ORCA_APP_RESTART_ABORTED_EVENT,
-  ORCA_APP_RESTART_STARTED_EVENT,
-  ORCA_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
-  ORCA_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
+  OAK_APP_RESTART_ABORTED_EVENT,
+  OAK_APP_RESTART_STARTED_EVENT,
+  OAK_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT,
+  OAK_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT
 } from '../shared/updater-renderer-events'
 import {
-  ORCA_INTERNAL_FILE_DRAG_TYPE,
+  OAK_INTERNAL_FILE_DRAG_TYPE,
   createNativeFileDropPayload,
   createRejectedNativeFileDropPayload,
   hasNativeFileDragTypes,
@@ -232,7 +232,7 @@ function requestEditorHotExitBackup(): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     let claimed = false
     window.dispatchEvent(
-      new CustomEvent<EditorPrepareHotExitDetail>(ORCA_EDITOR_PREPARE_HOT_EXIT_EVENT, {
+      new CustomEvent<EditorPrepareHotExitDetail>(OAK_EDITOR_PREPARE_HOT_EXIT_EVENT, {
         detail: {
           claim: () => {
             claimed = true
@@ -380,7 +380,7 @@ document.addEventListener(
   'drop',
   (e) => {
     // Let in-app drags (e.g. file explorer → terminal) through to React handlers
-    if (e.dataTransfer?.types.includes(ORCA_INTERNAL_FILE_DRAG_TYPE)) {
+    if (e.dataTransfer?.types.includes(OAK_INTERNAL_FILE_DRAG_TYPE)) {
       return
     }
 
@@ -439,7 +439,7 @@ document.addEventListener(
   true
 )
 
-const startupDiagnosticsEnabled = process.env.ORCA_STARTUP_DIAGNOSTICS === '1'
+const startupDiagnosticsEnabled = process.env.OAK_STARTUP_DIAGNOSTICS === '1'
 
 // Custom APIs for renderer
 const api = {
@@ -450,13 +450,13 @@ const api = {
     relaunch: (): Promise<void> => ipcRenderer.invoke('app:relaunch'),
     restart: async (): Promise<void> => {
       await prepareRendererForAppRestart({
-        startedEventName: ORCA_APP_RESTART_STARTED_EVENT,
-        abortedEventName: ORCA_APP_RESTART_ABORTED_EVENT
+        startedEventName: OAK_APP_RESTART_STARTED_EVENT,
+        abortedEventName: OAK_APP_RESTART_ABORTED_EVENT
       })
       try {
         return await ipcRenderer.invoke('app:restart')
       } catch (error) {
-        window.dispatchEvent(new Event(ORCA_APP_RESTART_ABORTED_EVENT))
+        window.dispatchEvent(new Event(OAK_APP_RESTART_ABORTED_EVENT))
         throw error
       }
     },
@@ -1324,9 +1324,8 @@ const api = {
       return () => ipcRenderer.removeListener('gh:workItemMutated', listener)
     },
 
-    checkOrcaStarred: (): Promise<boolean | null> => ipcRenderer.invoke('gh:checkOrcaStarred'),
-    starOrca: (source: AppStarSource): Promise<boolean> =>
-      ipcRenderer.invoke('gh:starOrca', source),
+    checkOakStarred: (): Promise<boolean | null> => ipcRenderer.invoke('gh:checkOakStarred'),
+    starOak: (source: AppStarSource): Promise<boolean> => ipcRenderer.invoke('gh:starOak', source),
 
     // Why: rate_limit is exempt from rate-limit accounting, but we still pass
     // `force` through so callers can bust the 30s in-process cache after a
@@ -1647,7 +1646,7 @@ const api = {
     complete: (): Promise<void> => ipcRenderer.invoke('star-nag:complete'),
     disable: (): Promise<void> => ipcRenderer.invoke('star-nag:disable'),
     openWeb: (): Promise<void> => ipcRenderer.invoke('star-nag:openWeb'),
-    starOrca: (): Promise<boolean> => ipcRenderer.invoke('star-nag:starOrca'),
+    starOak: (): Promise<boolean> => ipcRenderer.invoke('star-nag:starOak'),
     forceShow: (): Promise<void> => ipcRenderer.invoke('star-nag:forceShow'),
     agentValueMoment: (): Promise<
       { status: 'ready'; mode: 'gh' | 'web' } | { status: 'skipped' }
@@ -2235,15 +2234,15 @@ const api = {
       return () => ipcRenderer.removeListener('browser:pane-focus', listener)
     },
 
-    onOpenLinkInOrcaTab: (
+    onOpenLinkInOakTab: (
       callback: (event: { browserPageId: string; url: string }) => void
     ): (() => void) => {
       const listener = (
         _event: Electron.IpcRendererEvent,
         data: { browserPageId: string; url: string }
       ) => callback(data)
-      ipcRenderer.on('browser:open-link-in-orca-tab', listener)
-      return () => ipcRenderer.removeListener('browser:open-link-in-orca-tab', listener)
+      ipcRenderer.on('browser:open-link-in-oak-tab', listener)
+      return () => ipcRenderer.removeListener('browser:open-link-in-oak-tab', listener)
     },
 
     cancelDownload: (args: { downloadId: string }): Promise<boolean> =>
@@ -2527,13 +2526,13 @@ const api = {
     dismissNudge: () => ipcRenderer.invoke('updater:dismissNudge'),
     quitAndInstall: async (): Promise<void> => {
       await prepareRendererForAppRestart({
-        startedEventName: ORCA_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT,
-        abortedEventName: ORCA_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT
+        startedEventName: OAK_UPDATER_QUIT_AND_INSTALL_STARTED_EVENT,
+        abortedEventName: OAK_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT
       })
       try {
         return await ipcRenderer.invoke('updater:quitAndInstall')
       } catch (error) {
-        window.dispatchEvent(new Event(ORCA_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT))
+        window.dispatchEvent(new Event(OAK_UPDATER_QUIT_AND_INSTALL_ABORTED_EVENT))
         throw error
       }
     },

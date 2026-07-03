@@ -9,14 +9,12 @@ import { WORK_ITEM_LINK_QUERY_MAX_BYTES } from './work-item-link-query-bounds'
 
 describe('buildGitHubRepoUrl', () => {
   it('builds a GitHub repository URL from an owner/repo slug', () => {
-    expect(buildGitHubRepoUrl({ owner: 'stablyai', repo: 'orca' })).toBe(
-      'https://github.com/stablyai/orca'
-    )
+    expect(buildGitHubRepoUrl({ owner: 'e-yc', repo: 'oak' })).toBe('https://github.com/e-yc/oak')
   })
 
   it('encodes path segments', () => {
-    expect(buildGitHubRepoUrl({ owner: 'stably ai', repo: 'orca/tools' })).toBe(
-      'https://github.com/stably%20ai/orca%2Ftools'
+    expect(buildGitHubRepoUrl({ owner: 'stably ai', repo: 'oak/tools' })).toBe(
+      'https://github.com/stably%20ai/oak%2Ftools'
     )
   })
 })
@@ -25,8 +23,8 @@ describe('parseGitHubIssueOrPRNumber', () => {
   it('parses plain issue numbers and GitHub pull request URLs', () => {
     expect(parseGitHubIssueOrPRNumber('42')).toBe(42)
     expect(parseGitHubIssueOrPRNumber('#42')).toBe(42)
-    expect(parseGitHubIssueOrPRNumber('https://github.com/stablyai/orca/pull/123')).toBe(123)
-    expect(parseGitHubIssueOrPRNumber('https://github.com/stablyai/orca/issues/923')).toBe(923)
+    expect(parseGitHubIssueOrPRNumber('https://github.com/e-yc/oak/pull/123')).toBe(123)
+    expect(parseGitHubIssueOrPRNumber('https://github.com/e-yc/oak/issues/923')).toBe(923)
     expect(parseGitHubIssueOrPRNumber('https://github.my-company.net/MyOrg/my_repo/pull/395')).toBe(
       395
     )
@@ -65,8 +63,8 @@ describe('parseGitHubIssueOrPRNumber', () => {
 
 describe('parseGitHubIssueOrPRLink', () => {
   it('parses slug, number, and type for direct item URLs', () => {
-    expect(parseGitHubIssueOrPRLink('https://github.com/stablyai/orca/pull/123')).toEqual({
-      slug: { owner: 'stablyai', repo: 'orca' },
+    expect(parseGitHubIssueOrPRLink('https://github.com/e-yc/oak/pull/123')).toEqual({
+      slug: { owner: 'e-yc', repo: 'oak' },
       number: 123,
       type: 'pr'
     })
@@ -84,8 +82,8 @@ describe('parseGitHubIssueOrPRLink', () => {
       number: 395,
       type: 'pr'
     })
-    expect(parseGitHubIssueOrPRLink('https://github.com/stablyai/orca/issues/923')).toEqual({
-      slug: { owner: 'stablyai', repo: 'orca' },
+    expect(parseGitHubIssueOrPRLink('https://github.com/e-yc/oak/issues/923')).toEqual({
+      slug: { owner: 'e-yc', repo: 'oak' },
       number: 923,
       type: 'issue'
     })
@@ -131,8 +129,8 @@ describe('parseGitHubIssueOrPRLink', () => {
 
 describe('normalizeGitHubLinkQuery', () => {
   it('accepts full GitHub URLs whose slug differs from the selected repo slug', () => {
-    expect(normalizeGitHubLinkQuery('https://github.com/stablyai/orca/issues/923')).toEqual({
-      query: 'https://github.com/stablyai/orca/issues/923',
+    expect(normalizeGitHubLinkQuery('https://github.com/e-yc/oak/issues/923')).toEqual({
+      query: 'https://github.com/e-yc/oak/issues/923',
       directNumber: 923
     })
   })

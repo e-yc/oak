@@ -210,7 +210,7 @@ const FOREGROUND_GRID_DRIFT_CHECK_MIN_MS = 250
 // Why: this is only shown if hidden renderer output was skipped and main-owned
 // terminal state is unavailable, so the user has an explicit loss signal.
 const HIDDEN_OUTPUT_RESTORE_UNAVAILABLE_WARNING =
-  '\x18\x1b[0m\r\n[Orca skipped hidden terminal output because main recovery was unavailable.]\r\n'
+  '\x18\x1b[0m\r\n[Oak skipped hidden terminal output because main recovery was unavailable.]\r\n'
 type E2eTerminalPtyDataInjectionApi = {
   inject: (paneKey: string, data: string, meta?: PtyDataMeta) => boolean
   keys: () => string[]
@@ -1392,7 +1392,7 @@ export function connectPanePty(
       }
       // Why: restored idle agent TUIs can repaint after reattach SIGWINCH and
       // reapply DECSCUSR steady-bar; the normal working→idle reset will not
-      // fire because the agent was already idle before Orca restarted.
+      // fire because the agent was already idle before Oak restarted.
       queueAgentIdleTerminalModeReset()
     }, REATTACH_IDLE_AGENT_CURSOR_RESET_DELAY_MS)
   }
@@ -1423,7 +1423,7 @@ export function connectPanePty(
   ): void => {
     const state = useAppStore.getState()
     if (!entry) {
-      // Why: an Orca-started agent can exit before its first hook status. The
+      // Why: an Oak-started agent can exit before its first hook status. The
       // launch registry was still created up front, so clear it on command exit.
       state.clearAgentLaunchConfig(cacheKey)
       return
@@ -1980,7 +1980,7 @@ export function connectPanePty(
   // underneath. See POST_REPLAY_MODE_RESET in layout-serialization.ts.
   const onBell = (): void => {
     // Why: restored Claude Code sessions have been observed to emit a real
-    // standalone BEL some time after daemon snapshot reattach, even when Orca
+    // standalone BEL some time after daemon snapshot reattach, even when Oak
     // did not just forward focus/control input. Treat the BEL as authoritative
     // PTY output here; any product-side suppression should be an explicit UX
     // decision higher up, not a transport-layer guess.
@@ -2198,10 +2198,10 @@ export function connectPanePty(
     // Why: title reversion alone is not process death. The process/PTY tracker
     // owns removing agent rows when the TUI actually exits.
   }
-  // Why: inject ORCA_PANE_KEY so global Claude/Codex hooks can attribute their
-  // callbacks to the correct Orca pane without resolving worktrees from cwd.
+  // Why: inject OAK_PANE_KEY so global Claude/Codex hooks can attribute their
+  // callbacks to the correct Oak pane without resolving worktrees from cwd.
   // The key matches the `${tabId}:${leafId}` composite used for cacheTimerByKey
-  // and agentStatusByPaneKey. Treat it as opaque outside Orca.
+  // and agentStatusByPaneKey. Treat it as opaque outside Oak.
   const state = useAppStore.getState()
   const parsedWorkspaceKey = parseWorkspaceKey(deps.worktreeId)
   const folderWorkspace =
@@ -2210,17 +2210,17 @@ export function connectPanePty(
           (workspace) => workspace.id === parsedWorkspaceKey.folderWorkspaceId
         )
       : null
-  const workspaceEnv: Record<string, string> = { ORCA_WORKSPACE_ID: deps.worktreeId }
+  const workspaceEnv: Record<string, string> = { OAK_WORKSPACE_ID: deps.worktreeId }
   if (folderWorkspace) {
-    workspaceEnv.ORCA_PROJECT_GROUP_ID = folderWorkspace.projectGroupId
-    workspaceEnv.ORCA_WORKSPACE_ROOT = folderWorkspace.folderPath
+    workspaceEnv.OAK_PROJECT_GROUP_ID = folderWorkspace.projectGroupId
+    workspaceEnv.OAK_WORKSPACE_ROOT = folderWorkspace.folderPath
   }
   const paneIdentityEnv = {
     ...workspaceEnv,
-    ORCA_PANE_KEY: cacheKey,
-    ORCA_TAB_ID: deps.tabId,
-    ORCA_WORKTREE_ID: deps.worktreeId,
-    ...(launchToken ? { ORCA_AGENT_LAUNCH_TOKEN: launchToken } : {})
+    OAK_PANE_KEY: cacheKey,
+    OAK_TAB_ID: deps.tabId,
+    OAK_WORKTREE_ID: deps.worktreeId,
+    ...(launchToken ? { OAK_AGENT_LAUNCH_TOKEN: launchToken } : {})
   }
   const paneEnv = {
     ...paneStartup?.env,
@@ -2335,7 +2335,7 @@ export function connectPanePty(
     onAgentBecameIdle,
     onAgentBecameWorking,
     onAgentExited,
-    // Why: local IPC terminals are now model-owned in main: OrcaRuntimeService
+    // Why: local IPC terminals are now model-owned in main: OakRuntimeService
     // parses OSC 9999 before renderer delivery and forwards through the hook
     // server with local/SSH identity. Remote-runtime streams do not pass through
     // local main, so the renderer remains their status owner for now.
@@ -3122,7 +3122,7 @@ export function connectPanePty(
         command: startupPlan.launchCommand,
         env: {
           ...startupPlan.env,
-          ORCA_AGENT_LAUNCH_TOKEN: coldRestoreLaunchToken
+          OAK_AGENT_LAUNCH_TOKEN: coldRestoreLaunchToken
         },
         launchConfig: startupPlan.launchConfig,
         launchToken: coldRestoreLaunchToken,
@@ -3160,8 +3160,8 @@ export function connectPanePty(
         ? {
             ...env,
             ...paneIdentityEnv,
-            ...(env.ORCA_AGENT_LAUNCH_TOKEN
-              ? { ORCA_AGENT_LAUNCH_TOKEN: env.ORCA_AGENT_LAUNCH_TOKEN }
+            ...(env.OAK_AGENT_LAUNCH_TOKEN
+              ? { OAK_AGENT_LAUNCH_TOKEN: env.OAK_AGENT_LAUNCH_TOKEN }
               : {})
           }
         : undefined
@@ -3203,7 +3203,7 @@ export function connectPanePty(
       }
       if (!sshStartupShellReady) {
         if (sshShellReadyFallbackTimer === null) {
-          // Why: some SSH shells cannot emit Orca's ready marker. Prefer the
+          // Why: some SSH shells cannot emit Oak's ready marker. Prefer the
           // marker when available, but fall back to the old renderer delivery
           // behavior instead of dropping the startup command forever.
           sshShellReadyFallbackTimer = setTimeout(() => {

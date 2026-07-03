@@ -151,7 +151,7 @@ export function createPtyOutputProcessor({
   function applyObservedTerminalTitle(title: string, suppressAgentTracker = false): void {
     // Why: cursor-agent's native OSC title is the literal string "Cursor Agent"
     // and it re-emits that title many times per turn (on every internal redraw)
-    // even while it's actively working. Orca drives the cursor spinner/unread
+    // even while it's actively working. Oak drives the cursor spinner/unread
     // path by injecting its own synthesized "⠋ Cursor Agent" and "Cursor ready"
     // frames from the hook server (see src/main/index.ts). If we let cursor's
     // bare title through, it lands in `runtimePaneTitlesByTabId` — where
@@ -182,7 +182,7 @@ export function createPtyOutputProcessor({
     if (sideEffectDrainTimer !== null) {
       return
     }
-    // Why: xterm.write() buffers parsing onto its own timer. Defer Orca's
+    // Why: xterm.write() buffers parsing onto its own timer. Defer Oak's
     // title/status/BEL store work so live terminal rendering gets the next turn.
     sideEffectDrainTimer = setTimeout(drainPtySideEffects, 0)
   }
@@ -393,7 +393,7 @@ export function createPtyOutputProcessor({
   ): void {
     const rawLength = meta?.rawLength ?? data.length
     const suppressAttentionEvents = options.suppressAttentionEvents === true
-    // Why: OSC 9999 is an Orca control protocol. Parse it before xterm sees
+    // Why: OSC 9999 is an Oak control protocol. Parse it before xterm sees
     // the bytes, and keep parser state across chunks so partial PTY reads do
     // not drop valid status updates or print escape garbage.
     const processed = processAgentStatusChunk(data)
@@ -469,7 +469,7 @@ export function createIpcPtyTransport(opts: IpcPtyTransportOptions = {}): PtyTra
   // Why: eager PTY buffers contain output produced before the pane attached —
   // often from the previous app session. We still replay that data so titles
   // and scrollback restore correctly, but it must not produce fresh bells,
-  // unread marks, or notifications for unrelated worktrees just because Orca
+  // unread marks, or notifications for unrelated worktrees just because Oak
   // is reconnecting background terminals on launch.
   let suppressAttentionEvents = false
   let pendingInputWrites: PendingPtyInputWrite[] = []

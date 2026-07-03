@@ -18,12 +18,12 @@ type SendPhase =
 
 function agentPipReplyFailureMessage(status: AgentPipReplyStatus): string {
   if (status === 'main-window-unavailable') {
-    return translate('agentPip.error.mainWindowUnavailable', 'Open Orca to reply.')
+    return translate('agentPip.error.mainWindowUnavailable', 'Open Oak to reply.')
   }
   if (status === 'renderer-timeout') {
     return translate(
       'agentPip.error.rendererTimeout',
-      'Orca did not confirm the send. Check the terminal.'
+      'Oak did not confirm the send. Check the terminal.'
     )
   }
   if (status === 'unknown-pane') {
@@ -240,7 +240,7 @@ export function AgentPipRow({ row, onFocusPane }: AgentPipRowProps): React.JSX.E
       <button
         type="button"
         className="agent-pip-row-hover hidden size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground group-hover:flex"
-        aria-label={translate('agentPip.row.openInOrca', 'Open in Orca')}
+        aria-label={translate('agentPip.row.openInOak', 'Open in Oak')}
         onClick={(event) => {
           event.stopPropagation()
           onFocusPane(paneKey)

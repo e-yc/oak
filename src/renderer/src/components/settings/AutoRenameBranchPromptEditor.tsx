@@ -37,7 +37,7 @@ export function AutoRenameBranchPromptEditor({
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.AutoRenameBranchPromptEditor.2f5dc661fe',
-            "Appended to Orca's"
+            "Appended to Oak's"
           )}{' '}
           <Popover>
             <PopoverTrigger asChild>
@@ -65,7 +65,7 @@ export function AutoRenameBranchPromptEditor({
           </Popover>
           {translate(
             'auto.components.settings.AutoRenameBranchPromptEditor.af2d9a2cc6',
-            '. Orca generates only the final segment, like'
+            '. Oak generates only the final segment, like'
           )}{' '}
           <code className="font-mono">
             {translate(

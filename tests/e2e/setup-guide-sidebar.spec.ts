@@ -1,7 +1,7 @@
 /* eslint-disable max-lines -- Why: this regression spec keeps the deterministic IPC fakes, setup-state seeding, and frame-level flash monitor together so the flicker contract is auditable in one place. */
 import type { ElectronApplication, Page } from '@stablyai/playwright-test'
 import type { SkillDiscoveryResult } from '../../src/shared/skills'
-import { test, expect } from './helpers/orca-app'
+import { test, expect } from './helpers/oak-app'
 import { getStoreState, waitForActiveWorktree, waitForSessionReady } from './helpers/store'
 
 const CHECKLIST_TEXT = 'Onboarding checklist'
@@ -12,56 +12,56 @@ type SetupGuideFlashMonitor = {
 }
 
 test.describe('Setup guide sidebar entry', () => {
-  test.beforeEach(async ({ orcaPage }) => {
-    await waitForSessionReady(orcaPage)
-    await waitForActiveWorktree(orcaPage)
+  test.beforeEach(async ({ oakPage }) => {
+    await waitForSessionReady(oakPage)
+    await waitForActiveWorktree(oakPage)
   })
 
   test('does not flash while completed setup waits for capability readiness', async ({
     electronApp,
-    orcaPage
+    oakPage
   }) => {
     await installBlockedCompletedCapabilityFakes(electronApp)
-    await orcaPage.reload()
-    await orcaPage.waitForFunction(() => Boolean(window.__store), null, { timeout: 30_000 })
-    await waitForSessionReady(orcaPage)
-    await seedCompletedSetupExceptCapabilityReadiness(orcaPage)
+    await oakPage.reload()
+    await oakPage.waitForFunction(() => Boolean(window.__store), null, { timeout: 30_000 })
+    await waitForSessionReady(oakPage)
+    await seedCompletedSetupExceptCapabilityReadiness(oakPage)
 
     await expect
-      .poll(async () => getStoreState<boolean>(orcaPage, 'setupGuideSidebarDismissed'), {
+      .poll(async () => getStoreState<boolean>(oakPage, 'setupGuideSidebarDismissed'), {
         timeout: 5_000
       })
       .toBe(false)
-    await expect(orcaPage.getByText(CHECKLIST_TEXT)).toHaveCount(0)
+    await expect(oakPage.getByText(CHECKLIST_TEXT)).toHaveCount(0)
 
-    await startSetupGuideFlashMonitor(orcaPage)
+    await startSetupGuideFlashMonitor(oakPage)
 
-    await setActiveViewForFlashProbe(orcaPage, 'tasks')
+    await setActiveViewForFlashProbe(oakPage, 'tasks')
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe('tasks')
-    await orcaPage.waitForTimeout(500)
+    await oakPage.waitForTimeout(500)
 
-    await setActiveViewForFlashProbe(orcaPage, 'automations')
+    await setActiveViewForFlashProbe(oakPage, 'automations')
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe('automations')
-    await orcaPage.waitForTimeout(500)
+    await oakPage.waitForTimeout(500)
 
-    await setActiveViewForFlashProbe(orcaPage, 'mobile')
+    await setActiveViewForFlashProbe(oakPage, 'mobile')
     await expect
-      .poll(async () => getStoreState<string>(orcaPage, 'activeView'), { timeout: 5_000 })
+      .poll(async () => getStoreState<string>(oakPage, 'activeView'), { timeout: 5_000 })
       .toBe('mobile')
-    await orcaPage.waitForTimeout(500)
+    await oakPage.waitForTimeout(500)
 
-    const flashSamples = await stopSetupGuideFlashMonitor(orcaPage)
+    const flashSamples = await stopSetupGuideFlashMonitor(oakPage)
     expect(flashSamples, `setup guide sidebar flashed at ${flashSamples.join(', ')}`).toEqual([])
 
     // Unblock pending skill discovery IPC calls before teardown. Completion
     // after release is covered by the focused progress unit tests.
     await releaseBlockedSkillDiscovery(electronApp)
-    await orcaPage.evaluate(() => {
-      window.dispatchEvent(new CustomEvent('orca:installed-agent-skills-changed'))
+    await oakPage.evaluate(() => {
+      window.dispatchEvent(new CustomEvent('oak:installed-agent-skills-changed'))
     })
   })
 })
@@ -108,9 +108,9 @@ async function installBlockedCompletedCapabilityFakes(
       providers: ['agent-skills'],
       sourceKind: 'home',
       sourceLabel: 'E2E skill home',
-      rootPath: '/tmp/orca-e2e-skills',
-      directoryPath: `/tmp/orca-e2e-skills/${name}`,
-      skillFilePath: `/tmp/orca-e2e-skills/${name}/SKILL.md`,
+      rootPath: '/tmp/oak-e2e-skills',
+      directoryPath: `/tmp/oak-e2e-skills/${name}`,
+      skillFilePath: `/tmp/oak-e2e-skills/${name}/SKILL.md`,
       installed: true,
       fileCount: 1,
       updatedAt: 1
@@ -121,7 +121,7 @@ async function installBlockedCompletedCapabilityFakes(
       await waitForSkillDiscoveryRelease()
       return {
         skills: [
-          makeSkill('orca-cli', 'e2e-orca-cli'),
+          makeSkill('oak-cli', 'e2e-oak-cli'),
           makeSkill('computer-use', 'e2e-computer-use'),
           makeSkill('orchestration', 'e2e-orchestration')
         ],

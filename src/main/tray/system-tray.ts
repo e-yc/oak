@@ -7,7 +7,7 @@ type SystemTrayOptions = {
   appIcon: unknown
   /** Restore + show + focus the main window (recreating it if needed). */
   onOpen: () => void
-  /** Quit Orca for real (caller must set the quitting latch before quitting). */
+  /** Quit Oak for real (caller must set the quitting latch before quitting). */
   onQuit: () => void
 }
 
@@ -36,9 +36,9 @@ export function createSystemTray(opts: SystemTrayOptions): Tray | null {
     height: TRAY_ICON_SIZE
   })
   tray = new Tray(image)
-  tray.setToolTip('Orca')
+  tray.setToolTip('Oak')
   const menu = Menu.buildFromTemplate([
-    { label: translateMain('tray.openOrca', 'Open Orca'), click: () => opts.onOpen() },
+    { label: translateMain('tray.openOak', 'Open Oak'), click: () => opts.onOpen() },
     { type: 'separator' },
     { label: translateMain('tray.quit', 'Quit'), click: () => opts.onQuit() }
   ])

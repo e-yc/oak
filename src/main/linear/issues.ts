@@ -164,7 +164,7 @@ const LINEAR_ISSUE_NODE_FIELDS = `
 `
 
 const SEARCH_ISSUES_QUERY = `
-  query OrcaLinearIssueSearch($term: String!, $first: Int) {
+  query OakLinearIssueSearch($term: String!, $first: Int) {
     searchIssues(term: $term, first: $first) {
       nodes {
         ${LINEAR_ISSUE_NODE_FIELDS}
@@ -174,7 +174,7 @@ const SEARCH_ISSUES_QUERY = `
 `
 
 const ALL_ISSUES_QUERY = `
-  query OrcaLinearIssues(
+  query OakLinearIssues(
     $first: Int,
     $after: String,
     $filter: IssueFilter,
@@ -193,7 +193,7 @@ const ALL_ISSUES_QUERY = `
 `
 
 const VIEWER_ASSIGNED_ISSUES_QUERY = `
-  query OrcaLinearViewerAssignedIssues(
+  query OakLinearViewerAssignedIssues(
     $first: Int,
     $after: String,
     $filter: IssueFilter,
@@ -214,7 +214,7 @@ const VIEWER_ASSIGNED_ISSUES_QUERY = `
 `
 
 const VIEWER_CREATED_ISSUES_QUERY = `
-  query OrcaLinearViewerCreatedIssues(
+  query OakLinearViewerCreatedIssues(
     $first: Int,
     $after: String,
     $filter: IssueFilter,
@@ -253,7 +253,7 @@ const AGENT_ISSUE_WRITE_FIELDS = `
 `
 
 const ISSUE_BY_UUID_QUERY = `
-  query OrcaLinearIssueByUuid($id: String!) {
+  query OakLinearIssueByUuid($id: String!) {
     issue(id: $id) {
       ${AGENT_ISSUE_WRITE_FIELDS}
     }
@@ -261,7 +261,7 @@ const ISSUE_BY_UUID_QUERY = `
 `
 
 const COMMENT_BY_UUID_QUERY = `
-  query OrcaLinearCommentByUuid($id: String!) {
+  query OakLinearCommentByUuid($id: String!) {
     comment(id: $id) {
       id
       url
@@ -273,7 +273,7 @@ const COMMENT_BY_UUID_QUERY = `
 `
 
 const ATTACHMENT_BY_UUID_QUERY = `
-  query OrcaLinearAttachmentByUuid($id: String!) {
+  query OakLinearAttachmentByUuid($id: String!) {
     attachment(id: $id) {
       id
       title
@@ -393,7 +393,7 @@ async function readIssueConnectionPages(
   let hasMore = false
 
   while (items.length < limit) {
-    // Why: Linear caps connection pages at 50, so larger Orca reads must walk
+    // Why: Linear caps connection pages at 50, so larger Oak reads must walk
     // cursors instead of asking for the whole expanded limit in one request.
     const first = Math.min(LINEAR_ISSUE_API_PAGE_SIZE_MAX, limit - items.length)
     const connection = await loadConnection(after ? { first, after } : { first })

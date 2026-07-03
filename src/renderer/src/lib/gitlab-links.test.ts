@@ -14,10 +14,8 @@ describe('parseGitLabIssueOrMRNumber', () => {
   })
 
   it('parses gitlab.com issue and MR URLs', () => {
-    expect(parseGitLabIssueOrMRNumber('https://gitlab.com/stablyai/orca/-/issues/923')).toBe(923)
-    expect(
-      parseGitLabIssueOrMRNumber('https://gitlab.com/stablyai/orca/-/merge_requests/123')
-    ).toBe(123)
+    expect(parseGitLabIssueOrMRNumber('https://gitlab.com/e-yc/oak/-/issues/923')).toBe(923)
+    expect(parseGitLabIssueOrMRNumber('https://gitlab.com/e-yc/oak/-/merge_requests/123')).toBe(123)
   })
 
   it('parses URLs from self-hosted GitLab instances', () => {
@@ -39,8 +37,8 @@ describe('parseGitLabIssueOrMRNumber', () => {
   })
 
   it('rejects GitHub URLs (no /-/ separator)', () => {
-    expect(parseGitLabIssueOrMRNumber('https://github.com/stablyai/orca/issues/923')).toBeNull()
-    expect(parseGitLabIssueOrMRNumber('https://github.com/stablyai/orca/pull/123')).toBeNull()
+    expect(parseGitLabIssueOrMRNumber('https://github.com/e-yc/oak/issues/923')).toBeNull()
+    expect(parseGitLabIssueOrMRNumber('https://github.com/e-yc/oak/pull/123')).toBeNull()
   })
 
   it('rejects unparseable input', () => {
@@ -52,14 +50,16 @@ describe('parseGitLabIssueOrMRNumber', () => {
 
 describe('parseGitLabIssueOrMRLink', () => {
   it('extracts slug + number + type for issues and MRs', () => {
-    expect(parseGitLabIssueOrMRLink('https://gitlab.com/stablyai/orca/-/issues/923')).toEqual({
-      slug: { host: 'gitlab.com', path: 'stablyai/orca' },
+    expect(parseGitLabIssueOrMRLink('https://gitlab.com/e-yc/oak/-/issues/923')).toEqual({
+      slug: { host: 'gitlab.com', path: 'e-yc/oak' },
       number: 923,
       type: 'issue'
     })
-    expect(
-      parseGitLabIssueOrMRLink('https://gitlab.com/stablyai/orca/-/merge_requests/77')
-    ).toEqual({ slug: { host: 'gitlab.com', path: 'stablyai/orca' }, number: 77, type: 'mr' })
+    expect(parseGitLabIssueOrMRLink('https://gitlab.com/e-yc/oak/-/merge_requests/77')).toEqual({
+      slug: { host: 'gitlab.com', path: 'e-yc/oak' },
+      number: 77,
+      type: 'mr'
+    })
   })
 
   it('preserves self-hosted GitLab hosts in the slug', () => {
@@ -115,8 +115,8 @@ describe('parseGitLabIssueOrMRLink', () => {
   })
 
   it('returns null for non-GitLab URL shapes', () => {
-    expect(parseGitLabIssueOrMRLink('https://gitlab.com/stablyai/orca/issues/123')).toBeNull()
-    expect(parseGitLabIssueOrMRLink('https://gitlab.com/stablyai/orca/-/issues/123abc')).toBeNull()
+    expect(parseGitLabIssueOrMRLink('https://gitlab.com/e-yc/oak/issues/123')).toBeNull()
+    expect(parseGitLabIssueOrMRLink('https://gitlab.com/e-yc/oak/-/issues/123abc')).toBeNull()
   })
 })
 
@@ -126,17 +126,17 @@ describe('normalizeGitLabLinkQuery', () => {
   })
 
   it('routes a full URL to query + directNumber', () => {
-    expect(normalizeGitLabLinkQuery('https://gitlab.com/stablyai/orca/-/issues/923')).toEqual({
-      query: 'https://gitlab.com/stablyai/orca/-/issues/923',
+    expect(normalizeGitLabLinkQuery('https://gitlab.com/e-yc/oak/-/issues/923')).toEqual({
+      query: 'https://gitlab.com/e-yc/oak/-/issues/923',
       directNumber: 923
     })
   })
 
   it('routes full URLs with trailing page segments to directNumber', () => {
     expect(
-      normalizeGitLabLinkQuery('https://gitlab.com/stablyai/orca/-/merge_requests/77/diffs')
+      normalizeGitLabLinkQuery('https://gitlab.com/e-yc/oak/-/merge_requests/77/diffs')
     ).toEqual({
-      query: 'https://gitlab.com/stablyai/orca/-/merge_requests/77/diffs',
+      query: 'https://gitlab.com/e-yc/oak/-/merge_requests/77/diffs',
       directNumber: 77
     })
   })

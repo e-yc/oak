@@ -12,22 +12,22 @@ import {
 
 type PathOps = typeof posix
 
-const ORCA_CREATION_SOURCES = new Set<NonNullable<WorktreeMeta['orcaCreationSource']>>([
+const OAK_CREATION_SOURCES = new Set<NonNullable<WorktreeMeta['oakCreationSource']>>([
   'desktop',
   'runtime',
   'cli',
   'ssh'
 ])
-const ORCA_OWNED_PROVENANCE_META_KEYS = [
-  'orcaCreatedAt',
-  'orcaCreationSource',
-  'orcaCreationWorkspaceLayout',
+const OAK_OWNED_PROVENANCE_META_KEYS = [
+  'oakCreatedAt',
+  'oakCreationSource',
+  'oakCreationWorkspaceLayout',
   'automationProvenance'
 ] as const
-type UnregisteredOrcaCleanupMeta = Pick<
+type UnregisteredOakCleanupMeta = Pick<
   WorktreeMeta,
-  | 'orcaCreatedAt'
-  | 'orcaCreationSource'
+  | 'oakCreatedAt'
+  | 'oakCreationSource'
   | 'createdAt'
   | 'createdWithAgent'
   | 'pushTarget'
@@ -169,24 +169,24 @@ export async function canSafelyRemoveOrphanedWorktreeDirectory(
   })
 }
 
-export function canCleanupUnregisteredOrcaWorktreeDirectory(args: {
-  meta: UnregisteredOrcaCleanupMeta | null | undefined
+export function canCleanupUnregisteredOakWorktreeDirectory(args: {
+  meta: UnregisteredOakCleanupMeta | null | undefined
 }): boolean {
-  if (hasCurrentOrcaCreationProvenance(args.meta)) {
+  if (hasCurrentOakCreationProvenance(args.meta)) {
     return true
   }
 
-  if (hasLegacyOrcaCreationEvidence(args.meta)) {
+  if (hasLegacyOakCreationEvidence(args.meta)) {
     return true
   }
 
   // Why: path shape alone is not authority; users can create plain Git
-  // worktrees inside Orca's workspace directory too.
+  // worktrees inside Oak's workspace directory too.
   return false
 }
 
-export async function canCleanupUnregisteredOrcaLeftoverDirectory(args: {
-  meta: UnregisteredOrcaCleanupMeta | null | undefined
+export async function canCleanupUnregisteredOakLeftoverDirectory(args: {
+  meta: UnregisteredOakCleanupMeta | null | undefined
   worktreePath: string
   runtimeWorktreePath: string
   repo: Pick<Repo, 'path'>
@@ -198,8 +198,8 @@ export async function canCleanupUnregisteredOrcaLeftoverDirectory(args: {
   // Why: this recovery state has already lost the worktree .git marker, so the
   // existing .git-file orphan proof cannot establish ownership.
   // Why: without a surviving .git file, path shape alone is too weak to prove
-  // ownership for recursive deletion; require persisted Orca-created evidence.
-  if (!hasCurrentOrcaCreationProvenance(args.meta) && !hasLegacyOrcaCreationEvidence(args.meta)) {
+  // ownership for recursive deletion; require persisted Oak-created evidence.
+  if (!hasCurrentOakCreationProvenance(args.meta) && !hasLegacyOakCreationEvidence(args.meta)) {
     return false
   }
 
@@ -231,18 +231,18 @@ export async function canCleanupUnregisteredOrcaLeftoverDirectory(args: {
   return !(await args.isGitRepository(args.runtimeWorktreePath))
 }
 
-function hasCurrentOrcaCreationProvenance(
-  meta: Pick<WorktreeMeta, 'orcaCreatedAt' | 'orcaCreationSource'> | null | undefined
+function hasCurrentOakCreationProvenance(
+  meta: Pick<WorktreeMeta, 'oakCreatedAt' | 'oakCreationSource'> | null | undefined
 ): boolean {
   return (
-    typeof meta?.orcaCreatedAt === 'number' &&
-    !!meta.orcaCreationSource &&
-    ORCA_CREATION_SOURCES.has(meta.orcaCreationSource)
+    typeof meta?.oakCreatedAt === 'number' &&
+    !!meta.oakCreationSource &&
+    OAK_CREATION_SOURCES.has(meta.oakCreationSource)
   )
 }
 
-function hasLegacyOrcaCreationEvidence(
-  meta: UnregisteredOrcaCleanupMeta | null | undefined
+function hasLegacyOakCreationEvidence(
+  meta: UnregisteredOakCleanupMeta | null | undefined
 ): boolean {
   return Boolean(
     meta?.createdAt ||
@@ -254,11 +254,11 @@ function hasLegacyOrcaCreationEvidence(
   )
 }
 
-export function stripOrcaProvenanceMetaUpdates(
+export function stripOakProvenanceMetaUpdates(
   updates: Partial<WorktreeMeta> | null | undefined
 ): Partial<WorktreeMeta> {
   const sanitized = { ...updates }
-  for (const key of ORCA_OWNED_PROVENANCE_META_KEYS) {
+  for (const key of OAK_OWNED_PROVENANCE_META_KEYS) {
     delete sanitized[key]
   }
   return sanitized

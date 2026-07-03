@@ -1641,8 +1641,8 @@ export const XTERM_HTML = `<!DOCTYPE html>
   }
 
   function attachSurfaceEventHandlers(targetSurface) {
-    if (!targetSurface || targetSurface.__orcaSurfaceHandlersAttached) return;
-    targetSurface.__orcaSurfaceHandlersAttached = true;
+    if (!targetSurface || targetSurface.__oakSurfaceHandlersAttached) return;
+    targetSurface.__oakSurfaceHandlersAttached = true;
     // Why: init() swaps in a new hidden surface to avoid flicker; each
     // replacement needs gesture handlers or tab-switch replays stop scrolling.
     targetSurface.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); }, true);

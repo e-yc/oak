@@ -5,27 +5,27 @@ import { join } from 'node:path'
 import { promisify } from 'node:util'
 
 const execFileAsync = promisify(execFile)
-const RUNTIME_METADATA_FILE = 'orca-runtime.json'
-let orcaDevUserDataPath: string | null = null
-let orcaServeProcess: ChildProcess | null = null
-let orcaServeStdout = ''
-let orcaServeStderr = ''
+const RUNTIME_METADATA_FILE = 'oak-runtime.json'
+let oakDevUserDataPath: string | null = null
+let oakServeProcess: ChildProcess | null = null
+let oakServeStdout = ''
+let oakServeStderr = ''
 
 export type CliResult = {
   stdout: string
   stderr: string
 }
 
-type RunOrcaCliOptions = {
+type RunOakCliOptions = {
   retryMissingRuntimeMetadata?: boolean
 }
 
-export async function runOrcaCli(
+export async function runOakCli(
   args: string[],
-  options: RunOrcaCliOptions = {}
+  options: RunOakCliOptions = {}
 ): Promise<CliResult> {
   try {
-    return await runOrcaCliOnce(args)
+    return await runOakCliOnce(args)
   } catch (error) {
     if (
       options.retryMissingRuntimeMetadata !== false &&
@@ -33,20 +33,20 @@ export async function runOrcaCli(
     ) {
       // Why: Windows CI can let the dev runtime exit while launching the
       // fixture app; reopen once so the desktop action gets a live runtime.
-      await ensureOrcaRuntimeLaunched()
-      return await runOrcaCliOnce(args)
+      await ensureOakRuntimeLaunched()
+      return await runOakCliOnce(args)
     }
     throw error
   }
 }
 
-async function runOrcaCliOnce(args: string[]): Promise<CliResult> {
-  const devCli = join(process.cwd(), 'config/scripts/orca-dev.mjs')
-  const command = process.env.ORCA_COMPUTER_CLI ?? process.execPath
-  const cliArgs = process.env.ORCA_COMPUTER_CLI ? args : [devCli, ...args]
+async function runOakCliOnce(args: string[]): Promise<CliResult> {
+  const devCli = join(process.cwd(), 'config/scripts/oak-dev.mjs')
+  const command = process.env.OAK_COMPUTER_CLI ?? process.execPath
+  const cliArgs = process.env.OAK_COMPUTER_CLI ? args : [devCli, ...args]
   const env = { ...process.env }
-  if (!process.env.ORCA_COMPUTER_CLI && !env.ORCA_DEV_USER_DATA_PATH) {
-    env.ORCA_DEV_USER_DATA_PATH = await getComputerE2eOrcaDevUserDataPath()
+  if (!process.env.OAK_COMPUTER_CLI && !env.OAK_DEV_USER_DATA_PATH) {
+    env.OAK_DEV_USER_DATA_PATH = await getComputerE2eOakDevUserDataPath()
   }
   try {
     const result = await execFileAsync(command, cliArgs, {
@@ -63,21 +63,21 @@ async function runOrcaCliOnce(args: string[]): Promise<CliResult> {
   }
 }
 
-export async function ensureOrcaRuntimeLaunched(): Promise<void> {
-  if (!process.env.ORCA_COMPUTER_CLI && process.platform === 'win32') {
-    await ensureOrcaRuntimeServed()
+export async function ensureOakRuntimeLaunched(): Promise<void> {
+  if (!process.env.OAK_COMPUTER_CLI && process.platform === 'win32') {
+    await ensureOakRuntimeServed()
     return
   }
-  await runOrcaCli(['open', '--json'], { retryMissingRuntimeMetadata: false })
-  await waitForOrcaRuntimeReady()
+  await runOakCli(['open', '--json'], { retryMissingRuntimeMetadata: false })
+  await waitForOakRuntimeReady()
 }
 
-export async function stopOrcaRuntime(): Promise<void> {
-  const processToStop = orcaServeProcess
+export async function stopOakRuntime(): Promise<void> {
+  const processToStop = oakServeProcess
   if (!processToStop?.pid) {
     return
   }
-  orcaServeProcess = null
+  oakServeProcess = null
   if (process.platform === 'win32') {
     try {
       await execFileAsync('taskkill.exe', ['/PID', String(processToStop.pid), '/T', '/F'])
@@ -93,17 +93,17 @@ export function parseJsonOutput<T>(stdout: string): T {
   return JSON.parse(stdout) as T
 }
 
-async function getComputerE2eOrcaDevUserDataPath(): Promise<string> {
-  if (!orcaDevUserDataPath) {
-    // Why: the shared orca-dev profile can keep an older runtime alive across
+async function getComputerE2eOakDevUserDataPath(): Promise<string> {
+  if (!oakDevUserDataPath) {
+    // Why: the shared oak-dev profile can keep an older runtime alive across
     // local test runs, making computer-use E2E exercise stale provider code.
-    orcaDevUserDataPath = await mkdtemp(join(tmpdir(), 'orca-computer-runtime-'))
+    oakDevUserDataPath = await mkdtemp(join(tmpdir(), 'oak-computer-runtime-'))
   }
-  return orcaDevUserDataPath
+  return oakDevUserDataPath
 }
 
-async function waitForOrcaRuntimeReady(): Promise<void> {
-  const userDataPath = await getComputerE2eOrcaDevUserDataPath()
+async function waitForOakRuntimeReady(): Promise<void> {
+  const userDataPath = await getComputerE2eOakDevUserDataPath()
   const metadataPath = join(userDataPath, RUNTIME_METADATA_FILE)
   const deadline = Date.now() + 15000
   let lastError: unknown = null
@@ -113,7 +113,7 @@ async function waitForOrcaRuntimeReady(): Promise<void> {
       await access(metadataPath)
       const status = parseJsonOutput<{
         result: { runtime: { reachable: boolean } }
-      }>((await runOrcaCli(['status', '--json'], { retryMissingRuntimeMetadata: false })).stdout)
+      }>((await runOakCli(['status', '--json'], { retryMissingRuntimeMetadata: false })).stdout)
       if (status.result.runtime.reachable) {
         return
       }
@@ -125,45 +125,45 @@ async function waitForOrcaRuntimeReady(): Promise<void> {
 
   const detail = [
     lastError instanceof Error ? `Last error: ${lastError.message}` : null,
-    orcaServeStdout.trim() ? `serve stdout: ${orcaServeStdout.trim()}` : null,
-    orcaServeStderr.trim() ? `serve stderr: ${orcaServeStderr.trim()}` : null
+    oakServeStdout.trim() ? `serve stdout: ${oakServeStdout.trim()}` : null,
+    oakServeStderr.trim() ? `serve stderr: ${oakServeStderr.trim()}` : null
   ]
     .filter(Boolean)
     .join(' ')
-  throw new Error(`Orca runtime metadata was not ready at ${metadataPath}.${detail}`)
+  throw new Error(`Oak runtime metadata was not ready at ${metadataPath}.${detail}`)
 }
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function ensureOrcaRuntimeServed(): Promise<void> {
-  if (!orcaServeProcess || orcaServeProcess.exitCode !== null) {
-    const devCli = join(process.cwd(), 'config/scripts/orca-dev.mjs')
+async function ensureOakRuntimeServed(): Promise<void> {
+  if (!oakServeProcess || oakServeProcess.exitCode !== null) {
+    const devCli = join(process.cwd(), 'config/scripts/oak-dev.mjs')
     const env = {
       ...process.env,
-      ORCA_DEV_USER_DATA_PATH: await getComputerE2eOrcaDevUserDataPath()
+      OAK_DEV_USER_DATA_PATH: await getComputerE2eOakDevUserDataPath()
     }
-    orcaServeStdout = ''
-    orcaServeStderr = ''
-    orcaServeProcess = spawn(process.execPath, [devCli, 'serve', '--no-pairing', '--json'], {
+    oakServeStdout = ''
+    oakServeStderr = ''
+    oakServeProcess = spawn(process.execPath, [devCli, 'serve', '--no-pairing', '--json'], {
       env,
       windowsHide: true
     })
-    orcaServeProcess.stdout?.on('data', (chunk) => {
-      orcaServeStdout += String(chunk)
+    oakServeProcess.stdout?.on('data', (chunk) => {
+      oakServeStdout += String(chunk)
     })
-    orcaServeProcess.stderr?.on('data', (chunk) => {
-      orcaServeStderr += String(chunk)
+    oakServeProcess.stderr?.on('data', (chunk) => {
+      oakServeStderr += String(chunk)
     })
-    orcaServeProcess.once('exit', () => {
-      orcaServeProcess = null
+    oakServeProcess.once('exit', () => {
+      oakServeProcess = null
     })
     process.once('exit', () => {
-      orcaServeProcess?.kill()
+      oakServeProcess?.kill()
     })
   }
-  await waitForOrcaRuntimeReady()
+  await waitForOakRuntimeReady()
 }
 
 function isMissingRuntimeMetadataError(args: string[], error: unknown): boolean {
@@ -176,6 +176,6 @@ function isMissingRuntimeMetadataError(args: string[], error: unknown): boolean 
   const message = String((error as { message?: unknown }).message)
   return (
     message.includes('"code": "runtime_unavailable"') &&
-    message.includes('Could not read Orca runtime metadata')
+    message.includes('Could not read Oak runtime metadata')
   )
 }

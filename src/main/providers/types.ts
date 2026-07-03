@@ -33,7 +33,7 @@ export type PtySpawnOptions = {
   command?: string
   commandDelivery?: 'renderer' | 'provider'
   startupCommandDelivery?: StartupCommandDelivery
-  /** Orca worktree identity. When present, the local provider scopes shell
+  /** Oak worktree identity. When present, the local provider scopes shell
    *  history to this worktree so ArrowUp only surfaces local commands. */
   worktreeId?: string
   /** Daemon session ID. A caller-provided ID is treated as an attach request;

@@ -42,7 +42,7 @@ function isTelemetryConsentState(x: unknown): x is TelemetryConsentState {
   }
   if (e === 'disabled') {
     const r = (x as { reason?: unknown }).reason
-    return r === 'do_not_track' || r === 'orca_disabled' || r === 'ci' || r === 'user_opt_out'
+    return r === 'do_not_track' || r === 'oak_disabled' || r === 'ci' || r === 'user_opt_out'
   }
   return false
 }

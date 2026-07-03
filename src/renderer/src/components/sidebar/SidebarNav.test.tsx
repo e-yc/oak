@@ -263,7 +263,7 @@ describe('SidebarNav', () => {
   it('hides Mobile from its sidebar context menu', async () => {
     const container = await renderSidebarNav()
 
-    const mobileMenu = getButtonByText(container, 'Orca Mobile').closest(
+    const mobileMenu = getButtonByText(container, 'Oak Mobile').closest(
       '[data-testid="context-menu"]'
     )
     expect(mobileMenu).not.toBeNull()

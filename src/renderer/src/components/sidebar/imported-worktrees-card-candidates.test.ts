@@ -14,7 +14,7 @@ import type {
 const repo: Repo = {
   id: 'repo-1',
   path: '/repo',
-  displayName: 'orca',
+  displayName: 'oak',
   badgeColor: '#000000',
   addedAt: Date.UTC(2026, 4, 24),
   externalWorktreeVisibility: 'hide'
@@ -75,7 +75,7 @@ describe('getHiddenImportedWorktrees', () => {
         hidden,
         detectedWorktree({ id: 'visible', visible: true }),
         detectedWorktree({ id: 'selected', selectedCheckout: true }),
-        detectedWorktree({ id: 'orca-managed', ownership: 'orca-managed' })
+        detectedWorktree({ id: 'oak-managed', ownership: 'oak-managed' })
       ])
     )
 

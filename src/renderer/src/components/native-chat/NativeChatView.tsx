@@ -73,7 +73,7 @@ export type NativeChatViewProps = {
   paneKey?: string
   /** PTY bound to `paneKey`, used for composer and interactive-card sends. */
   targetPtyId?: string | null
-  /** Launch-time agent hint from the TerminalTab, when Orca started one. */
+  /** Launch-time agent hint from the TerminalTab, when Oak started one. */
   launchAgent?: TuiAgent | null
   /** Return this pane to the hosted terminal surface. */
   onSwitchToTerminal?: () => void

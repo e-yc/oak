@@ -323,10 +323,10 @@ describe('automation target availability', () => {
           sourceContext: {
             kind: 'task-source',
             provider: 'github',
-            projectId: 'github:stablyai/orca',
+            projectId: 'github:e-yc/oak',
             hostId: 'local',
             repoId: 'repo-1',
-            providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'orca' }
+            providerIdentity: { provider: 'github', owner: 'stablyai', repo: 'oak' }
           }
         }),
         repo: makeRepo(),
@@ -349,15 +349,15 @@ describe('automation target availability', () => {
           sourceContext: {
             kind: 'task-source',
             provider: 'gitlab',
-            projectId: 'gitlab:stablyai/orca',
+            projectId: 'gitlab:e-yc/oak',
             hostId: 'runtime:old-server',
             repoId: 'repo-1',
             providerIdentity: {
               provider: 'gitlab',
-              projectId: 'stablyai/orca',
+              projectId: 'e-yc/oak',
               namespace: 'stablyai',
-              project: 'orca',
-              webUrl: 'https://gitlab.com/stablyai/orca'
+              project: 'oak',
+              webUrl: 'https://gitlab.com/e-yc/oak'
             }
           }
         }),

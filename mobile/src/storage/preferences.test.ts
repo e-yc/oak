@@ -33,7 +33,7 @@ describe('terminal autocomplete preference', () => {
     vi.mocked(AsyncStorage.getItem).mockResolvedValue(null)
 
     await expect(loadTerminalAutocompleteEnabled()).resolves.toBe(false)
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith('orca:terminalAutocompleteEnabled')
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith('oak:terminalAutocompleteEnabled')
   })
 
   it('loads enabled only from the persisted true value', async () => {
@@ -55,11 +55,11 @@ describe('terminal autocomplete preference', () => {
   it('persists the selected value', async () => {
     await saveTerminalAutocompleteEnabled(true)
 
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('orca:terminalAutocompleteEnabled', 'true')
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith('oak:terminalAutocompleteEnabled', 'true')
 
     await saveTerminalAutocompleteEnabled(false)
 
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('orca:terminalAutocompleteEnabled', 'false')
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith('oak:terminalAutocompleteEnabled', 'false')
   })
 })
 
@@ -97,7 +97,7 @@ describe('host sidebar width preference', () => {
     await saveHostSidebarWidth(HOST_SIDEBAR_MIN_WIDTH - 20)
 
     expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-      'orca:hostSidebarWidth',
+      'oak:hostSidebarWidth',
       String(HOST_SIDEBAR_MIN_WIDTH)
     )
   })
@@ -117,11 +117,11 @@ describe('terminal link open mode preference', () => {
     vi.mocked(AsyncStorage.setItem).mockReset()
   })
 
-  it('defaults to Orca browser when unset', async () => {
+  it('defaults to Oak browser when unset', async () => {
     vi.mocked(AsyncStorage.getItem).mockResolvedValue(null)
 
-    await expect(loadTerminalLinkOpenMode()).resolves.toBe('orca-browser')
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith('orca:terminalLinkOpenMode')
+    await expect(loadTerminalLinkOpenMode()).resolves.toBe('oak-browser')
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith('oak:terminalLinkOpenMode')
   })
 
   it('loads only known modes', async () => {
@@ -129,18 +129,18 @@ describe('terminal link open mode preference', () => {
     await expect(loadTerminalLinkOpenMode()).resolves.toBe('phone-browser')
 
     vi.mocked(AsyncStorage.getItem).mockResolvedValue('external')
-    await expect(loadTerminalLinkOpenMode()).resolves.toBe('orca-browser')
+    await expect(loadTerminalLinkOpenMode()).resolves.toBe('oak-browser')
   })
 
-  it('falls back to Orca browser when storage cannot be read', async () => {
+  it('falls back to Oak browser when storage cannot be read', async () => {
     vi.mocked(AsyncStorage.getItem).mockRejectedValue(new Error('storage unavailable'))
 
-    await expect(loadTerminalLinkOpenMode()).resolves.toBe('orca-browser')
+    await expect(loadTerminalLinkOpenMode()).resolves.toBe('oak-browser')
   })
 
   it('persists the selected mode', async () => {
     await saveTerminalLinkOpenMode('phone-browser')
 
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('orca:terminalLinkOpenMode', 'phone-browser')
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith('oak:terminalLinkOpenMode', 'phone-browser')
   })
 })

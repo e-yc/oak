@@ -4,11 +4,11 @@ import { parseMobileMarkdown } from './mobile-markdown-parser'
 
 describe('parseMobileMarkdown', () => {
   it('parses GFM tables into table blocks', () => {
-    expect(parseMobileMarkdown('| Name | State |\n| --- | --- |\n| Orca | Open |')).toEqual([
+    expect(parseMobileMarkdown('| Name | State |\n| --- | --- |\n| Oak | Open |')).toEqual([
       {
         type: 'table',
         headers: ['Name', 'State'],
-        rows: [['Orca', 'Open']]
+        rows: [['Oak', 'Open']]
       }
     ])
   })
@@ -26,19 +26,19 @@ describe('parseMobileMarkdown', () => {
   it('normalizes common README HTML into readable Markdown preview text', () => {
     const normalized = normalizeMobileMarkdownPreviewHtml(`
 <h1 align="center">
-  <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Orca" width="64" /></a>
-  Orca
+  <a href="https://onOrca.dev"><img src="resources/build/icon.png" alt="Oak" width="64" /></a>
+  Oak
 </h1>
 
 <p align="center">
-  <a href="https://github.com/stablyai/orca/stargazers"><img src="https://badgen.net/github/stars/stablyai/orca" alt="GitHub stars" /></a>
+  <a href="https://github.com/e-yc/oak/stargazers"><img src="https://badgen.net/github/stars/stablyai/oak" alt="GitHub stars" /></a>
   <strong>The AI Orchestrator</strong><br/>
   Run Codex side-by-side.
 </p>
 `)
 
-    expect(normalized).toContain('# [Orca](https://onOrca.dev)')
-    expect(normalized).toContain('[GitHub stars](https://github.com/stablyai/orca/stargazers)')
+    expect(normalized).toContain('# [Oak](https://onOrca.dev)')
+    expect(normalized).toContain('[GitHub stars](https://github.com/e-yc/oak/stargazers)')
     expect(normalized).toContain('**The AI Orchestrator**')
     expect(normalized).not.toContain('<h1')
     expect(normalized).not.toContain('<img')
@@ -86,7 +86,7 @@ describe('parseMobileMarkdown', () => {
   })
 
   it('does not replace literal code placeholder text in markdown prose', () => {
-    const literalPlaceholder = '\uE000ORCA_MD_CODE_0\uE000'
+    const literalPlaceholder = '\uE000OAK_MD_CODE_0\uE000'
     expect(normalizeMobileMarkdownPreviewHtml(`${literalPlaceholder} and \`Array<string>\``)).toBe(
       `${literalPlaceholder} and \`Array<string>\``
     )

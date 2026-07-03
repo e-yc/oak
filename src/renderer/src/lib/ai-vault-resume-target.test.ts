@@ -58,8 +58,8 @@ describe('ai vault resume target ownership', () => {
   it('resolves runtime-owned worktree targets through their repo owner', () => {
     expect(
       getAiVaultResumeWorktreeTargetStatus({
-        worktreeId: 'repo-1::/repo/orca',
-        worktrees: [{ id: 'repo-1::/repo/orca', repoId: 'repo-1' }],
+        worktreeId: 'repo-1::/repo/oak',
+        worktrees: [{ id: 'repo-1::/repo/oak', repoId: 'repo-1' }],
         repos: [{ id: 'repo-1', connectionId: null, executionHostId: 'runtime:env-1' }]
       })
     ).toBe('runtime')
@@ -68,8 +68,8 @@ describe('ai vault resume target ownership', () => {
   it('prefers explicit worktree host ownership over repo ownership', () => {
     expect(
       getAiVaultResumeWorktreeTargetStatus({
-        worktreeId: 'repo-1::/repo/orca',
-        worktrees: [{ id: 'repo-1::/repo/orca', repoId: 'repo-1', hostId: 'ssh:ssh-1' }],
+        worktreeId: 'repo-1::/repo/oak',
+        worktrees: [{ id: 'repo-1::/repo/oak', repoId: 'repo-1', hostId: 'ssh:ssh-1' }],
         repos: [{ id: 'repo-1', connectionId: null, executionHostId: 'runtime:env-1' }]
       })
     ).toBe('ssh')
@@ -81,7 +81,7 @@ describe('ai vault resume target ownership', () => {
         makeState({
           repos: [{ id: 'repo-1', connectionId: null, executionHostId: 'runtime:env-1' }]
         }),
-        'repo-1::/repo/orca'
+        'repo-1::/repo/oak'
       )
     ).toBe('runtime')
   })
@@ -91,11 +91,11 @@ describe('ai vault resume target ownership', () => {
       getAiVaultResumeWorkspaceTargetStatus(
         makeState({
           worktreesByRepo: {
-            'repo-1': [{ id: 'repo-1::/repo/orca', repoId: 'repo-1' }]
+            'repo-1': [{ id: 'repo-1::/repo/oak', repoId: 'repo-1' }]
           },
           repos: [{ id: 'repo-1', connectionId: null, executionHostId: 'runtime:env-1' }]
         }),
-        'worktree:repo-1::/repo/orca'
+        'worktree:repo-1::/repo/oak'
       )
     ).toBe('runtime')
   })
@@ -105,11 +105,11 @@ describe('ai vault resume target ownership', () => {
       getAiVaultResumeWorkspaceTargetStatus(
         makeState({
           worktreesByRepo: {
-            'repo-1': [{ id: 'repo-1::/repo/orca', repoId: 'repo-1', hostId: 'runtime:env-1' }]
+            'repo-1': [{ id: 'repo-1::/repo/oak', repoId: 'repo-1', hostId: 'runtime:env-1' }]
           },
           repos: [{ id: 'repo-1', connectionId: 'ssh-1', executionHostId: 'ssh:ssh-1' }]
         }),
-        'worktree:repo-1::/repo/orca'
+        'worktree:repo-1::/repo/oak'
       )
     ).toBe('runtime')
   })

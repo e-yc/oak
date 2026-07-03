@@ -488,7 +488,7 @@ export async function importExternalPathsToRuntime(
     } catch (error) {
       if (createdDirectoryImportRoot) {
         // Why: match local directory imports by removing the no-clobber root
-        // Orca created when a nested runtime upload fails halfway through.
+        // Oak created when a nested runtime upload fails halfway through.
         await callRuntimeRpc(
           target,
           'files.delete',
@@ -581,7 +581,7 @@ function makeRuntimeUploadTempPath(relativePath: string): string {
   const dir = slashIndex === -1 ? '' : normalized.slice(0, slashIndex + 1)
   const leaf = slashIndex === -1 ? normalized : normalized.slice(slashIndex + 1)
   const nonce = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`
-  return `${dir}.${leaf}.orca-upload-${nonce}`
+  return `${dir}.${leaf}.oak-upload-${nonce}`
 }
 
 async function ensureRuntimeDirectory(
@@ -853,7 +853,7 @@ function closeSharedRuntimeFileWatch(key: string, shared: SharedRuntimeFileWatch
 }
 
 function isWebRuntimeFileWatchSharedSocket(): boolean {
-  return Boolean((globalThis as { __ORCA_WEB_CLIENT__?: boolean }).__ORCA_WEB_CLIENT__)
+  return Boolean((globalThis as { __OAK_WEB_CLIENT__?: boolean }).__OAK_WEB_CLIENT__)
 }
 
 function unwatchSharedRuntimeFileWatch(shared: SharedRuntimeFileWatch): void {

@@ -68,8 +68,8 @@ export async function launchAgentBackgroundSession(
         repo.connectionId ? undefined : getLocalProjectExecutionRuntimeContext(store, worktreeId)
       )
     : CLIENT_PLATFORM
-  // Why: SSH remotes deploy the CLI shim as plain `orca`, so the Linux-only
-  // `orca-ide` rename must not be applied for remote launches.
+  // Why: SSH remotes deploy the CLI shim as plain `oak`, so the Linux-only
+  // `oak-ide` rename must not be applied for remote launches.
   const isRemote = repo ? repoIsRemote(repo) : false
   const trimmedPrompt = prompt?.trim() ?? ''
   const hasPrompt = trimmedPrompt.length > 0
@@ -140,10 +140,10 @@ export async function launchAgentBackgroundSession(
   store.setTabLayout(tab.id, singlePaneLayoutSnapshot(leafId))
   const paneEnv = {
     ...startupPlan.env,
-    ORCA_PANE_KEY: paneKey,
-    ORCA_TAB_ID: tab.id,
-    ORCA_WORKTREE_ID: worktreeId,
-    ORCA_AGENT_LAUNCH_TOKEN: launchToken
+    OAK_PANE_KEY: paneKey,
+    OAK_TAB_ID: tab.id,
+    OAK_WORKTREE_ID: worktreeId,
+    OAK_AGENT_LAUNCH_TOKEN: launchToken
   }
   const sshConnectionId = repo?.connectionId ?? null
   const sshStartupDelivery = createSshBackgroundStartupDelivery({

@@ -918,7 +918,7 @@ describe('pane terminal output scheduler', () => {
     vi.advanceTimersByTime(0)
 
     const output = terminal.write.mock.calls.map(([data]) => data).join('')
-    expect(output).toContain('Orca skipped hidden terminal output')
+    expect(output).toContain('Oak skipped hidden terminal output')
     expect(output).toContain('after-cap')
     expect(output).not.toContain('x'.repeat(1024))
   })
@@ -935,7 +935,7 @@ describe('pane terminal output scheduler', () => {
     vi.advanceTimersByTime(0)
 
     const output = terminal.write.mock.calls.map(([data]) => data).join('')
-    expect(output).toContain('Orca skipped hidden terminal output')
+    expect(output).toContain('Oak skipped hidden terminal output')
     expect(output).not.toContain('x'.repeat(512))
   })
 
